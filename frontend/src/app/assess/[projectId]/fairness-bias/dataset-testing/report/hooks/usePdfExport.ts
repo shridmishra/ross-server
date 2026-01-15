@@ -1,5 +1,5 @@
 
-import { useState, useCallback, RefObject } from "react";
+import { useState, useCallback, useRef, RefObject } from "react";
 import type { DatasetReportPayload } from "../../types";
 
 interface UsePdfExportProps {
@@ -12,12 +12,14 @@ const PDF_RENDERING_DELAY_MS = 1000;
 
 export const usePdfExport = ({ reportRef, payload }: UsePdfExportProps) => {
     const [isExporting, setIsExporting] = useState(false);
+    const isExportingRef = useRef(false);
 
     const exportPdf = useCallback(async () => {
         if (!reportRef.current || !payload) return;
-        if (isExporting) return; // Prevent concurrent exports
+        if (isExportingRef.current) return; // Prevent concurrent exports
         try {
             setIsExporting(true);
+            isExportingRef.current = true;
 
             // Wait for React to re-render with isExporting=true (which expands all rows)
             // Increased timeout to ensure all components (especially charts) have fully successfully rendered
@@ -355,6 +357,7 @@ export const usePdfExport = ({ reportRef, payload }: UsePdfExportProps) => {
             console.error("Failed to export PDF", error);
         } finally {
             setIsExporting(false);
+            isExportingRef.current = false;
         }
     }, [reportRef, payload]);
 
