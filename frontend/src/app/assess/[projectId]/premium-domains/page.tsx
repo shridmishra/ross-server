@@ -100,7 +100,7 @@ export default function PremiumDomainsPage() {
             {projectId && (
               <button
                 type="button"
-                onClick={() => router.push(`/assess/${projectId}`)}
+                onClick={() => router.push(isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`)}
                 className="flex items-center justify-center gap-2 px-6 py-3 border border-border text-foreground hover:bg-muted rounded-xl transition-all duration-300"
               >
                 <IconArrowLeft className="w-4 h-4" />

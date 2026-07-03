@@ -48,7 +48,7 @@ export default function CRCWelcomePage() {
         <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={() => router.push(`/assess/${projectId}`)}
+            onClick={() => router.push(isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`)}
             className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
           >
             <IconArrowLeft className="w-4 h-4" />

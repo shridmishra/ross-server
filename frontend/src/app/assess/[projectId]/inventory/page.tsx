@@ -412,7 +412,7 @@ export default function ComponentInventoryPage() {
         <SubscriptionModal
           isOpen={true}
           onClose={() => {
-            router.push(`/assess/${projectId}`);
+            router.push(isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`);
           }}
         />
         <div className="text-center">
@@ -431,7 +431,7 @@ export default function ComponentInventoryPage() {
     <div className="flex-1 flex flex-col h-full overflow-y-auto bg-background p-6 space-y-6">
       {/* Header breadcrumb */}
       <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-        <Link href={`/assess/${projectId}`} className="hover:text-foreground transition-colors">
+        <Link href={isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`} className="hover:text-foreground transition-colors">
           Project Dashboard
         </Link>
         <span>/</span>
