@@ -26,16 +26,9 @@ export default function AssessmentPage() {
 
   const premiumStatus = isPremiumStatus(user?.subscription_status);
 
-  // Redirect premium users to CRC dashboard — AIMA is not their default workspace
-  useEffect(() => {
-    if (!loading && premiumStatus && projectId) {
-      router.replace(`/assess/${projectId}/crc/dashboard`);
-    }
-  }, [loading, premiumStatus, projectId, router]);
-
   // --- Render Loading / Error States ---
 
-  if (loading || premiumStatus) {
+  if (loading) {
     return <AssessmentSkeleton />;
   }
 
