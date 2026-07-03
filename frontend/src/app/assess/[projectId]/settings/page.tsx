@@ -86,7 +86,7 @@ export default function ProjectSettingsPage() {
                 <p className="text-muted-foreground mb-8 max-w-sm mx-auto">Please sign in with an authorized account to view and manage these project settings.</p>
                 <div className="flex justify-center gap-4">
                     <button 
-                        onClick={() => router.push("/auth?isLogin=true")}
+                        onClick={() => router.push(`/auth?isLogin=true&redirect=${encodeURIComponent(`/assess/${projectId}/settings`)}`)}
                         className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                     >
                         Sign In
