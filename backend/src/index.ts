@@ -57,7 +57,25 @@ if (process.env.NODE_ENV === 'production' && !FRONTEND_URL) {
 
 // Configure CORS with proper options for production
 app.use(cors({
-  origin: FRONTEND_URL || "http://localhost:3000", // Only allow configured frontend, default to localhost in development
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin matches the configured FRONTEND_URL or local hosts or Vercel domains
+    const allowed = [
+      FRONTEND_URL,
+      "http://localhost:3000",
+      "http://localhost:3001"
+    ].filter(Boolean) as string[];
+
+    const isAllowed = allowed.some(url => origin === url || origin.startsWith(url));
+    const isVercel = origin.endsWith(".vercel.app") || origin.match(/^https?:\/\/ross-server-[a-z0-9-]+\.vercel\.app$/i);
+
+    if (isAllowed || isVercel) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
