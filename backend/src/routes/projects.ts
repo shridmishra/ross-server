@@ -276,10 +276,16 @@ router.put(
       values.push(industry);
     }
     if (status !== undefined) {
+      if (status !== "not_started" && status !== "in_progress") {
+        return res.status(400).json({ error: "Invalid status. Status can only be updated to 'not_started' or 'in_progress' via this endpoint. Project completion is restricted to the submission endpoint." });
+      }
       fields.push(`status = $${idx++}`);
       values.push(status);
     }
     if (pathChoice !== undefined) {
+      if (pathChoice !== "aima" && pathChoice !== "premium") {
+        return res.status(400).json({ error: "Invalid pathChoice. Must be 'aima' or 'premium'." });
+      }
       fields.push(`path_choice = $${idx++}`);
       values.push(pathChoice);
     }
