@@ -205,44 +205,49 @@ function extractEvaluationJobContext(event: any): { jobId?: string; responseInde
   for (const getPath of paths) {
     const data = getPath();
     if (data) {
-      if (data.jobId && data.responseIndex !== undefined) {
+      if (jobId === undefined && data.jobId && data.responseIndex !== undefined) {
         jobId = data.jobId;
         responseIndex = data.responseIndex;
       }
-      if (data.evaluationId) {
+      if (evaluationId === undefined && data.evaluationId) {
         evaluationId = data.evaluationId;
+      }
+      // Stop searching a field once jobId/responseIndex or evaluationId has been set,
+      // or break as soon as a preferred path yields valid identifiers.
+      if ((jobId !== undefined && responseIndex !== undefined) || evaluationId !== undefined) {
+        break;
       }
     }
   }
 
   if ((!jobId || responseIndex === undefined) && !evaluationId) {
+    const stripSensitiveFields = (obj: any) => {
+      if (obj && typeof obj === "object") {
+        delete obj.userId;
+        delete obj.userResponse;
+        delete obj.questionText;
+        delete obj.category;
+      }
+    };
+
     const redactEvent = (ev: any): any => {
       if (!ev) return ev;
       const clone = { ...ev };
       if (clone.data) {
         clone.data = { ...clone.data };
-        delete clone.data.userId;
-        delete clone.data.userResponse;
-        delete clone.data.questionText;
-        delete clone.data.category;
+        stripSensitiveFields(clone.data);
         if (clone.data.event) {
           clone.data.event = { ...clone.data.event };
           if (clone.data.event.data) {
             clone.data.event.data = { ...clone.data.event.data };
-            delete clone.data.event.data.userId;
-            delete clone.data.event.data.userResponse;
-            delete clone.data.event.data.questionText;
-            delete clone.data.event.data.category;
+            stripSensitiveFields(clone.data.event.data);
           }
         }
         if (Array.isArray(clone.data.events)) {
           clone.data.events = clone.data.events.map((e: any) => {
             if (e && e.data) {
               const ec = { ...e, data: { ...e.data } };
-              delete ec.data.userId;
-              delete ec.data.userResponse;
-              delete ec.data.questionText;
-              delete ec.data.category;
+              stripSensitiveFields(ec.data);
               return ec;
             }
             return e;
@@ -500,6 +505,10 @@ export const evaluationAggregator = inngest.createFunction(
   { event: "evaluation/single.completed" },
   async ({ event, step }) => {
     const { jobId, responseIndex, result, error } = event.data;
+
+    if (!jobId || responseIndex === undefined) {
+      return;
+    }
 
     const allComplete = await step.run("process-completion", async () => {
       const jobResult = await pool.query(

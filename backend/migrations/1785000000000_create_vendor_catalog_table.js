@@ -3,16 +3,16 @@
 exports.shorthands = undefined;
 
 exports.up = async (pgm) => {
-  // Create table directly using pgm.db.query so it exists immediately for inserts
   await pgm.db.query(`
     CREATE TABLE IF NOT EXISTS vendor_catalog (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      vendor_name VARCHAR(255) UNIQUE NOT NULL,
+      vendor_name VARCHAR(255) NOT NULL,
       models JSONB NOT NULL DEFAULT '[]'::jsonb,
       compliance_url TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_vendor_catalog_lower_vendor_name ON vendor_catalog (LOWER(vendor_name));
   `);
 
   // Seed data

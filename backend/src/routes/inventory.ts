@@ -188,16 +188,42 @@ async function upsertToVendorCatalog(client: any, provider: string, modelName: s
   const lowerProvider = trimmedProvider.toLowerCase();
   if (["internal", "proprietary", "other", "custom"].includes(lowerProvider)) return;
 
+  // Stop persisting tenant-specific component names into vendor_catalog entirely
+  const GLOBAL_VENDORS = [
+    "openai", "anthropic", "google", "meta", "mistral", "cohere", "aws bedrock", 
+    "azure openai", "vertex ai", "huggingface", "pinecone", "weaviate", 
+    "chromadb", "qdrant", "langchain", "llamaindex"
+  ];
+  if (!GLOBAL_VENDORS.includes(lowerProvider)) return;
+
+  // Wrap the best-effort catalog write in a SAVEPOINT to protect the caller's transaction
+  await client.query("SAVEPOINT upsert_catalog_sp");
+
   try {
+    // Handle the race window safely and atomically by locking the vendor row for update
     const selectRes = await client.query(
-      "SELECT id, models, compliance_url FROM vendor_catalog WHERE LOWER(vendor_name) = LOWER($1)",
+      "SELECT id, models, compliance_url FROM vendor_catalog WHERE LOWER(vendor_name) = LOWER($1) FOR UPDATE",
       [trimmedProvider]
     );
 
     if (selectRes.rows.length === 0) {
+      // Safe insertion using ON CONFLICT targeting the case-insensitive unique index
       await client.query(
-        "INSERT INTO vendor_catalog (vendor_name, models, compliance_url) VALUES ($1, $2, $3)",
-        [trimmedProvider, JSON.stringify([trimmedModelName]), complianceUrl || null]
+        `INSERT INTO vendor_catalog (vendor_name, models, compliance_url) 
+         VALUES ($1, $2, $3) 
+         ON CONFLICT (LOWER(vendor_name)) DO UPDATE 
+         SET models = CASE 
+           WHEN NOT (vendor_catalog.models ? $4) THEN (vendor_catalog.models || $5::jsonb) 
+           ELSE vendor_catalog.models 
+         END,
+         compliance_url = COALESCE(vendor_catalog.compliance_url, EXCLUDED.compliance_url)`,
+        [
+          trimmedProvider, 
+          JSON.stringify([trimmedModelName]), 
+          complianceUrl || null, 
+          trimmedModelName,
+          JSON.stringify([trimmedModelName])
+        ]
       );
     } else {
       const vendor = selectRes.rows[0];
@@ -213,8 +239,15 @@ async function upsertToVendorCatalog(client: any, provider: string, modelName: s
         );
       }
     }
+
+    await client.query("RELEASE SAVEPOINT upsert_catalog_sp");
   } catch (error) {
     console.error("Failed to upsert to vendor catalog:", error);
+    try {
+      await client.query("ROLLBACK TO SAVEPOINT upsert_catalog_sp");
+    } catch (rollbackError) {
+      console.error("Failed to rollback catalog savepoint:", rollbackError);
+    }
   }
 }
 
