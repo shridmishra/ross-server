@@ -1419,7 +1419,7 @@ function SidebarContentComponent() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   {state === "collapsed" ? (
-                    <button className="flex items-center justify-center size-8 rounded-lg bg-transparent border-0 cursor-pointer mx-auto relative hover:bg-sidebar-accent/60 focus:outline-none focus:ring-1 focus:ring-ring select-none">
+                    <button aria-label="User profile menu" className="flex items-center justify-center size-8 rounded-lg bg-transparent border-0 cursor-pointer mx-auto relative hover:bg-sidebar-accent/60 focus:outline-none focus:ring-1 focus:ring-ring select-none">
                       <Avatar className="size-6 rounded-full shrink-0 select-none">
                         <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center size-6">
                           {(user.name || user.email || "U").charAt(0).toUpperCase()}

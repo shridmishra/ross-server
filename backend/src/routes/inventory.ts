@@ -177,6 +177,97 @@ function mapRowToResponse(row: any) {
   };
 }
 
+// Helper to upsert a custom provider/model into the dynamic catalog
+async function upsertToVendorCatalog(client: any, provider: string, modelName: string, complianceUrl: string | null) {
+  const trimmedProvider = provider.trim();
+  const trimmedModelName = modelName.trim();
+  
+  if (!trimmedProvider || !trimmedModelName) return;
+  
+  // Skip internal / proprietary / other placeholders
+  const lowerProvider = trimmedProvider.toLowerCase();
+  if (["internal", "proprietary", "other", "custom"].includes(lowerProvider)) return;
+
+  // Stop persisting tenant-specific component names into vendor_catalog entirely
+  const GLOBAL_VENDORS = [
+    "openai", "anthropic", "google", "meta", "mistral", "cohere", "aws bedrock", 
+    "azure openai", "vertex ai", "huggingface", "pinecone", "weaviate", 
+    "chromadb", "qdrant", "langchain", "llamaindex"
+  ];
+  if (!GLOBAL_VENDORS.includes(lowerProvider)) return;
+
+  // Wrap the best-effort catalog write in a SAVEPOINT to protect the caller's transaction
+  await client.query("SAVEPOINT upsert_catalog_sp");
+
+  try {
+    // Handle the race window safely and atomically by locking the vendor row for update
+    const selectRes = await client.query(
+      "SELECT id, models, compliance_url FROM vendor_catalog WHERE LOWER(vendor_name) = LOWER($1) FOR UPDATE",
+      [trimmedProvider]
+    );
+
+    if (selectRes.rows.length === 0) {
+      // Safe insertion using ON CONFLICT targeting the case-insensitive unique index
+      await client.query(
+        `INSERT INTO vendor_catalog (vendor_name, models, compliance_url) 
+         VALUES ($1, $2, $3) 
+         ON CONFLICT (LOWER(vendor_name)) DO UPDATE 
+         SET models = CASE 
+           WHEN NOT EXISTS (
+             SELECT 1 
+             FROM jsonb_array_elements_text(vendor_catalog.models) AS elem 
+             WHERE LOWER(TRIM(elem)) = LOWER($4)
+           ) THEN (vendor_catalog.models || $5::jsonb) 
+           ELSE vendor_catalog.models 
+         END,
+         compliance_url = COALESCE(vendor_catalog.compliance_url, EXCLUDED.compliance_url)`,
+        [
+          trimmedProvider, 
+          JSON.stringify([trimmedModelName]), 
+          complianceUrl || null, 
+          trimmedModelName,
+          JSON.stringify([trimmedModelName])
+        ]
+      );
+    } else {
+      const vendor = selectRes.rows[0];
+      const modelsList: string[] = Array.isArray(vendor.models) ? vendor.models : [];
+      
+      const modelExists = modelsList.some(m => m.toLowerCase().trim() === trimmedModelName.toLowerCase());
+      if (!modelExists) {
+        const updatedModels = [...modelsList, trimmedModelName];
+        const updatedComplianceUrl = vendor.compliance_url || complianceUrl || null;
+        await client.query(
+          "UPDATE vendor_catalog SET models = $1::jsonb, compliance_url = $2 WHERE id = $3",
+          [JSON.stringify(updatedModels), updatedComplianceUrl, vendor.id]
+        );
+      }
+    }
+
+    await client.query("RELEASE SAVEPOINT upsert_catalog_sp");
+  } catch (error) {
+    console.error("Failed to upsert to vendor catalog:", error);
+    try {
+      await client.query("ROLLBACK TO SAVEPOINT upsert_catalog_sp");
+    } catch (rollbackError) {
+      console.error("Failed to rollback catalog savepoint:", rollbackError);
+    }
+  }
+}
+
+// GET /inventory/vendors/catalog - Fetch dynamic vendor catalog
+router.get("/vendors/catalog", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT vendor_name AS \"vendorName\", models, compliance_url AS \"complianceUrl\" FROM vendor_catalog ORDER BY vendor_name ASC"
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error("Error fetching vendor catalog:", error);
+    res.status(500).json({ error: "Failed to fetch vendor catalog" });
+  }
+});
+
 // GET /inventory/:projectId - List components with filters
 router.get("/:projectId", authenticateToken, async (req, res) => {
   try {
@@ -377,6 +468,9 @@ router.post("/:projectId", authenticateToken, async (req, res) => {
       client
     });
 
+    // Auto-upsert provider & model to dynamic vendor catalog
+    await upsertToVendorCatalog(client, data.provider, data.componentName, complianceUrl);
+
     await client.query("COMMIT");
     beganTxn = false;
 
@@ -483,6 +577,9 @@ router.put("/:projectId/:id", authenticateToken, async (req, res) => {
       metadata: { componentId: updated.componentId, componentName: updated.componentName },
       client
     });
+
+    // Auto-upsert provider & model to dynamic vendor catalog
+    await upsertToVendorCatalog(client, data.provider, data.componentName, complianceUrl);
 
     await client.query("COMMIT");
     beganTxn = false;

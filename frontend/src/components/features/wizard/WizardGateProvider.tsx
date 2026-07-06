@@ -17,7 +17,6 @@ interface WizardGateProviderProps {
 export function WizardGateProvider({ projectId, featureName, children }: WizardGateProviderProps) {
   const { user } = useAuth();
   const { loading, wizardCompleted, wizardApplied, refreshWizardStatus } = useWizardGate(projectId);
-  const [skipped, setSkipped] = useState(false);
   const [showWizardModal, setShowWizardModal] = useState(false);
 
   // Free users never see the wizard gate
@@ -33,8 +32,8 @@ export function WizardGateProvider({ projectId, featureName, children }: WizardG
     );
   }
 
-  // Render main content if user has fully applied the wizard outputs, is free, or skipped
-  if ((wizardCompleted && wizardApplied) || !isPremium || skipped) {
+  // Render main content if user has fully applied the wizard outputs, or is free
+  if ((wizardCompleted && wizardApplied) || !isPremium) {
     return (
       <>
         {children}
@@ -81,7 +80,6 @@ export function WizardGateProvider({ projectId, featureName, children }: WizardG
       <PreWizardScreen
         featureName={featureName}
         onStart={() => setShowWizardModal(true)}
-        onSkip={() => setSkipped(true)}
       />
       {showWizardModal && (
         <SystemProfileWizard

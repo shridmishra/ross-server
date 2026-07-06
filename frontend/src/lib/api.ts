@@ -2045,6 +2045,10 @@ class ApiService {
   // AI COMPONENT INVENTORY
   // ==========================================
 
+  async getVendorCatalog(): Promise<{ success: boolean; data: { vendorName: string; models: string[]; complianceUrl: string | null }[] }> {
+    return this.request<{ success: boolean; data: { vendorName: string; models: string[]; complianceUrl: string | null }[] }>("/inventory/vendors/catalog");
+  }
+
   async getComponents(
     projectId: string,
     filters?: { type?: string; provider?: string; risk_tier?: string; status?: string }

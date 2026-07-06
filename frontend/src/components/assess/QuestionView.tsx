@@ -384,6 +384,7 @@ export default function QuestionView() {
                                         <button
                                             type="button"
                                             aria-describedby="tooltip-level"
+                                            aria-label="View information about maturity levels"
                                             className="focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-full"
                                         >
                                             <IconInfoCircle size={16} className="text-muted-foreground hover:text-foreground" />
@@ -407,6 +408,7 @@ export default function QuestionView() {
                                         <button
                                             type="button"
                                             aria-describedby="tooltip-stream"
+                                            aria-label="View stream details"
                                             className="focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-full"
                                         >
                                             <IconInfoCircle size={16} className="text-muted-foreground hover:text-foreground" />

@@ -298,7 +298,7 @@ function CommentItem({ comment, replies, currentUser, onEdit, onDelete, onReplyS
                     {canModify && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                                <Button aria-label="Comment options" variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                                     <IconDotsVertical className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -369,7 +369,7 @@ function CommentItem({ comment, replies, currentUser, onEdit, onDelete, onReplyS
                                         {currentUser?.id === reply.author_id && (
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover/reply:opacity-100 transition-opacity">
+                                                    <Button aria-label="Reply options" variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover/reply:opacity-100 transition-opacity">
                                                         <IconDotsVertical className="h-3 w-3 text-muted-foreground" />
                                                     </Button>
                                                 </DropdownMenuTrigger>

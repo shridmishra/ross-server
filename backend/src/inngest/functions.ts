@@ -36,12 +36,16 @@ export const evaluateSingleResponse = inngest.createFunction(
     id: "evaluate-single-response", 
     name: "Evaluate Single Response",
     onFailure: async ({ event, error }: { event: any; error: Error }) => {
-      const { jobId, responseIndex } = event.data;
+      const { jobId, responseIndex, evaluationId } = extractEvaluationJobContext(event);
+      if ((!jobId || responseIndex === undefined) && !evaluationId) {
+        return;
+      }
       await inngest.send({
         name: "evaluation/single.completed",
         data: {
           jobId,
           responseIndex,
+          evaluationId,
           result: null,
           error: error.message || "Unknown error",
         },
@@ -57,7 +61,8 @@ export const evaluateSingleResponse = inngest.createFunction(
       userId, 
       category, 
       questionText, 
-      userResponse 
+      userResponse,
+      evaluationId
     } = event.data;
 
     const evaluation = await step.run("evaluate-fairness", async () => {
@@ -79,6 +84,7 @@ export const evaluateSingleResponse = inngest.createFunction(
       data: {
         jobId,
         responseIndex,
+        evaluationId,
         result: evaluation,
         error: null,
       },
@@ -180,6 +186,81 @@ function extractJobContext(event: any): { jobId?: string; promptIndex?: number }
 
   return {};
 }
+
+/**
+ * Defensively extracts jobId, responseIndex, and evaluationId from various Inngest event shapes.
+ * Tries canonical paths in order and logs a redacted warning if both identifiers are missing.
+ */
+function extractEvaluationJobContext(event: any): { jobId?: string; responseIndex?: number; evaluationId?: string } {
+  const paths = [
+    () => event?.data?.event?.data,
+    () => event?.data,
+    () => event?.data?.events?.[0]?.data,
+  ];
+
+  let jobId: string | undefined;
+  let responseIndex: number | undefined;
+  let evaluationId: string | undefined;
+
+  for (const getPath of paths) {
+    const data = getPath();
+    if (data) {
+      if (jobId === undefined && data.jobId && data.responseIndex !== undefined) {
+        jobId = data.jobId;
+        responseIndex = data.responseIndex;
+      }
+      if (evaluationId === undefined && data.evaluationId) {
+        evaluationId = data.evaluationId;
+      }
+    }
+  }
+
+  if ((!jobId || responseIndex === undefined) && !evaluationId) {
+    const stripSensitiveFields = (obj: any) => {
+      if (obj && typeof obj === "object") {
+        delete obj.userId;
+        delete obj.userResponse;
+        delete obj.questionText;
+        delete obj.category;
+      }
+    };
+
+    const redactEvent = (ev: any): any => {
+      if (!ev) return ev;
+      const clone = { ...ev };
+      if (clone.data) {
+        clone.data = { ...clone.data };
+        stripSensitiveFields(clone.data);
+        if (clone.data.event) {
+          clone.data.event = { ...clone.data.event };
+          if (clone.data.event.data) {
+            clone.data.event.data = { ...clone.data.event.data };
+            stripSensitiveFields(clone.data.event.data);
+          }
+        }
+        if (Array.isArray(clone.data.events)) {
+          clone.data.events = clone.data.events.map((e: any) => {
+            if (e && e.data) {
+              const ec = { ...e, data: { ...e.data } };
+              stripSensitiveFields(ec.data);
+              return ec;
+            }
+            return e;
+          });
+        }
+      }
+      return clone;
+    };
+
+    console.warn(
+      "[evaluateSingleResponse.onFailure] Failed to extract jobId/responseIndex or evaluationId from event. Raw event:",
+      JSON.stringify(redactEvent(event), null, 2)
+    );
+  }
+
+  return { jobId, responseIndex, evaluationId };
+}
+
 
 export const callUserApiForPrompt = inngest.createFunction(
   {
@@ -419,6 +500,13 @@ export const evaluationAggregator = inngest.createFunction(
   { event: "evaluation/single.completed" },
   async ({ event, step }) => {
     const { jobId, responseIndex, result, error } = event.data;
+
+    if (!jobId || responseIndex === undefined) {
+      console.warn(
+        `[evaluationAggregator] Dropped event due to missing jobId or responseIndex. jobId: ${jobId}, responseIndex: ${responseIndex}, evaluationId: ${event.data?.evaluationId}, error: ${event.data?.error}`
+      );
+      return;
+    }
 
     const allComplete = await step.run("process-completion", async () => {
       const jobResult = await pool.query(

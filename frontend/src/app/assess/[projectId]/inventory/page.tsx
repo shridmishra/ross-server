@@ -72,11 +72,11 @@ import {
   DATA_CATEGORIES,
   RISK_TIERS,
   COMPONENT_STATUSES,
-  VENDOR_CATALOG,
-  PROVIDERS,
+  VENDOR_CATALOG as STATIC_VENDOR_CATALOG,
+  PROVIDERS as STATIC_PROVIDERS,
   CRC_CONTROL_LINKAGES,
   suggestRiskTierFrontend,
-  VENDOR_COMPLIANCE_URLS,
+  VENDOR_COMPLIANCE_URLS as STATIC_VENDOR_COMPLIANCE_URLS,
   type RiskTier,
   type ComponentStatus
 } from "@/lib/inventoryConstants";
@@ -139,20 +139,57 @@ export default function ComponentInventoryPage() {
   
   const [riskOverride, setRiskOverride] = useState(false);
 
+  // Dynamic Vendor Catalog States
+  const [providers, setProviders] = useState<string[]>(STATIC_PROVIDERS);
+  const [vendorCatalog, setVendorCatalog] = useState<Record<string, string[]>>(STATIC_VENDOR_CATALOG);
+  const [vendorComplianceUrls, setVendorComplianceUrls] = useState<Record<string, string>>(STATIC_VENDOR_COMPLIANCE_URLS);
+  
+  // Custom Provider/Model toggles for form input
+  const [isCustomProvider, setIsCustomProvider] = useState(false);
+  const [isCustomModel, setIsCustomModel] = useState(false);
+
   const [controlsList, setControlsList] = useState<any[]>([]);
 
   // Fetch data
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [comps, summ, controlsRes] = await Promise.all([
+      const [comps, summ, controlsRes, catalogRes] = await Promise.all([
         apiService.getComponents(projectId),
         apiService.getInventorySummary(projectId),
-        apiService.getPublishedCRCControls().catch(() => ({ data: [] }))
+        apiService.getPublishedCRCControls().catch(() => ({ data: [] })),
+        apiService.getVendorCatalog().catch((err) => {
+          console.error("Failed to load vendor catalog:", err);
+          return null;
+        })
       ]);
       setComponents(comps);
       setSummary(summ);
       setControlsList(controlsRes?.data || []);
+
+      if (catalogRes && catalogRes.success && Array.isArray(catalogRes.data)) {
+        const provs: string[] = [];
+        const cat: Record<string, string[]> = {};
+        const urls: Record<string, string> = {};
+        
+        catalogRes.data.forEach(item => {
+          provs.push(item.vendorName);
+          cat[item.vendorName] = item.models || [];
+          if (item.complianceUrl) {
+            urls[item.vendorName] = item.complianceUrl;
+          }
+        });
+        
+        // Add "Other" if not present
+        if (!provs.includes("Other")) {
+          provs.push("Other");
+          cat["Other"] = ["Custom Model/Service"];
+        }
+
+        setProviders(provs);
+        setVendorCatalog(cat);
+        setVendorComplianceUrls(urls);
+      }
     } catch (error) {
       console.error("Error loading inventory:", error);
       showToast.error("Failed to fetch component inventory");
@@ -204,28 +241,55 @@ export default function ComponentInventoryPage() {
 
   // Handle provider selection → prefill component options or URL
   const handleProviderChange = (provider: string) => {
+    if (provider === "custom_provider_trigger") {
+      setIsCustomProvider(true);
+      setFormProvider("");
+      setFormName("");
+      setIsCustomModel(true);
+      setFormComplianceUrl("");
+      return;
+    }
+
     setFormProvider(provider);
+    setIsCustomProvider(false);
+    setIsCustomModel(false);
     
     // Auto populate compliance URL if known
-    if (VENDOR_COMPLIANCE_URLS[provider]) {
-      setFormComplianceUrl(VENDOR_COMPLIANCE_URLS[provider]);
+    if (vendorComplianceUrls[provider]) {
+      setFormComplianceUrl(vendorComplianceUrls[provider]);
     } else {
       setFormComplianceUrl("");
     }
 
     // Prefill model name if catalog matches
-    const models = VENDOR_CATALOG[provider];
+    const models = vendorCatalog[provider];
     if (models && models.length > 0) {
       setFormName(models[0]);
+    } else {
+      setFormName("");
     }
   };
 
   // Open Form for Add
   const openAddForm = () => {
     setFormMode("add");
+    setIsCustomProvider(false);
+    setIsCustomModel(false);
     setFormName("");
     setFormType("Closed Foundation Model");
     setFormProvider("OpenAI");
+    
+    // Auto populate OpenAI details on init
+    const OpenAIModels = vendorCatalog["OpenAI"] || [];
+    if (OpenAIModels.length > 0) {
+      setFormName(OpenAIModels[0]);
+    }
+    if (vendorComplianceUrls["OpenAI"]) {
+      setFormComplianceUrl(vendorComplianceUrls["OpenAI"]);
+    } else {
+      setFormComplianceUrl("https://openai.com/security");
+    }
+
     setFormVersion("");
     setFormRole("");
     setFormDataCategories([]);
@@ -233,7 +297,6 @@ export default function ComponentInventoryPage() {
     setFormRiskTier("Low");
     setFormStatus("Active");
     setFormModelCardUrl("");
-    setFormComplianceUrl("https://openai.com/security");
     setFormDpaUrl("");
     setFormNotes("");
     setIsFormOpen(true);
@@ -242,9 +305,23 @@ export default function ComponentInventoryPage() {
   // Open Form for Edit
   const openEditForm = (comp: InventoryComponent) => {
     setFormMode("edit");
+    
+    // Check if provider is a custom provider (i.e. not in standard list)
+    const hasProvider = providers.includes(comp.provider);
+    setIsCustomProvider(!hasProvider);
+    setFormProvider(comp.provider);
+
+    // Check if model is a custom model for that provider
+    if (hasProvider) {
+      const models = vendorCatalog[comp.provider] || [];
+      const hasModel = models.includes(comp.componentName);
+      setIsCustomModel(!hasModel);
+    } else {
+      setIsCustomModel(true);
+    }
+
     setFormName(comp.componentName);
     setFormType(comp.componentType);
-    setFormProvider(comp.provider);
     setFormVersion(comp.version || "");
     setFormRole(comp.roleInSystem);
     setFormDataCategories(comp.dataCategoriesSent);
@@ -563,7 +640,7 @@ export default function ComponentInventoryPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Providers</SelectItem>
-              {PROVIDERS.map((prov) => (
+              {providers.map((prov) => (
                 <SelectItem key={prov} value={prov.toLowerCase()}>
                   {prov}
                 </SelectItem>
@@ -1010,45 +1087,107 @@ export default function ComponentInventoryPage() {
 
               {/* Provider */}
               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                <label className="text-xs font-bold text-foreground">Provider / Vendor *</label>
-                <Select value={formProvider} onValueChange={handleProviderChange}>
-                  <SelectTrigger className="rounded-xl border-border/65">
-                    <SelectValue placeholder="Select provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVIDERS.map((prov) => (
-                      <SelectItem key={prov} value={prov}>
-                        {prov}
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-foreground">Provider / Vendor *</label>
+                  {isCustomProvider && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomProvider(false);
+                        setIsCustomModel(false);
+                        setFormProvider("OpenAI");
+                        const OpenAIModels = vendorCatalog["OpenAI"] || [];
+                        if (OpenAIModels.length > 0) {
+                          setFormName(OpenAIModels[0]);
+                        }
+                      }}
+                      className="text-[10px] text-primary hover:underline font-semibold"
+                    >
+                      Select standard vendor
+                    </button>
+                  )}
+                </div>
+                {isCustomProvider ? (
+                  <Input
+                    placeholder="e.g. DeepSeek, Anthropic, Custom"
+                    value={formProvider}
+                    onChange={(e) => setFormProvider(e.target.value)}
+                    className="rounded-xl border-border/65"
+                    required
+                  />
+                ) : (
+                  <Select value={formProvider} onValueChange={handleProviderChange}>
+                    <SelectTrigger className="rounded-xl border-border/65">
+                      <SelectValue placeholder="Select provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {providers.map((prov) => (
+                        <SelectItem key={prov} value={prov}>
+                          {prov}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom_provider_trigger" className="text-primary font-semibold border-t border-border/30 mt-1">
+                        + Type custom provider...
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               {/* Name */}
               <div className="space-y-1.5 col-span-2">
-                <label className="text-xs font-bold text-foreground">Component / Model Name *</label>
-                {VENDOR_CATALOG[formProvider] ? (
-                  <Select value={formName} onValueChange={setFormName}>
-                    <SelectTrigger className="rounded-xl border-border/65">
-                      <SelectValue placeholder="Select or type component name" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VENDOR_CATALOG[formProvider].map((model) => (
-                        <SelectItem key={model} value={model}>
-                          {model}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-foreground">Component / Model Name *</label>
+                  {!isCustomProvider && isCustomModel && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomModel(false);
+                        const models = vendorCatalog[formProvider] || [];
+                        if (models.length > 0) {
+                          setFormName(models[0]);
+                        }
+                      }}
+                      className="text-[10px] text-primary hover:underline font-semibold"
+                    >
+                      Select standard model
+                    </button>
+                  )}
+                </div>
+                {isCustomModel ? (
                   <Input
-                    placeholder="e.g. GPT-4, Custom Embedding Model, Pinecone DB"
+                    placeholder="e.g. GPT-5, DeepSeek-V3, Custom DB Index"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     className="rounded-xl border-border/65"
                     required
                   />
+                ) : (
+                  <Select
+                    value={formName}
+                    onValueChange={(val) => {
+                      if (val === "custom_model_trigger") {
+                        setIsCustomModel(true);
+                        setFormName("");
+                      } else {
+                        setFormName(val);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="rounded-xl border-border/65">
+                      <SelectValue placeholder="Select or type component name" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(vendorCatalog[formProvider] || []).map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom_model_trigger" className="text-primary font-semibold border-t border-border/30 mt-1">
+                        + Type custom model name...
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
               </div>
 

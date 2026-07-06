@@ -9,10 +9,9 @@ import { Button } from "../../ui/button";
 interface PreWizardScreenProps {
   featureName: string;
   onStart: () => void;
-  onSkip: () => void;
 }
 
-export function PreWizardScreen({ featureName, onStart, onSkip }: PreWizardScreenProps) {
+export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) {
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -158,26 +157,18 @@ export function PreWizardScreen({ featureName, onStart, onSkip }: PreWizardScree
           </CardContent>
 
           <CardFooter className="relative z-10 flex flex-col items-center gap-4 py-6 px-6 sm:px-8 border-t border-border/40 bg-muted/20">
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+            <motion.div variants={itemVariants} className="w-full max-w-md">
               <Button
                 onClick={onStart}
-                className="flex-1 py-6 bg-indigo-600 text-white hover:bg-indigo-500 font-semibold shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+                className="w-full py-6 bg-indigo-600 text-white hover:bg-indigo-500 font-semibold shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
               >
                 Configure AI Profile <ArrowRight className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                onClick={onSkip}
-                className="py-6 border border-border bg-background hover:bg-muted text-muted-foreground font-semibold flex items-center justify-center"
-              >
-                Skip for now
               </Button>
             </motion.div>
 
             <motion.div variants={itemVariants} className="text-center max-w-sm">
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-indigo-400">Note:</span> If skipped, the platform defaults to generic compliance parameters. Takes about 5 minutes.
+                <span className="font-semibold text-indigo-400">Required:</span> This setup is needed to unlock your premium features. Takes about 5 minutes — you can save and resume anytime.
               </p>
             </motion.div>
           </CardFooter>
