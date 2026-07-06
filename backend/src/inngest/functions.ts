@@ -212,11 +212,6 @@ function extractEvaluationJobContext(event: any): { jobId?: string; responseInde
       if (evaluationId === undefined && data.evaluationId) {
         evaluationId = data.evaluationId;
       }
-      // Stop searching a field once jobId/responseIndex or evaluationId has been set,
-      // or break as soon as a preferred path yields valid identifiers.
-      if ((jobId !== undefined && responseIndex !== undefined) || evaluationId !== undefined) {
-        break;
-      }
     }
   }
 
@@ -507,6 +502,9 @@ export const evaluationAggregator = inngest.createFunction(
     const { jobId, responseIndex, result, error } = event.data;
 
     if (!jobId || responseIndex === undefined) {
+      console.warn(
+        `[evaluationAggregator] Dropped event due to missing jobId or responseIndex. jobId: ${jobId}, responseIndex: ${responseIndex}, evaluationId: ${event.data?.evaluationId}, error: ${event.data?.error}`
+      );
       return;
     }
 

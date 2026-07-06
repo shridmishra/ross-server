@@ -213,7 +213,11 @@ async function upsertToVendorCatalog(client: any, provider: string, modelName: s
          VALUES ($1, $2, $3) 
          ON CONFLICT (LOWER(vendor_name)) DO UPDATE 
          SET models = CASE 
-           WHEN NOT (vendor_catalog.models ? $4) THEN (vendor_catalog.models || $5::jsonb) 
+           WHEN NOT EXISTS (
+             SELECT 1 
+             FROM jsonb_array_elements_text(vendor_catalog.models) AS elem 
+             WHERE LOWER(TRIM(elem)) = LOWER($4)
+           ) THEN (vendor_catalog.models || $5::jsonb) 
            ELSE vendor_catalog.models 
          END,
          compliance_url = COALESCE(vendor_catalog.compliance_url, EXCLUDED.compliance_url)`,
