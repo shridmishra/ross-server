@@ -82,6 +82,7 @@ import { cn } from "@/lib/utils";
 import SubscriptionModal from "../features/subscriptions/SubscriptionModal";
 import { ProjectSelectionModal } from "./ProjectSelectionModal";
 import { useSidebarStore, MIN_WIDTH, MAX_WIDTH_RATIO } from "../../store/sidebarStore";
+import { buildAssessmentAnswerKey } from "@/lib/assessmentValidation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -479,7 +480,7 @@ function SidebarContentComponent() {
       const practices = Object.entries(domain.practices || {}).map(([practiceId, practice]: [string, any]) => {
         const rawQuestions = getQuestionsListFromLevels(practice.levels);
         const questions = rawQuestions.map((q: any, idx: number) => {
-          const answerKey = `${domain.id}_${practiceId}_${idx}`;
+          const answerKey = buildAssessmentAnswerKey(domain.id, practiceId, q.level, q.stream, idx);
           return {
             ...q,
             index: idx,
@@ -1499,7 +1500,7 @@ function SidebarContentComponent() {
                   <DropdownMenuItem onClick={(e) => { e.preventDefault(); toggleTheme(); }} className="flex items-center justify-between cursor-pointer">
                     <div className="flex items-center">
                       {theme === "dark" ? <IconSun className="size-4 mr-2 text-primary" /> : <IconMoon className="size-4 mr-2 text-primary" />}
-                      <span>Theme Mode</span>
+                      <span>Theme</span>
                     </div>
                     <Switch checked={theme === "dark"} className="pointer-events-none scale-75" />
                   </DropdownMenuItem>

@@ -255,17 +255,54 @@ router.put(
       trimmedName = typeof name === "string" ? name.trim() : name;
     }
 
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (trimmedName !== undefined) {
+      fields.push(`name = $${idx++}`);
+      values.push(trimmedName);
+    }
+    if (description !== undefined) {
+      fields.push(`description = $${idx++}`);
+      values.push(description);
+    }
+    if (aiSystemType !== undefined) {
+      fields.push(`ai_system_type = $${idx++}`);
+      values.push(aiSystemType);
+    }
+    if (industry !== undefined) {
+      fields.push(`industry = $${idx++}`);
+      values.push(industry);
+    }
+    if (status !== undefined) {
+      if (status !== "not_started" && status !== "in_progress") {
+        return res.status(400).json({ error: "Invalid status. Status can only be updated to 'not_started' or 'in_progress' via this endpoint. Project completion is restricted to the submission endpoint." });
+      }
+      fields.push(`status = $${idx++}`);
+      values.push(status);
+    }
+    if (pathChoice !== undefined) {
+      if (pathChoice !== "aima" && pathChoice !== "premium") {
+        return res.status(400).json({ error: "Invalid pathChoice. Must be 'aima' or 'premium'." });
+      }
+      fields.push(`path_choice = $${idx++}`);
+      values.push(pathChoice);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    // Always bump updated_at
+    fields.push(`updated_at = CURRENT_TIMESTAMP`);
+
+    values.push(req.params.projectId);
+    const projectIdIdx = idx;
+
     const result = await pool.query(
-      "UPDATE projects SET name = COALESCE($1, name), description = COALESCE($2, description), ai_system_type = COALESCE($3, ai_system_type), industry = COALESCE($4, industry), status = COALESCE($5, status), path_choice = COALESCE($6, path_choice), updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING *",
-      [
-        trimmedName !== undefined ? trimmedName : null,
-        description,
-        aiSystemType,
-        industry,
-        status,
-        pathChoice,
-        req.params.projectId,
-      ],
+      `UPDATE projects SET ${fields.join(", ")} WHERE id = $${projectIdIdx} RETURNING *`,
+      values,
     );
 
     if (result.rows.length === 0) {

@@ -93,16 +93,18 @@ export default function ProjectEditForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0">
           <Label htmlFor="ai-system-type">AI System Type</Label>
           <Select
             value={data.aiSystemType}
             onValueChange={(value) => setData({ ...data, aiSystemType: value })}
           >
-            <SelectTrigger id="ai-system-type">
-              <div className="flex items-center gap-2">
-                <IconRobot className="h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="Select AI System Type" />
+            <SelectTrigger id="ai-system-type" className="w-full">
+              <div className="flex items-center gap-2 min-w-0 w-full">
+                <IconRobot className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">
+                  <SelectValue placeholder="Select AI System Type" />
+                </span>
               </div>
             </SelectTrigger>
             <SelectContent>
@@ -115,16 +117,18 @@ export default function ProjectEditForm({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0">
           <Label htmlFor="industry">Industry</Label>
           <Select
             value={data.industry}
             onValueChange={(value) => setData({ ...data, industry: value })}
           >
-            <SelectTrigger id="industry">
-              <div className="flex items-center gap-2">
-                <IconBriefcase className="h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="Select Industry" />
+            <SelectTrigger id="industry" className="w-full">
+              <div className="flex items-center gap-2 min-w-0 w-full">
+                <IconBriefcase className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">
+                  <SelectValue placeholder="Select Industry" />
+                </span>
               </div>
             </SelectTrigger>
             <SelectContent>
