@@ -1,0 +1,4 @@
+# Playwright UI E2E — local artifacts & secrets
+.env.e2e
+.auth/
+.artifacts/
