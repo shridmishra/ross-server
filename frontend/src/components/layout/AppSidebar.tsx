@@ -43,6 +43,7 @@ import {
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { AUTH_LOGIN_URL, ROLES, PREMIUM_STATUS } from "../../lib/constants";
+import { getRouteFlags } from "../../lib/route-utils";
 import {
   Sidebar,
   SidebarContent,
@@ -82,7 +83,7 @@ import { showToast } from "@/lib/toast";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useOptionalAssessmentContext } from "../../contexts/AssessmentContext";
 import { apiService, CRCControl } from "../../lib/api";
-import { cn } from "@/lib/utils";
+import { cn, getDomainIcon } from "@/lib/utils";
 import SubscriptionModal from "../features/subscriptions/SubscriptionModal";
 import { ProjectSelectionModal } from "./ProjectSelectionModal";
 import { useSidebarStore, MIN_WIDTH, MAX_WIDTH_RATIO } from "../../store/sidebarStore";
@@ -144,35 +145,6 @@ const getProjectIdFromPath = (pathname: string | null): string | null => {
   return match ? match[1] : null;
 };
 
-const getRouteFlags = (pathname: string | null) => {
-  const isCrcPage = !!pathname?.match(/\/crc($|\/|\?)/);
-  const isFairnessPage = !!pathname?.match(/\/fairness-bias($|\/|\?)/);
-  const isFairnessRootPage = !!pathname?.match(/\/fairness-bias($|\?|\/$)/);
-  const isApiEndpointPage = !!pathname?.match(/\/fairness-bias\/api-endpoint($|\/|\?)/);
-  const isVulnerabilityPage = !!pathname?.match(/\/vulnerability-assessment($|\/|\?)/);
-  const isDatasetTestingPage = !!pathname?.match(/\/fairness-bias\/dataset-testing($|\/|\?)/);
-  const isFairnessOptionsPage = !!pathname?.match(/\/fairness-bias\/options($|\/|\?)/);
-  const isTeamPage = !!pathname?.match(/\/team($|\/|\?)/);
-  const isSettingsPage = !!pathname?.match(/\/assess\/[^/]+\/settings($|\/|\?)/);
-  const isInventoryPage = !!pathname?.match(/\/inventory($|\/|\?)/);
-  const isAimaPage = !isCrcPage && !isFairnessPage && !isTeamPage && !isSettingsPage && !isInventoryPage && !!pathname?.match(/\/assess\/[^/]+/);
-  const isAimaQuestionPage = isAimaPage && !!pathname?.match(/\/assess\/[^/]+\/[^/]+\/[^/]+/);
-  return {
-    isCrcPage,
-    isFairnessPage,
-    isFairnessRootPage,
-    isApiEndpointPage,
-    isVulnerabilityPage,
-    isDatasetTestingPage,
-    isFairnessOptionsPage,
-    isTeamPage,
-    isSettingsPage,
-    isInventoryPage,
-    isAimaPage,
-    isAimaQuestionPage,
-  };
-};
-
 // ─── Sub-Components ───────────────────────────────────────────────────────────
 
 interface Domain {
@@ -216,23 +188,6 @@ const CompactProgress = ({ current, total, isCompleted, size = "default" }: { cu
     {current}/{total}
   </span>
 );
-
-const getDomainIcon = (title: string) => {
-  const t = title.toLowerCase();
-  if (t.includes("govern") || t.includes("responsib")) {
-    return IconShieldLock;
-  }
-  if (t.includes("data") || t.includes("privacy")) {
-    return IconDatabase;
-  }
-  if (t.includes("design") || t.includes("develop") || t.includes("model")) {
-    return IconCpu;
-  }
-  if (t.includes("security") || t.includes("protection")) {
-    return IconLock;
-  }
-  return IconFolder;
-};
 
 const DomainTreeItem = ({
   domain,

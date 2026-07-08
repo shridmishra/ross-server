@@ -11,31 +11,27 @@ import { Loader2 } from "lucide-react";
 import { apiService, Project } from "@/lib/api";
 import { showToast } from "@/lib/toast";
 import { IconFolder, IconCpu } from "@tabler/icons-react";
+import { CARD_THEMES } from "@/lib/constants";
 
-const CARD_THEMES = [
+const LOCAL_MODAL_THEMES = [
   { // Indigo
-    border: "border-indigo-500/25 bg-indigo-500/[0.02] hover:bg-indigo-500/5 hover:border-indigo-500/40",
-    badge: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs",
+    bgAndHover: "bg-indigo-500/[0.02] hover:bg-indigo-500/5 hover:border-indigo-500/40",
     icon: "text-indigo-600 dark:text-indigo-400",
   },
   { // Red
-    border: "border-destructive/35 bg-destructive/[0.01] hover:bg-destructive/5 hover:border-destructive/50",
-    badge: "bg-destructive/10 text-destructive dark:text-red-400 font-semibold shadow-xs",
+    bgAndHover: "bg-destructive/[0.01] hover:bg-destructive/5 hover:border-destructive/50",
     icon: "text-destructive",
   },
   { // Yellow
-    border: "border-warning/50 bg-warning/[0.02] hover:bg-warning/5 hover:border-warning/60",
-    badge: "bg-warning/15 text-warning-foreground dark:text-warning font-semibold shadow-xs",
+    bgAndHover: "bg-warning/[0.02] hover:bg-warning/5 hover:border-warning/60",
     icon: "text-warning-foreground dark:text-warning",
   },
   { // Green
-    border: "border-success/40 bg-success/[0.01] hover:bg-success/5 hover:border-success/50",
-    badge: "bg-success/10 text-success dark:text-success font-semibold shadow-xs",
+    bgAndHover: "bg-success/[0.01] hover:bg-success/5 hover:border-success/50",
     icon: "text-success",
   },
   { // Purple
-    border: "border-purple-500/25 bg-purple-500/[0.02] hover:bg-purple-500/5 hover:border-purple-500/40",
-    badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold shadow-xs",
+    bgAndHover: "bg-purple-500/[0.02] hover:bg-purple-500/5 hover:border-purple-500/40",
     icon: "text-purple-600 dark:text-purple-400",
   }
 ];
@@ -107,15 +103,16 @@ export function ProjectSelectionModal({
           ) : (
             projects.map((project, index) => {
               const theme = CARD_THEMES[index % CARD_THEMES.length];
+              const localTheme = LOCAL_MODAL_THEMES[index % LOCAL_MODAL_THEMES.length];
               return (
                 <Button
                   key={project.id}
                   variant="outline"
-                  className={`justify-start h-auto py-3 px-4 w-full border transition-all duration-200 ${theme.border}`}
+                  className={`justify-start h-auto py-3 px-4 w-full border transition-all duration-200 ${theme.border} ${localTheme.bgAndHover}`}
                   onClick={() => onSelectProject(project.id)}
                 >
                   <div className="flex items-center gap-3 w-full overflow-hidden">
-                    <IconFolder className={`w-5 h-5 shrink-0 ${theme.icon}`} />
+                    <IconFolder className={`w-5 h-5 shrink-0 ${localTheme.icon}`} />
                     <div className="flex items-center justify-between flex-1 min-w-0 w-full gap-2">
                       <div className="flex flex-col items-start min-w-0 flex-1">
                         <span className="font-semibold truncate w-full text-left text-foreground">{project.name}</span>

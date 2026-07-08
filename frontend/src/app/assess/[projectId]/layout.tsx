@@ -7,6 +7,8 @@ import { Breadcrumb } from "../../../components/shared/Breadcrumb";
 import { WizardGateProvider } from "../../../components/features/wizard/WizardGateProvider";
 import { useAuth } from "../../../contexts/AuthContext";
 import { isPremiumStatus } from "../../../lib/constants";
+import { getRouteFlags } from "../../../lib/route-utils";
+
 
 const getBreadcrumbLabel = (pathname: string) => {
     if (pathname.includes("premium-features")) return "Premium Features";
@@ -57,11 +59,9 @@ function AssessmentLayoutContent({ children }: { children: React.ReactNode }) {
         ? `/assess/${projectId}/crc/dashboard`
         : `/assess/${projectId}`;
 
-    // Hide layout breadcrumb for the main assessment page and standalone practice page
-    // (they embed the breadcrumb inside their sticky page header)
     const isMainAssessment = pathname === `/assess/${projectId}`;
-    const isPracticePage = pathname.match(new RegExp(`^/assess/[^/]+/[^/]+/[^/]+$`));
-    const hideLayoutBreadcrumb = isMainAssessment || isPracticePage;
+    const { isAimaQuestionPage } = getRouteFlags(pathname);
+    const hideLayoutBreadcrumb = isMainAssessment || isAimaQuestionPage;
 
     return (
         <div className="flex flex-col min-h-full">

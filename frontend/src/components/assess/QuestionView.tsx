@@ -25,24 +25,9 @@ import { sanitizeAimaDescription } from "../../lib/sanitize";
 import { getMissingQuestions, buildAssessmentAnswerKey, type MissingQuestion } from "../../lib/assessmentValidation";
 import MissingAnswersDialog from "./MissingAnswersDialog";
 import { Breadcrumb } from "../shared/Breadcrumb";
+import { getDomainIcon } from "@/lib/utils";
 import { isPremiumStatus } from "../../lib/constants";
 
-const getDomainIcon = (title: string) => {
-    const t = title.toLowerCase();
-    if (t.includes("govern") || t.includes("responsib")) {
-        return IconShieldLock;
-    }
-    if (t.includes("data") || t.includes("privacy")) {
-        return IconDatabase;
-    }
-    if (t.includes("design") || t.includes("develop") || t.includes("model")) {
-        return IconCpu;
-    }
-    if (t.includes("security") || t.includes("protection")) {
-        return IconLock;
-    }
-    return IconFolder;
-};
 
 const getLevelColor = (level: string | number) => {
     const lvl = String(level);
@@ -535,7 +520,7 @@ export default function QuestionView() {
                                                 }
                                                 className="sr-only peer"
                                             />
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 peer-focus-visible:ring peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-1 ${colors.radioClass}`}>
+                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-1 ${colors.radioClass}`}>
                                                 {isSelected && (
                                                     <motion.div
                                                         initial={{ scale: 0 }}

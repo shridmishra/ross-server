@@ -27,6 +27,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PREMIUM_STATUS } from "../../lib/constants";
 import { CRCControl } from "../../lib/api";
 import { cn } from "@/lib/utils";
+import { getRouteFlags } from "../../lib/route-utils";
 import SubscriptionModal from "../features/subscriptions/SubscriptionModal";
 import {
   Sidebar,
@@ -98,32 +99,6 @@ const DOMAIN_PRIORITY = [
 
 const normalize = (value?: string) => value?.trim().toLowerCase() || "";
 
-const getRouteFlags = (pathname: string | null) => {
-  const isCrcPage = !!pathname?.match(/\/crc($|\/|\?)/);
-  const isFairnessPage = !!pathname?.match(/\/fairness-bias($|\/|\?)/);
-  const isFairnessRootPage = !!pathname?.match(/\/fairness-bias($|\?|\/$)/);
-  const isApiEndpointPage = !!pathname?.match(/\/fairness-bias\/api-endpoint($|\/|\?)/);
-  const isVulnerabilityPage = !!pathname?.match(/\/vulnerability-assessment($|\/|\?)/);
-  const isDatasetTestingPage = !!pathname?.match(/\/fairness-bias\/dataset-testing($|\/|\?)/);
-  const isFairnessOptionsPage = !!pathname?.match(/\/fairness-bias\/options($|\/|\?)/);
-  const isTeamPage = !!pathname?.match(/\/team($|\/|\?)/);
-  const isSettingsPage = !!pathname?.match(/\/settings($|\/|\?)/);
-  const isInventoryPage = !!pathname?.match(/\/inventory($|\/|\?)/);
-  const isAimaPage = !isCrcPage && !isFairnessPage && !isTeamPage && !isSettingsPage && !isInventoryPage && !!pathname?.match(/\/assess\/[^/]+$/);
-  return { 
-    isCrcPage, 
-    isFairnessPage, 
-    isFairnessRootPage,
-    isApiEndpointPage, 
-    isVulnerabilityPage,
-    isDatasetTestingPage,
-    isFairnessOptionsPage,
-    isTeamPage, 
-    isSettingsPage, 
-    isInventoryPage,
-    isAimaPage 
-  };
-};
 
 const CompactProgress = ({ current, total, isCompleted, size = "default" }: { current: number; total: number; isCompleted: boolean; size?: "default" | "sm" }) => {
   return (

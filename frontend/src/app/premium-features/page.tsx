@@ -308,7 +308,7 @@ export default function PremiumFeaturesPage() {
                     <Button
                       variant="ghost"
                       onClick={() => handleProjectClick(project.id)}
-                      className="w-full justify-start h-auto py-4 px-4 hover:bg-primary/5 border border-border/20 rounded-xl flex items-center"
+                      className="group w-full justify-start h-auto py-4 px-4 hover:bg-primary/5 border border-border/20 rounded-xl flex items-center"
                     >
                       <div className="mr-3 p-2 bg-primary/10 rounded-lg text-primary shrink-0">
                         <IconFolder className="w-5 h-5" />

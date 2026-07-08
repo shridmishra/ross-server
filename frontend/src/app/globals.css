@@ -813,17 +813,17 @@ button:enabled,
 /* --- Free Section (Green) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-free {
-  color: oklch(60% 0.18 142 / 75%) !important;
+  color: color-mix(in oklch, var(--section-free) 75%, transparent) !important;
 }
 .sidebar-btn-free svg {
-  color: oklch(60% 0.18 142 / 70%) !important;
+  color: color-mix(in oklch, var(--section-free) 70%, transparent) !important;
 }
 .sidebar-btn-free:hover {
-  background-color: oklch(60% 0.18 142 / 8%) !important;
-  color: oklch(60% 0.18 142) !important;
+  background-color: color-mix(in oklch, var(--section-free) 8%, transparent) !important;
+  color: var(--section-free) !important;
 }
 .sidebar-btn-free:hover svg {
-  color: oklch(60% 0.18 142) !important;
+  color: var(--section-free) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-free[data-active="true"] {

@@ -67,59 +67,12 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import ProjectEditForm from "@/components/features/projects/ProjectEditForm";
-import { INDUSTRY_OPTIONS, AI_SYSTEM_TYPES, isPremiumStatus } from "@/lib/constants";
+import { INDUSTRY_OPTIONS, AI_SYSTEM_TYPES, isPremiumStatus, CARD_THEMES } from "@/lib/constants";
 import { getReportRoute } from "@/lib/reportRoute";
 
 const POST_CHECKOUT_RETURN_URL_KEY = "postCheckoutReturnUrl";
 const SKELETON_COUNT = 5;
 
-const CARD_THEMES = [
-  { // Indigo / Purple-Blue
-    border: "border-indigo-500/25",
-    shadow: "hover:shadow-indigo-500/5",
-    btnPrimary: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 border-0 font-bold",
-    btnSecondary: "border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10",
-    badge: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs",
-    badgeRole: "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs",
-    text: "text-foreground"
-  },
-  { // Red
-    border: "border-destructive/35",
-    shadow: "hover:shadow-destructive/5",
-    btnPrimary: "bg-destructive/15 text-destructive dark:text-red-400 hover:bg-destructive/25 border-0 font-bold",
-    btnSecondary: "border-destructive/20 text-destructive dark:text-red-400 hover:bg-destructive/10",
-    badge: "bg-destructive/10 text-destructive dark:text-red-400 font-semibold shadow-xs",
-    badgeRole: "bg-destructive/20 text-destructive dark:text-red-400 font-bold shadow-xs",
-    text: "text-foreground"
-  },
-  { // Yellow
-    border: "border-warning/50",
-    shadow: "hover:shadow-warning/5",
-    btnPrimary: "bg-warning/20 text-warning-foreground dark:text-warning hover:bg-warning/30 border-0 font-bold",
-    btnSecondary: "border-warning/35 text-warning-foreground dark:text-warning hover:bg-warning/10",
-    badge: "bg-warning/15 text-warning-foreground dark:text-warning font-semibold shadow-xs",
-    badgeRole: "bg-warning/25 text-warning-foreground dark:text-warning font-bold shadow-xs",
-    text: "text-foreground"
-  },
-  { // Green
-    border: "border-success/40",
-    shadow: "hover:shadow-success/5",
-    btnPrimary: "bg-success/15 text-success dark:text-success hover:bg-success/25 border-0 font-bold",
-    btnSecondary: "border-success/30 text-success dark:text-success hover:bg-success/10",
-    badge: "bg-success/10 text-success dark:text-success font-semibold shadow-xs",
-    badgeRole: "bg-success/20 text-success dark:text-success font-bold shadow-xs",
-    text: "text-foreground"
-  },
-  { // Purple
-    border: "border-purple-500/25",
-    shadow: "hover:shadow-purple-500/5",
-    btnPrimary: "bg-purple-500/15 text-purple-700 dark:text-purple-300 hover:bg-purple-500/25 border-0 font-bold",
-    btnSecondary: "border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10",
-    badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold shadow-xs",
-    badgeRole: "bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold shadow-xs",
-    text: "text-foreground"
-  }
-];
 
 export default function DashboardPage() {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -193,7 +146,8 @@ export default function DashboardPage() {
     if (isNaN(date.getTime())) return "";
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     const dd = String(date.getDate()).padStart(2, "0");
-    return `${mm}/${dd}`;
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
   };
 
   const getProjectEditHref = (projId: string) => {
@@ -587,11 +541,9 @@ export default function DashboardPage() {
                         {decliningTokens.has(invitation.token) ? (
                           <IconLoader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <>
-                            <IconTrash className="w-4 h-4" />
-                            <span>Decline</span>
-                          </>
+                          <IconTrash className="w-4 h-4" />
                         )}
+                        <span>Decline</span>
                       </Button>
                     </CardFooter>
                   </Card>
@@ -844,17 +796,17 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-2.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sort By</h4>
               <div className="grid grid-cols-2 gap-2">
-                {[
+                {([
                   { id: 'created_desc', label: 'Newest First' },
                   { id: 'created_asc', label: 'Oldest First' },
                   { id: 'name_asc', label: 'Name (A-Z)' },
                   { id: 'name_desc', label: 'Name (Z-A)' },
-                ].map((opt) => (
+                ] satisfies { id: typeof sortBy; label: string }[]).map((opt) => (
                   <Button
                     key={opt.id}
                     variant={sortBy === opt.id ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSortBy(opt.id as any)}
+                    onClick={() => setSortBy(opt.id)}
                     className={`h-9 px-3 rounded-lg text-xs font-semibold justify-start transition-all duration-200 ${
                       sortBy === opt.id ? "bg-primary text-primary-foreground shadow-sm" : "border-border/60 hover:bg-muted/50"
                     }`}
@@ -869,17 +821,17 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-2.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Filter By Status</h4>
               <div className="grid grid-cols-2 gap-2">
-                {[
+                {([
                   { id: 'all', label: 'All Statuses' },
                   { id: 'not_started', label: 'Not Started' },
                   { id: 'in_progress', label: 'In Progress' },
                   { id: 'completed', label: 'Completed' },
-                ].map((opt) => (
+                ] satisfies { id: typeof filterStatus; label: string }[]).map((opt) => (
                   <Button
                     key={opt.id}
                     variant={filterStatus === opt.id ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus(opt.id as any)}
+                    onClick={() => setFilterStatus(opt.id)}
                     className={`h-9 px-3 rounded-lg text-xs font-semibold justify-start transition-all duration-200 ${
                       filterStatus === opt.id ? "bg-primary text-primary-foreground shadow-sm" : "border-border/60 hover:bg-muted/50"
                     }`}

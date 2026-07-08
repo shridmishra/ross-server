@@ -53,3 +53,62 @@ export const AI_SYSTEM_TYPES = [
   "Autonomous System",
   "Other",
 ];
+
+export const CARD_THEMES = [
+  { // Indigo / Purple-Blue
+    id: "indigo",
+    border: "border-indigo-500/25",
+    shadow: "hover:shadow-indigo-500/5",
+    btnPrimary: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 border-0 font-bold",
+    btnSecondary: "border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10",
+    badge: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs",
+    badgeRole: "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs",
+    text: "text-foreground",
+    color: "indigo"
+  },
+  { // Red
+    id: "red",
+    border: "border-destructive/35",
+    shadow: "hover:shadow-destructive/5",
+    btnPrimary: "bg-destructive/15 text-destructive dark:text-red-400 hover:bg-destructive/25 border-0 font-bold",
+    btnSecondary: "border-destructive/20 text-destructive dark:text-red-400 hover:bg-destructive/10",
+    badge: "bg-destructive/10 text-destructive dark:text-red-400 font-semibold shadow-xs",
+    badgeRole: "bg-destructive/20 text-destructive dark:text-red-400 font-bold shadow-xs",
+    text: "text-foreground",
+    color: "destructive"
+  },
+  { // Yellow
+    id: "yellow",
+    border: "border-warning/50",
+    shadow: "hover:shadow-warning/5",
+    btnPrimary: "bg-warning/20 text-warning-foreground dark:text-warning hover:bg-warning/30 border-0 font-bold",
+    btnSecondary: "border-warning/35 text-warning-foreground dark:text-warning hover:bg-warning/10",
+    badge: "bg-warning/15 text-warning-foreground dark:text-warning font-semibold shadow-xs",
+    badgeRole: "bg-warning/25 text-warning-foreground dark:text-warning font-bold shadow-xs",
+    text: "text-foreground",
+    color: "warning"
+  },
+  { // Green
+    id: "green",
+    border: "border-success/40",
+    shadow: "hover:shadow-success/5",
+    btnPrimary: "bg-success/15 text-success dark:text-success hover:bg-success/25 border-0 font-bold",
+    btnSecondary: "border-success/30 text-success dark:text-success hover:bg-success/10",
+    badge: "bg-success/10 text-success dark:text-success font-semibold shadow-xs",
+    badgeRole: "bg-success/20 text-success dark:text-success font-bold shadow-xs",
+    text: "text-foreground",
+    color: "success"
+  },
+  { // Purple
+    id: "purple",
+    border: "border-purple-500/25",
+    shadow: "hover:shadow-purple-500/5",
+    btnPrimary: "bg-purple-500/15 text-purple-700 dark:text-purple-300 hover:bg-purple-500/25 border-0 font-bold",
+    btnSecondary: "border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10",
+    badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold shadow-xs",
+    badgeRole: "bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold shadow-xs",
+    text: "text-foreground",
+    color: "purple"
+  }
+];
+

@@ -84,6 +84,7 @@ The sidebar uses a **unified navigation model** with collapsible sections, drag-
 ### 3.1 Sidebar Header
 
 The sidebar header uses **logo images** (not text):
+
 ```tsx
 <SidebarHeader className="p-3 group-data-[collapsible=icon]:p-2">
   <div className="flex items-center justify-between w-full gap-2 group-data-[collapsible=icon]:justify-center">
@@ -108,7 +109,7 @@ Key details:
 
 The sidebar has **four main top-level sections** plus an Admin section:
 
-```
+```text
 Dashboard                      (sidebar-btn-dashboard, always blue)
 ├── Free                       (sidebar-btn-free, green, collapsible)
 │   └── AIMA Assessment        (sidebar-btn-free, nested collapsible)
@@ -143,7 +144,7 @@ Dashboard                      (sidebar-btn-dashboard, always blue)
 
 ### 3.4 CSS Class → Section Mapping
 
-```
+```text
 sidebar-btn-dashboard  →  --primary (Blue)
 sidebar-btn-free       →  --section-free (Green)
 sidebar-btn-premium    →  --section-premium (Yellow)
@@ -187,6 +188,7 @@ When sidebar is `collapsible="icon"`:
 ### 3.8 Collapsible Sub-Sections (Animated)
 
 All collapsible sections expand/collapse with Framer Motion:
+
 ```tsx
 <motion.div
   initial={{ height: 0, opacity: 0 }}
@@ -195,6 +197,7 @@ All collapsible sections expand/collapse with Framer Motion:
   transition={{ duration: 0.2 }}
 />
 ```
+
 Chevron rotates 90° when expanded: `cn("rotate-90")`.
 
 ### 3.9 Drag-to-Resize Sidebar
@@ -210,7 +213,7 @@ The sidebar supports **drag resizing** via a custom resize handle:
 
 ### 3.10 Sidebar Footer — User Profile Card
 
-```
+```text
 ┌────────────────────────────────────────┐
 │ ─── Separator ────                     │
 │ ┌──────────────────────────┐ ┌──────┐ │
@@ -257,7 +260,7 @@ Layout breadcrumb is **hidden** for:
 
 The assess page has a **sticky header** at the top of the content area:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │ bg-background border-b border-border px-8 py-3 sticky top-0    │
 │ z-20 shadow-xs                                                  │
@@ -283,7 +286,7 @@ Key styles:
 
 ### 4.3 Question Content Area
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │ px-8 py-6, max-w-4xl mx-auto                                │
 │                                                              │
@@ -346,6 +349,7 @@ Interactive states: `hover:shadow-xs hover:-translate-y-0.5 active:translate-y-0
 ### 4.6 Question Card Animation
 
 Questions animate in from the right on navigation:
+
 ```tsx
 <motion.div
   key={questionKey}
@@ -358,7 +362,8 @@ Questions animate in from the right on navigation:
 ### 4.7 Description Guide Box
 
 The description section uses a distinctive left-border card pattern:
-```
+
+```text
 border-l-4 border-l-primary/60 border-y border-r border-border
 bg-muted/20 p-5 rounded-xl shadow-2xs
 ```
@@ -380,6 +385,7 @@ Custom CSS overrides for rich HTML content:
 ### 4.9 Project Notes & Collaboration Section
 
 Below the QuestionView, a collaboration section is rendered:
+
 ```tsx
 <div className="border border-border/80 p-6 bg-card rounded-2xl shadow-sm mt-6 max-w-4xl mx-auto">
   <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2 mb-4 px-2">
@@ -393,6 +399,7 @@ Below the QuestionView, a collaboration section is rendered:
 ### 4.10 Assess Layout Breadcrumb
 
 For sub-pages (CRC, Inventory, Fairness, etc.), the layout renders a `<Breadcrumb>` component:
+
 ```tsx
 <div className="px-8 py-6 max-w-7xl w-full mx-auto">
   <Breadcrumb
@@ -409,7 +416,7 @@ Free users' project breadcrumb links to `/assess/[projectId]`.
 
 ### 4.11 Breadcrumb Component Pattern
 
-```
+```text
 🏠 > ProjectName > Current Page
 ```
 
@@ -426,7 +433,7 @@ Free users' project breadcrumb links to `/assess/[projectId]`.
 
 Each card gets a subtle tinted background via CSS classes in `globals.css`. These provide a **4% tint** in light mode and **5–6% tint** in dark mode:
 
-```
+```text
 card-google-indigo   →  oklch(56% 0.15 275 / 4%)    [dark: 6%]
 card-google-red      →  oklch(57% 0.23 27  / 4%)    [dark: 6%]
 card-google-green    →  oklch(64% 0.19 145 / 4%)    [dark: 6%]
@@ -452,7 +459,8 @@ Each card also gets a `CARD_THEMES[index % 5]` object with coordinated classes:
 | `badgeRole` | Role pill (bolder) | `dark:text-*` overrides |
 
 **Critical dark mode rule:** Every `text-*` in the theme MUST have a `dark:text-*` counterpart. Example:
-```
+
+```text
 text-warning-foreground dark:text-warning   ← Yellow badge visible in both modes
 text-success dark:text-success              ← Green badge visible in both modes
 ```
@@ -460,13 +468,14 @@ text-success dark:text-success              ← Green badge visible in both mode
 ### 5.3 Card Hover Animation
 
 Cards lift on hover via Framer Motion:
+
 ```tsx
 <motion.div whileHover={{ y: -5 }}>
 ```
 
 ### 5.4 Card Layout Structure
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │ CardHeader (pb-3)                        │
 │  ┌─ Title row ──────────────── ⋮ menu ─┐│
@@ -484,7 +493,7 @@ Cards lift on hover via Framer Motion:
 
 ### 5.5 Metadata Badges (Custom `<span>` Elements)
 
-**Do NOT use shadcn `<Badge>`.** The Badge component has hover color-change side effects. Use plain `<span>` tags instead:
+**Do NOT use shadcn `<Badge>`. The Badge component has hover color-change side effects. Use plain `<span>` tags instead:
 
 ```tsx
 <span className={`text-[10px] py-1 px-2.5 rounded-full font-semibold
@@ -692,6 +701,7 @@ useEffect(() => {
 ### 10.3 Select a Practice (Assessment Landing)
 
 When a user is on the assessment page but hasn't selected a practice:
+
 ```tsx
 <div className="flex flex-1 h-full flex-col items-center justify-center p-8 text-center bg-background/50 backdrop-blur-sm">
   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">

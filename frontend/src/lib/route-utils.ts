@@ -27,3 +27,33 @@ export const isAuthRoute = (pathname: string | null): boolean => {
 export const isLandingRoute = (pathname: string | null): boolean => {
   return pathname === "/";
 };
+
+export const getRouteFlags = (pathname: string | null) => {
+  const isCrcPage = !!pathname?.match(/\/crc($|\/|\?)/);
+  const isFairnessPage = !!pathname?.match(/\/fairness-bias($|\/|\?)/);
+  const isFairnessRootPage = !!pathname?.match(/\/fairness-bias($|\?|\/$)/);
+  const isApiEndpointPage = !!pathname?.match(/\/fairness-bias\/api-endpoint($|\/|\?)/);
+  const isVulnerabilityPage = !!pathname?.match(/\/vulnerability-assessment($|\/|\?)/);
+  const isDatasetTestingPage = !!pathname?.match(/\/fairness-bias\/dataset-testing($|\/|\?)/);
+  const isFairnessOptionsPage = !!pathname?.match(/\/fairness-bias\/options($|\/|\?)/);
+  const isTeamPage = !!pathname?.match(/\/team($|\/|\?)/);
+  const isSettingsPage = !!pathname?.match(/\/assess\/[^/]+\/settings($|\/|\?)/) || !!pathname?.match(/\/settings($|\/|\?)/);
+  const isInventoryPage = !!pathname?.match(/\/inventory($|\/|\?)/);
+  const isAimaPage = !isCrcPage && !isFairnessPage && !isTeamPage && !isSettingsPage && !isInventoryPage && !!pathname?.match(/\/assess\/[^/]+/);
+  const isAimaQuestionPage = isAimaPage && !!pathname?.match(/\/assess\/[^/]+\/[^/]+\/[^/]+/);
+  return {
+    isCrcPage,
+    isFairnessPage,
+    isFairnessRootPage,
+    isApiEndpointPage,
+    isVulnerabilityPage,
+    isDatasetTestingPage,
+    isFairnessOptionsPage,
+    isTeamPage,
+    isSettingsPage,
+    isInventoryPage,
+    isAimaPage,
+    isAimaQuestionPage,
+  };
+};
+
