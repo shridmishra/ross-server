@@ -871,7 +871,7 @@ function SidebarContentComponent() {
                         disabled={item.disabled}
                         tooltip={item.label}
                         className={cn(
-                          "transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
+                          "sidebar-btn-dashboard transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
                           active && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:rounded-md font-semibold rounded-l-none rounded-r-md"
                         )}
                       >
@@ -898,7 +898,7 @@ function SidebarContentComponent() {
                           setIsFreeExpanded(!isFreeExpanded);
                         }}
                         className={cn(
-                          "transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
+                          "sidebar-btn-free transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
                           isFreeActive && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:rounded-md font-semibold rounded-l-none rounded-r-md"
                         )}
                         tooltip="Free"
@@ -940,7 +940,7 @@ function SidebarContentComponent() {
                                   }}
                                   isActive={isAimaActive}
                                   className={cn(
-                                    "group/aima h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-free group/aima h-8 px-2 transition-all duration-200",
                                     isAimaActive && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1006,7 +1006,7 @@ function SidebarContentComponent() {
                           setIsPremiumFeaturesExpanded(!isPremiumFeaturesExpanded);
                         }}
                         className={cn(
-                          "transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
+                          "sidebar-btn-premium transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
                           isPremiumActive && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:rounded-md font-semibold rounded-l-none rounded-r-md"
                         )}
                         tooltip="Premium Features"
@@ -1043,7 +1043,7 @@ function SidebarContentComponent() {
                                     : openSubscriptionModal("Unlock Premium to Access AI Vulnerability Assessment", "Upgrade to premium to unlock this feature and many more advanced capabilities.")}
                                   isActive={routeFlags.isVulnerabilityPage}
                                   className={cn(
-                                    "group/premium-btn h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
                                     routeFlags.isVulnerabilityPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1066,7 +1066,7 @@ function SidebarContentComponent() {
                                   }}
                                   isActive={routeFlags.isCrcPage}
                                   className={cn(
-                                    "group/premium-btn h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
                                     routeFlags.isCrcPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1195,7 +1195,7 @@ function SidebarContentComponent() {
                                     : openSubscriptionModal("Unlock Premium to Access AI Component Inventory")}
                                   isActive={routeFlags.isInventoryPage}
                                   className={cn(
-                                    "group/premium-btn h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
                                     routeFlags.isInventoryPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1216,7 +1216,7 @@ function SidebarContentComponent() {
                                   }}
                                   isActive={routeFlags.isFairnessPage && !routeFlags.isVulnerabilityPage}
                                   className={cn(
-                                    "group/premium-btn h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
                                     (routeFlags.isFairnessPage && !routeFlags.isVulnerabilityPage) && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1300,7 +1300,7 @@ function SidebarContentComponent() {
                           }
                         }}
                         className={cn(
-                          "transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
+                          "sidebar-btn-settings transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
                           isProjectSettingsActive && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:rounded-md font-semibold rounded-l-none rounded-r-md"
                         )}
                         tooltip="Project Settings"
@@ -1334,7 +1334,7 @@ function SidebarContentComponent() {
                                   onClick={() => handleProjectNav(`/settings`)}
                                   isActive={routeFlags.isSettingsPage}
                                   className={cn(
-                                    "h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-settings h-8 px-2 transition-all duration-200",
                                     routeFlags.isSettingsPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1349,7 +1349,7 @@ function SidebarContentComponent() {
                                   onClick={() => handleProjectNav(`/team`)}
                                   isActive={routeFlags.isTeamPage}
                                   className={cn(
-                                    "h-8 px-2 transition-all duration-200",
+                                    "sidebar-btn-settings h-8 px-2 transition-all duration-200",
                                     routeFlags.isTeamPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
                                   )}
                                 >
@@ -1389,7 +1389,7 @@ function SidebarContentComponent() {
                           isActive={active}
                           tooltip={item.label}
                           className={cn(
-                            "transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
+                            "sidebar-btn-admin transition-all duration-250 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:[&>svg]:!size-[22px] group-data-[collapsible=icon]:mx-auto",
                             active && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:rounded-md font-semibold rounded-l-none rounded-r-md"
                           )}
                         >

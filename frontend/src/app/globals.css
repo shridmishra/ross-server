@@ -18,6 +18,12 @@ body {
   font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.bg-background {
+  background-color: var(--background) !important;
 }
 
 /* ======================
@@ -558,7 +564,7 @@ button:enabled,
   --radius: 0.75rem;
 
   /* Surfaces - Clean whites with subtle warmth */
-  --background: #fafbfc;
+  --background: #ebf1fa;
   --foreground: #1a1f2e;
 
   /* Cards & Popovers */
@@ -568,10 +574,14 @@ button:enabled,
   --popover-foreground: #1a1f2e;
 
   /* Primary - Google Blue */
-  --primary: #4285f4;
+  --primary: #1a73e8;
   --primary-foreground: #ffffff;
-  --primary-dark: #2b5cad;
-  --primary-light: #7aabf7;
+  --primary-dark: #1557b0;
+  --primary-light: #78a9f0;
+
+  /* Gradient Background variables */
+  --background-start: #e9f0fa;
+  --background-end: #ffffff;
 
   /* Secondary - Light blue tint */
   --secondary: #eef3fc;
@@ -579,7 +589,7 @@ button:enabled,
   --secondary-hover: #dfe8f7;
 
   /* Muted - Neutral grays */
-  --muted: #f1f3f5;
+  --muted: #f0f2f5;
   --muted-foreground: #6b7280;
 
   /* Accent - Subtle blue highlight */
@@ -602,7 +612,7 @@ button:enabled,
 
   /* Borders & Inputs */
   --border: #e2e5e9;
-  --input: #e2e5e9;
+  --input: #dde1e7;
   --ring: #4285f4;
 
   /* Chart Colors - Google Brand Colors */
@@ -612,17 +622,23 @@ button:enabled,
   --chart-4: #34a853;  /* Google Green */
   --chart-5: #9c27b0;  /* Purple accent */
 
-  /* Sidebar */
-  --sidebar: #fafbfd;
+  /* Sidebar - Distinct from page background */
+  --sidebar: #ffffff;
   --sidebar-foreground: #1a1f2e;
   --sidebar-primary: #4285f4;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef3fc;
-  --sidebar-accent-foreground: #2c4a7c;
-  --sidebar-border: #e8ebef;
+  --sidebar-accent: #dbe3f0;
+  --sidebar-accent-foreground: #1e3a6e;
+  --sidebar-border: #e2e8f0;
   --sidebar-ring: #4285f4;
   --sidebar-width: 20rem;
   --sidebar-width-icon: 3rem;
+
+  /* Section accent colors for sidebar */
+  --section-free: #16a34a;
+  --section-premium: #d97706;
+  --section-settings: #64748b;
+  --section-admin: #7c3aed;
 }
 
 /* Disable transitions during sidebar drag resize for smooth performance */
@@ -637,32 +653,36 @@ button:enabled,
 
 .dark {
   /* Surfaces - Dark grays with subtle blue tint */
-  --background: #1a1d24;
+  --background: #0f111a;
   --foreground: #ebeef2;
 
   /* Cards & Popovers */
-  --card: #242830;
+  --card: #1e2128;
   --card-foreground: #ebeef2;
-  --popover: #242830;
+  --popover: #1e2128;
   --popover-foreground: #ebeef2;
 
   /* Primary - Google Blue (lighter for dark mode) */
-  --primary: #5c9cf5;
-  --primary-foreground: #ffffff;
-  --primary-dark: #4285f4;
+  --primary: #6ea8f7;
+  --primary-foreground: #0c1322;
+  --primary-dark: #1a73e8;
   --primary-light: #8bb8f8;
 
+  /* Gradient Background variables */
+  --background-start: #0a0d14;
+  --background-end: #141822;
+
   /* Secondary */
-  --secondary: #2d323c;
+  --secondary: #252a35;
   --secondary-foreground: #d8dce4;
-  --secondary-hover: #363c48;
+  --secondary-hover: #2e3440;
 
   /* Muted */
-  --muted: #2a2e36;
+  --muted: #1e222a;
   --muted-foreground: #9ca3af;
 
   /* Accent */
-  --accent: #2d3340;
+  --accent: #222838;
   --accent-foreground: #d8dce4;
 
   /* Semantic Colors - Adjusted for dark mode */
@@ -677,29 +697,35 @@ button:enabled,
   --difficulty-easy: #4ade80;
   --difficulty-medium: #fcd34d;
   --difficulty-hard: #f87171;
-  --difficulty-completed: #5c9cf5;
+  --difficulty-completed: #6ea8f7;
 
   /* Borders & Inputs */
-  --border: #3d424d;
-  --input: #3d424d;
-  --ring: #5c9cf5;
+  --border: #2d323d;
+  --input: #2d323d;
+  --ring: #6ea8f7;
 
   /* Chart Colors - Brightened for dark mode */
-  --chart-1: #5c9cf5;
+  --chart-1: #6ea8f7;
   --chart-2: #f87171;
   --chart-3: #fcd34d;
   --chart-4: #4ade80;
   --chart-5: #c084fc;
 
-  /* Sidebar */
-  --sidebar: #161920;
-  --sidebar-foreground: #ebeef2;
-  --sidebar-primary: #5c9cf5;
-  --sidebar-primary-foreground: #1a1d24;
-  --sidebar-accent: #282d36;
-  --sidebar-accent-foreground: #d8dce4;
-  --sidebar-border: #2a2e36;
-  --sidebar-ring: #5c9cf5;
+  /* Sidebar - Noticeably distinct from dark bg */
+  --sidebar: #191c24;
+  --sidebar-foreground: #e0e4ea;
+  --sidebar-primary: #6ea8f7;
+  --sidebar-primary-foreground: #0c1322;
+  --sidebar-accent: #252b3a;
+  --sidebar-accent-foreground: #d0d6e0;
+  --sidebar-border: #2a3040;
+  --sidebar-ring: #6ea8f7;
+
+  /* Section accent colors for sidebar */
+  --section-free: #4ade80;
+  --section-premium: #fbbf24;
+  --section-settings: #94a3b8;
+  --section-admin: #a78bfa;
 }
 
 /* ======================
@@ -749,3 +775,200 @@ button:enabled,
 .elevation-5 {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
+
+/* ==========================================================================
+   Sidebar Color Coding & Active States Redesign
+   ========================================================================== */
+
+/* Base transitions for all sidebar buttons and their SVGs */
+.sidebar-btn-dashboard,
+.sidebar-btn-free,
+.sidebar-btn-premium,
+.sidebar-btn-settings,
+.sidebar-btn-admin {
+  transition: all 0.2s ease-in-out !important;
+}
+.sidebar-btn-dashboard svg,
+.sidebar-btn-free svg,
+.sidebar-btn-premium svg,
+.sidebar-btn-settings svg,
+.sidebar-btn-admin svg {
+  transition: color 0.2s ease-in-out !important;
+}
+
+/* --- Dashboard Section (Standard Primary Blue) --- */
+.sidebar-btn-dashboard[data-active="true"] {
+  border-left: 4px solid var(--primary) !important;
+  background-color: var(--sidebar-accent) !important;
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  padding-left: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.sidebar-btn-dashboard[data-active="true"] svg {
+  color: var(--primary) !important;
+}
+
+/* --- Free Section (Green) --- */
+/* Inactive State: Soft color-coded theme */
+.sidebar-btn-free {
+  color: rgba(22, 163, 74, 0.75) !important;
+}
+.sidebar-btn-free svg {
+  color: rgba(22, 163, 74, 0.7) !important;
+}
+.sidebar-btn-free:hover {
+  background-color: rgba(22, 163, 74, 0.08) !important;
+  color: #16a34a !important;
+}
+.sidebar-btn-free:hover svg {
+  color: #16a34a !important;
+}
+/* Active State: Rich, full color themed highlight */
+.sidebar-btn-free[data-active="true"] {
+  border-left: 4px solid var(--section-free) !important;
+  background-color: rgba(22, 163, 74, 0.12) !important;
+  color: var(--section-free) !important;
+  font-weight: 700 !important;
+  padding-left: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.sidebar-btn-free[data-active="true"] svg {
+  color: var(--section-free) !important;
+}
+
+/* --- Premium Section (Gold/Amber) --- */
+/* Inactive State: Soft color-coded theme */
+.sidebar-btn-premium {
+  color: rgba(217, 119, 6, 0.75) !important;
+}
+.sidebar-btn-premium svg {
+  color: rgba(217, 119, 6, 0.7) !important;
+}
+.sidebar-btn-premium:hover {
+  background-color: rgba(217, 119, 6, 0.08) !important;
+  color: #d97706 !important;
+}
+.sidebar-btn-premium:hover svg {
+  color: #d97706 !important;
+}
+/* Active State: Rich, full color themed highlight */
+.sidebar-btn-premium[data-active="true"] {
+  border-left: 4px solid var(--section-premium) !important;
+  background-color: rgba(217, 119, 6, 0.12) !important;
+  color: var(--section-premium) !important;
+  font-weight: 700 !important;
+  padding-left: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.sidebar-btn-premium[data-active="true"] svg {
+  color: var(--section-premium) !important;
+}
+
+/* --- Settings Section (Slate-Gray) --- */
+/* Inactive State: Soft color-coded theme */
+.sidebar-btn-settings {
+  color: rgba(100, 116, 139, 0.75) !important;
+}
+.sidebar-btn-settings svg {
+  color: rgba(100, 116, 139, 0.7) !important;
+}
+.sidebar-btn-settings:hover {
+  background-color: rgba(100, 116, 139, 0.08) !important;
+  color: #64748b !important;
+}
+.sidebar-btn-settings:hover svg {
+  color: #64748b !important;
+}
+/* Active State: Rich, full color themed highlight */
+.sidebar-btn-settings[data-active="true"] {
+  border-left: 4px solid var(--section-settings) !important;
+  background-color: rgba(100, 116, 139, 0.12) !important;
+  color: var(--section-settings) !important;
+  font-weight: 700 !important;
+  padding-left: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.sidebar-btn-settings[data-active="true"] svg {
+  color: var(--section-settings) !important;
+}
+
+/* --- Admin Section (Purple) --- */
+/* Inactive State: Soft color-coded theme */
+.sidebar-btn-admin {
+  color: rgba(124, 58, 237, 0.75) !important;
+}
+.sidebar-btn-admin svg {
+  color: rgba(124, 58, 237, 0.7) !important;
+}
+.sidebar-btn-admin:hover {
+  background-color: rgba(124, 58, 237, 0.08) !important;
+  color: #7c3aed !important;
+}
+.sidebar-btn-admin:hover svg {
+  color: #7c3aed !important;
+}
+/* Active State: Rich, full color themed highlight */
+.sidebar-btn-admin[data-active="true"] {
+  border-left: 4px solid var(--section-admin) !important;
+  background-color: rgba(124, 58, 237, 0.12) !important;
+  color: var(--section-admin) !important;
+  font-weight: 700 !important;
+  padding-left: 0.5rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.sidebar-btn-admin[data-active="true"] svg {
+  color: var(--section-admin) !important;
+}
+
+/* Custom Google Brand Cards - Solid subtle backgrounds */
+.card-google-blue {
+  background-color: rgba(26, 115, 232, 0.04) !important;
+  border: 1px solid rgba(26, 115, 232, 0.15) !important;
+}
+.dark .card-google-blue {
+  background-color: rgba(110, 168, 247, 0.06) !important;
+  border: 1px solid rgba(110, 168, 247, 0.2) !important;
+}
+
+.card-google-red {
+  background-color: rgba(234, 67, 53, 0.04) !important;
+  border: 1px solid rgba(234, 67, 53, 0.15) !important;
+}
+.dark .card-google-red {
+  background-color: rgba(248, 113, 113, 0.06) !important;
+  border: 1px solid rgba(248, 113, 113, 0.2) !important;
+}
+
+.card-google-green {
+  background-color: rgba(52, 168, 83, 0.04) !important;
+  border: 1px solid rgba(52, 168, 83, 0.15) !important;
+}
+.dark .card-google-green {
+  background-color: rgba(74, 222, 128, 0.06) !important;
+  border: 1px solid rgba(74, 222, 128, 0.2) !important;
+}
+
+.card-google-yellow {
+  background-color: rgba(251, 188, 4, 0.04) !important;
+  border: 1px solid rgba(251, 188, 4, 0.15) !important;
+}
+.dark .card-google-yellow {
+  background-color: rgba(252, 211, 77, 0.05) !important;
+  border: 1px solid rgba(252, 211, 77, 0.2) !important;
+}
+
+.card-google-purple {
+  background-color: rgba(156, 39, 176, 0.04) !important;
+  border: 1px solid rgba(156, 39, 176, 0.15) !important;
+}
+.dark .card-google-purple {
+  background-color: rgba(192, 132, 252, 0.06) !important;
+  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+}
+

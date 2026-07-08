@@ -552,7 +552,7 @@ export default function DashboardPage() {
                     animate={{ opacity: 1, y: 0 }}
                     whileHover={{ y: -5 }}
                   >
-                    <Card className={`h-full hover:shadow-xl transition-all duration-300 ${["bg-chart-1/10", "bg-chart-2/10", "bg-chart-3/10", "bg-chart-4/10", "bg-chart-5/10"][index % 5]}`}>
+                    <Card className={`h-full hover:shadow-xl transition-all duration-300 ${["card-google-blue", "card-google-red", "card-google-yellow", "card-google-green", "card-google-purple"][index % 5]}`}>
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start w-full min-w-0">
                           <div className="flex-1 mr-2 min-w-0">

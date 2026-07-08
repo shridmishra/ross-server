@@ -59,7 +59,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
       } as React.CSSProperties}
     >
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="shadow-[inset_6px_0_12px_-8px_rgba(0,0,0,0.08)] dark:shadow-[inset_6px_0_12px_-8px_rgba(0,0,0,0.4)] border-l border-sidebar-border/30">
         <TrialBanner />
         <main className="flex-1 bg-background">{children}</main>
       </SidebarInset>
