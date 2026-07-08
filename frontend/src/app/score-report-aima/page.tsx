@@ -498,7 +498,7 @@ export default function ScoreReportPage() {
                                 const domainInsights = parseInsightText(insights[domain.domainId] || domain.insights || "");
                                 if (!domainInsights.analysis && !domainInsights.strengths && !domainInsights.improvements && domainInsights.recommendations.length === 0) {
                                   return (
-                                    <div className="text-sm text-muted-foreground italic bg-background/50 p-4 rounded-xl border border-border/50">
+                                    <div className="text-sm text-muted-foreground italic bg-muted/50 p-4 rounded-xl border border-border/50">
                                       {generatingInsights ? "Preparing analysis..." : "Insights will appear once the analysis is complete."}
                                     </div>
                                   );
@@ -534,7 +534,7 @@ export default function ScoreReportPage() {
                                       <div className="space-y-2">
                                         {domainInsights.recommendations.length > 0 ? (
                                           domainInsights.recommendations.map((rec, i) => (
-                                            <div key={i} className="flex gap-3 group/item bg-background/40 p-2.5 rounded-xl border border-border/50">
+                                            <div key={i} className="flex gap-3 group/item bg-muted/30 p-2.5 rounded-xl border border-border/50">
                                               <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 text-primary text-[9px] font-black flex items-center justify-center">
                                                 {i + 1}
                                               </div>
@@ -568,7 +568,7 @@ export default function ScoreReportPage() {
                                          <div key={practice.practiceId} className="flex flex-col sm:flex-row sm:items-center gap-3.5 p-3.5 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/30 transition-colors group/practice">
                                              <div className="flex-1 min-w-0">
                                                  <div className="flex items-center gap-2.5 mb-2.5">
-                                                     <span className="text-[9px] font-black text-muted-foreground/60 border border-border px-1.5 py-0.5 rounded bg-background shadow-xs">
+                                                     <span className="text-[9px] font-black text-muted-foreground/60 border border-border px-1.5 py-0.5 rounded bg-muted shadow-xs">
                                                          P{String(pIdx + 1).padStart(2, '0')}
                                                      </span>
                                                      <span className="text-xs font-black text-foreground truncate block leading-tight tracking-tight uppercase" title={practice.practiceTitle}>

@@ -187,7 +187,7 @@ export const SecureTextarea: React.FC<SecureTextareaProps> = ({
             read-only:opacity-80 read-only:cursor-default
             bg-transparent
             ${isValid
-              ? "border-input bg-background text-foreground"
+              ? "border-input bg-transparent text-foreground"
               : "border-destructive bg-destructive/10 text-destructive"
             }
             ${isOverLimit ? "border-destructive" : ""}

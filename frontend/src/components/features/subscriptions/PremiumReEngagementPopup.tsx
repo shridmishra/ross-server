@@ -116,7 +116,7 @@ export default function PremiumReEngagementPopup() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
-            className="bg-background rounded-3xl shadow-2xl border border-primary/20 overflow-hidden"
+            className="bg-card rounded-3xl shadow-2xl border border-primary/20 overflow-hidden"
           >
             {/* Gradient Header */}
             <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent px-6 pt-6 pb-4 relative">

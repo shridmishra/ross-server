@@ -477,7 +477,7 @@ export default function DashboardPage() {
                             Invited by <span className="font-semibold text-foreground">{invitation.inviter?.name || "Someone"}</span>
                           </CardDescription>
                         </div>
-                        <Badge variant="outline" className="bg-background">
+                        <Badge variant="outline" className="bg-muted">
                           {invitation.role}
                         </Badge>
                       </div>

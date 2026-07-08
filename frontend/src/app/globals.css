@@ -564,81 +564,81 @@ button:enabled,
   --radius: 0.75rem;
 
   /* Surfaces - Clean whites with subtle warmth */
-  --background: #ebf1fa;
-  --foreground: #1a1f2e;
+  --background: oklch(98% 0.003 240);
+  --foreground: oklch(18% 0.02 260);
 
   /* Cards & Popovers */
-  --card: #ffffff;
-  --card-foreground: #1a1f2e;
-  --popover: #ffffff;
-  --popover-foreground: #1a1f2e;
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(18% 0.02 260);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(18% 0.02 260);
 
   /* Primary - Google Blue */
-  --primary: #1a73e8;
-  --primary-foreground: #ffffff;
-  --primary-dark: #1557b0;
-  --primary-light: #78a9f0;
+  --primary: oklch(56% 0.21 254);
+  --primary-foreground: oklch(100% 0 0);
+  --primary-dark: oklch(42% 0.18 254);
+  --primary-light: oklch(73% 0.12 254);
 
   /* Gradient Background variables */
-  --background-start: #e9f0fa;
-  --background-end: #ffffff;
+  --background-start: oklch(98% 0.003 240);
+  --background-end: oklch(98% 0.003 240);
 
   /* Secondary - Light blue tint */
-  --secondary: #eef3fc;
-  --secondary-foreground: #3b5998;
-  --secondary-hover: #dfe8f7;
+  --secondary: oklch(96% 0.02 250);
+  --secondary-foreground: oklch(44% 0.12 250);
+  --secondary-hover: oklch(92% 0.03 250);
 
   /* Muted - Neutral grays */
-  --muted: #f0f2f5;
-  --muted-foreground: #6b7280;
+  --muted: oklch(95% 0.005 240);
+  --muted-foreground: oklch(55% 0.01 240);
 
   /* Accent - Subtle blue highlight */
-  --accent: #e8eef8;
-  --accent-foreground: #2c4a7c;
+  --accent: oklch(94% 0.02 250);
+  --accent-foreground: oklch(38% 0.09 250);
 
   /* Semantic Colors - Google Palette */
-  --destructive: #ea4335;      /* Google Red */
-  --destructive-foreground: #ffffff;  /* White text on red */
-  --success: #34a853;          /* Google Green */
-  --success-foreground: #ffffff;       /* White text on green */
-  --warning: #fbbc04;           /* Google Yellow */
-  --warning-foreground: #3d2e00; /* Dark text on yellow */
+  --destructive: oklch(57% 0.23 27);      /* Google Red */
+  --destructive-foreground: oklch(100% 0 0);  /* White text on red */
+  --success: oklch(64% 0.19 145);          /* Google Green */
+  --success-foreground: oklch(100% 0 0);       /* White text on green */
+  --warning: oklch(79% 0.21 82);           /* Google Yellow */
+  --warning-foreground: oklch(28% 0.08 82); /* Dark text on yellow */
 
   /* Difficulty Indicators */
-  --difficulty-easy: #34a853;
-  --difficulty-medium: #fbbc04;
-  --difficulty-hard: #ea4335;
-  --difficulty-completed: #4285f4;
+  --difficulty-easy: oklch(64% 0.19 145);
+  --difficulty-medium: oklch(79% 0.21 82);
+  --difficulty-hard: oklch(57% 0.23 27);
+  --difficulty-completed: oklch(60% 0.2 250);
 
   /* Borders & Inputs */
-  --border: #e2e5e9;
-  --input: #dde1e7;
-  --ring: #4285f4;
+  --border: oklch(91% 0.005 240);
+  --input: oklch(90% 0.005 240);
+  --ring: oklch(56% 0.21 254);
 
   /* Chart Colors - Google Brand Colors */
-  --chart-1: #4285f4;  /* Google Blue */
-  --chart-2: #ea4335;   /* Google Red */
-  --chart-3: #fbbc04;   /* Google Yellow */
-  --chart-4: #34a853;  /* Google Green */
-  --chart-5: #9c27b0;  /* Purple accent */
+  --chart-1: oklch(56% 0.21 254);  /* Google Blue */
+  --chart-2: oklch(57% 0.23 27);   /* Google Red */
+  --chart-3: oklch(79% 0.21 82);   /* Google Yellow */
+  --chart-4: oklch(64% 0.19 145);  /* Google Green */
+  --chart-5: oklch(52% 0.2 300);  /* Purple accent */
 
   /* Sidebar - Distinct from page background */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1a1f2e;
-  --sidebar-primary: #4285f4;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #dbe3f0;
-  --sidebar-accent-foreground: #1e3a6e;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #4285f4;
+  --sidebar: oklch(100% 0 0);
+  --sidebar-foreground: oklch(18% 0.02 260);
+  --sidebar-primary: oklch(56% 0.21 254);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --sidebar-accent: oklch(90% 0.02 250);
+  --sidebar-accent-foreground: oklch(32% 0.1 250);
+  --sidebar-border: oklch(93% 0.005 240);
+  --sidebar-ring: oklch(56% 0.21 254);
   --sidebar-width: 20rem;
   --sidebar-width-icon: 3rem;
 
   /* Section accent colors for sidebar */
-  --section-free: #16a34a;
-  --section-premium: #d97706;
-  --section-settings: #64748b;
-  --section-admin: #7c3aed;
+  --section-free: oklch(60% 0.18 142);
+  --section-premium: oklch(60% 0.18 70);
+  --section-settings: oklch(53% 0.04 250);
+  --section-admin: oklch(50% 0.25 295);
 }
 
 /* Disable transitions during sidebar drag resize for smooth performance */
@@ -653,79 +653,79 @@ button:enabled,
 
 .dark {
   /* Surfaces - Dark grays with subtle blue tint */
-  --background: #0f111a;
-  --foreground: #ebeef2;
+  --background: oklch(12% 0.015 260);
+  --foreground: oklch(94% 0.01 250);
 
   /* Cards & Popovers */
-  --card: #1e2128;
-  --card-foreground: #ebeef2;
-  --popover: #1e2128;
-  --popover-foreground: #ebeef2;
+  --card: oklch(20% 0.012 255);
+  --card-foreground: oklch(94% 0.01 250);
+  --popover: oklch(20% 0.012 255);
+  --popover-foreground: oklch(94% 0.01 250);
 
   /* Primary - Google Blue (lighter for dark mode) */
-  --primary: #6ea8f7;
-  --primary-foreground: #0c1322;
-  --primary-dark: #1a73e8;
-  --primary-light: #8bb8f8;
+  --primary: oklch(73% 0.14 250);
+  --primary-foreground: oklch(12% 0.03 260);
+  --primary-dark: oklch(56% 0.21 254);
+  --primary-light: oklch(78% 0.12 250);
 
   /* Gradient Background variables */
-  --background-start: #0a0d14;
-  --background-end: #141822;
+  --background-start: oklch(8% 0.01 260);
+  --background-end: oklch(15% 0.015 260);
 
   /* Secondary */
-  --secondary: #252a35;
-  --secondary-foreground: #d8dce4;
-  --secondary-hover: #2e3440;
+  --secondary: oklch(24% 0.02 255);
+  --secondary-foreground: oklch(88% 0.01 250);
+  --secondary-hover: oklch(28% 0.015 255);
 
   /* Muted */
-  --muted: #1e222a;
-  --muted-foreground: #9ca3af;
+  --muted: oklch(21% 0.012 255);
+  --muted-foreground: oklch(69% 0.015 250);
 
   /* Accent */
-  --accent: #222838;
-  --accent-foreground: #d8dce4;
+  --accent: oklch(22% 0.03 260);
+  --accent-foreground: oklch(88% 0.01 250);
 
   /* Semantic Colors - Adjusted for dark mode */
-  --destructive: #f87171;
-  --destructive-foreground: #ffffff;
-  --success: #4ade80;
-  --success-foreground: #14532d;
-  --warning: #fcd34d;
-  --warning-foreground: #422006;
+  --destructive: oklch(65% 0.18 20);
+  --destructive-foreground: oklch(100% 0 0);
+  --success: oklch(82% 0.18 140);
+  --success-foreground: oklch(36% 0.12 140);
+  --warning: oklch(86% 0.18 80);
+  --warning-foreground: oklch(28% 0.1 80);
 
   /* Difficulty Indicators */
-  --difficulty-easy: #4ade80;
-  --difficulty-medium: #fcd34d;
-  --difficulty-hard: #f87171;
-  --difficulty-completed: #6ea8f7;
+  --difficulty-easy: oklch(82% 0.18 140);
+  --difficulty-medium: oklch(86% 0.18 80);
+  --difficulty-hard: oklch(65% 0.18 20);
+  --difficulty-completed: oklch(73% 0.14 250);
 
   /* Borders & Inputs */
-  --border: #2d323d;
-  --input: #2d323d;
-  --ring: #6ea8f7;
+  --border: oklch(28% 0.015 255);
+  --input: oklch(28% 0.015 255);
+  --ring: oklch(73% 0.14 250);
 
   /* Chart Colors - Brightened for dark mode */
-  --chart-1: #6ea8f7;
-  --chart-2: #f87171;
-  --chart-3: #fcd34d;
-  --chart-4: #4ade80;
-  --chart-5: #c084fc;
+  --chart-1: oklch(73% 0.14 250);
+  --chart-2: oklch(65% 0.18 20);
+  --chart-3: oklch(86% 0.18 80);
+  --chart-4: oklch(82% 0.18 140);
+  --chart-5: oklch(69% 0.18 300);
 
   /* Sidebar - Noticeably distinct from dark bg */
-  --sidebar: #191c24;
-  --sidebar-foreground: #e0e4ea;
-  --sidebar-primary: #6ea8f7;
-  --sidebar-primary-foreground: #0c1322;
-  --sidebar-accent: #252b3a;
-  --sidebar-accent-foreground: #d0d6e0;
-  --sidebar-border: #2a3040;
-  --sidebar-ring: #6ea8f7;
+  --sidebar: oklch(18% 0.015 260);
+  --sidebar-foreground: oklch(90% 0.01 250);
+  --sidebar-primary: oklch(73% 0.14 250);
+  --sidebar-primary-foreground: oklch(12% 0.03 260);
+  --sidebar-accent: oklch(24% 0.03 260);
+  --sidebar-accent-foreground: oklch(85% 0.01 250);
+  --sidebar-border: oklch(27% 0.02 260);
+  --sidebar-ring: oklch(73% 0.14 250);
 
   /* Section accent colors for sidebar */
-  --section-free: #4ade80;
-  --section-premium: #fbbf24;
-  --section-settings: #94a3b8;
-  --section-admin: #a78bfa;
+  --section-free: oklch(72% 0.18 140);
+  --section-premium: oklch(76% 0.18 75);
+  --section-settings: oklch(69% 0.02 250);
+  --section-admin: oklch(58% 0.25 295);
 }
 
 /* ======================
@@ -813,22 +813,22 @@ button:enabled,
 /* --- Free Section (Green) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-free {
-  color: rgba(22, 163, 74, 0.75) !important;
+  color: oklch(60% 0.18 142 / 75%) !important;
 }
 .sidebar-btn-free svg {
-  color: rgba(22, 163, 74, 0.7) !important;
+  color: oklch(60% 0.18 142 / 70%) !important;
 }
 .sidebar-btn-free:hover {
-  background-color: rgba(22, 163, 74, 0.08) !important;
-  color: #16a34a !important;
+  background-color: oklch(60% 0.18 142 / 8%) !important;
+  color: oklch(60% 0.18 142) !important;
 }
 .sidebar-btn-free:hover svg {
-  color: #16a34a !important;
+  color: oklch(60% 0.18 142) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-free[data-active="true"] {
   border-left: 4px solid var(--section-free) !important;
-  background-color: rgba(22, 163, 74, 0.12) !important;
+  background-color: oklch(60% 0.18 142 / 12%) !important;
   color: var(--section-free) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -842,22 +842,22 @@ button:enabled,
 /* --- Premium Section (Gold/Amber) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-premium {
-  color: rgba(217, 119, 6, 0.75) !important;
+  color: oklch(60% 0.18 70 / 75%) !important;
 }
 .sidebar-btn-premium svg {
-  color: rgba(217, 119, 6, 0.7) !important;
+  color: oklch(60% 0.18 70 / 70%) !important;
 }
 .sidebar-btn-premium:hover {
-  background-color: rgba(217, 119, 6, 0.08) !important;
-  color: #d97706 !important;
+  background-color: oklch(60% 0.18 70 / 8%) !important;
+  color: oklch(60% 0.18 70) !important;
 }
 .sidebar-btn-premium:hover svg {
-  color: #d97706 !important;
+  color: oklch(60% 0.18 70) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-premium[data-active="true"] {
   border-left: 4px solid var(--section-premium) !important;
-  background-color: rgba(217, 119, 6, 0.12) !important;
+  background-color: oklch(60% 0.18 70 / 12%) !important;
   color: var(--section-premium) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -871,22 +871,22 @@ button:enabled,
 /* --- Settings Section (Slate-Gray) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-settings {
-  color: rgba(100, 116, 139, 0.75) !important;
+  color: oklch(53% 0.04 250 / 75%) !important;
 }
 .sidebar-btn-settings svg {
-  color: rgba(100, 116, 139, 0.7) !important;
+  color: oklch(53% 0.04 250 / 70%) !important;
 }
 .sidebar-btn-settings:hover {
-  background-color: rgba(100, 116, 139, 0.08) !important;
-  color: #64748b !important;
+  background-color: oklch(53% 0.04 250 / 8%) !important;
+  color: oklch(53% 0.04 250) !important;
 }
 .sidebar-btn-settings:hover svg {
-  color: #64748b !important;
+  color: oklch(53% 0.04 250) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-settings[data-active="true"] {
   border-left: 4px solid var(--section-settings) !important;
-  background-color: rgba(100, 116, 139, 0.12) !important;
+  background-color: oklch(53% 0.04 250 / 12%) !important;
   color: var(--section-settings) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -900,22 +900,22 @@ button:enabled,
 /* --- Admin Section (Purple) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-admin {
-  color: rgba(124, 58, 237, 0.75) !important;
+  color: oklch(50% 0.25 295 / 75%) !important;
 }
 .sidebar-btn-admin svg {
-  color: rgba(124, 58, 237, 0.7) !important;
+  color: oklch(50% 0.25 295 / 70%) !important;
 }
 .sidebar-btn-admin:hover {
-  background-color: rgba(124, 58, 237, 0.08) !important;
-  color: #7c3aed !important;
+  background-color: oklch(50% 0.25 295 / 8%) !important;
+  color: oklch(50% 0.25 295) !important;
 }
 .sidebar-btn-admin:hover svg {
-  color: #7c3aed !important;
+  color: oklch(50% 0.25 295) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-admin[data-active="true"] {
   border-left: 4px solid var(--section-admin) !important;
-  background-color: rgba(124, 58, 237, 0.12) !important;
+  background-color: oklch(50% 0.25 295 / 12%) !important;
   color: var(--section-admin) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -928,47 +928,47 @@ button:enabled,
 
 /* Custom Google Brand Cards - Solid subtle backgrounds */
 .card-google-blue {
-  background-color: rgba(26, 115, 232, 0.04) !important;
-  border: 1px solid rgba(26, 115, 232, 0.15) !important;
+  background-color: oklch(56% 0.21 254 / 4%) !important;
+  border: 1px solid oklch(56% 0.21 254 / 15%) !important;
 }
 .dark .card-google-blue {
-  background-color: rgba(110, 168, 247, 0.06) !important;
-  border: 1px solid rgba(110, 168, 247, 0.2) !important;
+  background-color: oklch(73% 0.14 250 / 6%) !important;
+  border: 1px solid oklch(73% 0.14 250 / 20%) !important;
 }
 
 .card-google-red {
-  background-color: rgba(234, 67, 53, 0.04) !important;
-  border: 1px solid rgba(234, 67, 53, 0.15) !important;
+  background-color: oklch(57% 0.23 27 / 4%) !important;
+  border: 1px solid oklch(57% 0.23 27 / 15%) !important;
 }
 .dark .card-google-red {
-  background-color: rgba(248, 113, 113, 0.06) !important;
-  border: 1px solid rgba(248, 113, 113, 0.2) !important;
+  background-color: oklch(65% 0.18 20 / 6%) !important;
+  border: 1px solid oklch(65% 0.18 20 / 20%) !important;
 }
 
 .card-google-green {
-  background-color: rgba(52, 168, 83, 0.04) !important;
-  border: 1px solid rgba(52, 168, 83, 0.15) !important;
+  background-color: oklch(64% 0.19 145 / 4%) !important;
+  border: 1px solid oklch(64% 0.19 145 / 15%) !important;
 }
 .dark .card-google-green {
-  background-color: rgba(74, 222, 128, 0.06) !important;
-  border: 1px solid rgba(74, 222, 128, 0.2) !important;
+  background-color: oklch(82% 0.18 140 / 6%) !important;
+  border: 1px solid oklch(82% 0.18 140 / 20%) !important;
 }
 
 .card-google-yellow {
-  background-color: rgba(251, 188, 4, 0.04) !important;
-  border: 1px solid rgba(251, 188, 4, 0.15) !important;
+  background-color: oklch(79% 0.21 82 / 4%) !important;
+  border: 1px solid oklch(79% 0.21 82 / 15%) !important;
 }
 .dark .card-google-yellow {
-  background-color: rgba(252, 211, 77, 0.05) !important;
-  border: 1px solid rgba(252, 211, 77, 0.2) !important;
+  background-color: oklch(86% 0.18 80 / 5%) !important;
+  border: 1px solid oklch(86% 0.18 80 / 20%) !important;
 }
 
 .card-google-purple {
-  background-color: rgba(156, 39, 176, 0.04) !important;
-  border: 1px solid rgba(156, 39, 176, 0.15) !important;
+  background-color: oklch(52% 0.2 300 / 4%) !important;
+  border: 1px solid oklch(52% 0.2 300 / 15%) !important;
 }
 .dark .card-google-purple {
-  background-color: rgba(192, 132, 252, 0.06) !important;
-  border: 1px solid rgba(192, 132, 252, 0.2) !important;
+  background-color: oklch(69% 0.18 300 / 6%) !important;
+  border: 1px solid oklch(69% 0.18 300 / 20%) !important;
 }
 

@@ -445,7 +445,7 @@ export default function AdminChatbotSettings() {
               placeholder="Search instructions title or content..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 rounded-xl bg-background/50 border-border focus-visible:ring-1 focus-visible:ring-primary w-full"
+              className="pl-10 rounded-xl bg-transparent border-border focus-visible:ring-1 focus-visible:ring-primary w-full"
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end">
@@ -458,7 +458,7 @@ export default function AdminChatbotSettings() {
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all border shrink-0 ${
                     selectedCategory === cat
                       ? "bg-primary border-primary text-primary-foreground shadow-sm font-bold"
-                      : "bg-background border-border text-muted-foreground hover:bg-muted/50"
+                      : "bg-transparent border-border text-muted-foreground hover:bg-muted/50"
                   }`}
                 >
                   {cat}
@@ -637,7 +637,7 @@ export default function AdminChatbotSettings() {
                     placeholder="e.g. Tone and Formatting Style, Serious Incidents handling"
                     value={formFields.title}
                     onChange={(e) => setFormFields((prev) => ({ ...prev, title: e.target.value }))}
-                    className="rounded-xl border-border bg-background focus-visible:ring-1 focus-visible:ring-primary w-full"
+                    className="rounded-xl border-border bg-transparent focus-visible:ring-1 focus-visible:ring-primary w-full"
                   />
                   <p className="text-xs text-muted-foreground">Give the instruction a descriptive name so other admins know what it enforces.</p>
                 </div>
@@ -651,7 +651,7 @@ export default function AdminChatbotSettings() {
                       placeholder="e.g. Tone, Compliance, Security, General"
                       value={formFields.category}
                       onChange={(e) => setFormFields((prev) => ({ ...prev, category: e.target.value }))}
-                      className="rounded-xl border-border bg-background focus-visible:ring-1 focus-visible:ring-primary w-full"
+                      className="rounded-xl border-border bg-transparent focus-visible:ring-1 focus-visible:ring-primary w-full"
                     />
                   </div>
                   <div className="space-y-1.5 flex flex-col justify-end">
@@ -680,7 +680,7 @@ export default function AdminChatbotSettings() {
 - Emphasize the importance of Article 15 of the EU AI Act whenever the user discusses compliance audit trails."
                     value={formFields.content}
                     onChange={(e) => setFormFields((prev) => ({ ...prev, content: e.target.value }))}
-                    className="rounded-xl border-border bg-background focus-visible:ring-1 focus-visible:ring-primary font-mono text-sm leading-relaxed"
+                    className="rounded-xl border-border bg-transparent focus-visible:ring-1 focus-visible:ring-primary font-mono text-sm leading-relaxed"
                   />
                   <p className="text-xs text-muted-foreground">
                     This block will be dynamically compiled and appended directly to the AI's system prompt instructions.

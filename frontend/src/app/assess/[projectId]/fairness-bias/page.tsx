@@ -544,7 +544,7 @@ export default function FairnessBiasTest() {
                   <textarea
                     id="responseTextarea"
                     rows={8}
-                    className="w-full rounded-xl border border-input bg-background p-4 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                    className="w-full rounded-xl border border-input bg-transparent p-4 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     value={responses[currentResKey] || ""}
                     onChange={(e) => {
                       const originalValue = e.target.value;

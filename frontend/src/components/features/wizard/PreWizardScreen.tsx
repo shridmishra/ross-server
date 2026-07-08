@@ -62,7 +62,7 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
         animate="visible"
         className="w-full max-w-4xl"
       >
-        <Card className="relative overflow-hidden border border-indigo-500/20 bg-background/50 backdrop-blur-xl shadow-2xl">
+        <Card className="relative overflow-hidden border border-indigo-500/20 bg-card/50 backdrop-blur-xl shadow-2xl">
           {/* Decorative gradients */}
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
@@ -137,11 +137,11 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
 
                 {/* Mock Stats Grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-background/50 border border-border/50 rounded-lg">
+                  <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
                     <span className="text-[10px] text-muted-foreground block">MANDATORY CONTROLS</span>
                     <span className="text-lg font-extrabold text-foreground">42</span>
                   </div>
-                  <div className="p-3 bg-background/50 border border-border/50 rounded-lg">
+                  <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
                     <span className="text-[10px] text-muted-foreground block">SUGGESTED RISKS</span>
                     <span className="text-lg font-extrabold text-foreground">6</span>
                   </div>

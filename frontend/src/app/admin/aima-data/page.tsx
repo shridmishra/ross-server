@@ -1138,7 +1138,7 @@ export default function AdminQuestions() {
                                                 [question.id]: e.target.value,
                                               }))
                                             }
-                                            className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
+                                            className="w-full px-3 py-2 border border-input rounded-lg bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
                                           >
                                             <option value="1">Level 1</option>
                                             <option value="2">Level 2</option>
@@ -1157,7 +1157,7 @@ export default function AdminQuestions() {
                                                 [question.id]: e.target.value,
                                               }))
                                             }
-                                            className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
+                                            className="w-full px-3 py-2 border border-input rounded-lg bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
                                           >
                                             <option value="A">Stream A</option>
                                             <option value="B">Stream B</option>
@@ -1174,7 +1174,7 @@ export default function AdminQuestions() {
                                             [question.id]: e.target.value,
                                           }))
                                         }
-                                        className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
+                                        className="w-full px-3 py-2 border border-input rounded-lg bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
                                         rows={4}
                                         placeholder="Update the question text..."
                                       />
@@ -1309,7 +1309,7 @@ export default function AdminQuestions() {
                         });
                       }
                     }}
-                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground transition-all duration-200"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-transparent text-foreground transition-all duration-200"
                     placeholder={
                       showDomainModal ? "Domain title" : "Practice title"
                     }
@@ -1343,7 +1343,7 @@ export default function AdminQuestions() {
                         });
                       }
                     }}
-                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground transition-all duration-200 resize-none"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-transparent text-foreground transition-all duration-200 resize-none"
                     rows={3}
                     placeholder={
                       showDomainModal
@@ -1434,7 +1434,7 @@ export default function AdminQuestions() {
                           level: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground transition-all duration-200"
+                      className="w-full px-4 py-3 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-transparent text-foreground transition-all duration-200"
                     >
                       <option value="1">Level 1</option>
                       <option value="2">Level 2</option>
@@ -1454,7 +1454,7 @@ export default function AdminQuestions() {
                           stream: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground transition-all duration-200"
+                      className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-transparent text-foreground transition-all duration-200"
                     >
                       <option value="A">Stream A</option>
                       <option value="B">Stream B</option>
@@ -1474,7 +1474,7 @@ export default function AdminQuestions() {
                         question_text: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground transition-all duration-200 resize-none"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-transparent text-foreground transition-all duration-200 resize-none"
                     rows={4}
                     placeholder="Enter the question text..."
                   />

@@ -45,7 +45,7 @@
   height: 12px;
   border-radius: 50%;
   background: var(--destructive, #ea4335);
-  border: 2px solid var(--background);
+  border: 2px solid var(--card);
   animation: unread-pulse 2s ease-in-out infinite;
 }
 
@@ -396,7 +396,7 @@
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--background);
+  background: var(--card);
   color: var(--foreground);
   font-size: 13px;
   font-family: inherit;

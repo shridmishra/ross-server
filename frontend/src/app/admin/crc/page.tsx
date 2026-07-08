@@ -171,7 +171,7 @@ const RepeatableField = ({ items, onChange, placeholder = "Enter item...", min =
                 <div key={index} className="flex gap-2">
                     {type === "textarea" ? (
                         <textarea
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={item}
                             onChange={(e) => updateItem(index, e.target.value)}
                             placeholder={placeholder}
@@ -1236,7 +1236,7 @@ export default function CRCAdminPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Control Objective</label>
                                 <textarea
-                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                                     value={formData.control_objective || ""}
                                     onChange={(e) => setFormData({ ...formData, control_objective: e.target.value })}
                                     placeholder="What is the objective of this control?"
@@ -1633,7 +1633,7 @@ export default function CRCAdminPage() {
                                         </Button>
                                     </div>
                                     <textarea
-                                        className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                        className="flex min-h-[200px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                                         placeholder="Paste your list of questions here..."
                                         value={bulkPastedText}
                                         onChange={(e) => setBulkPastedText(e.target.value)}
@@ -1657,7 +1657,7 @@ export default function CRCAdminPage() {
                                     />
                                     {bulkPastedText && (
                                         <textarea
-                                            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-2"
+                                            className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm mt-2"
                                             value={bulkPastedText}
                                             onChange={(e) => setBulkPastedText(e.target.value)}
                                             placeholder="Or paste CSV content..."
@@ -1682,7 +1682,7 @@ export default function CRCAdminPage() {
                                     />
                                     {bulkPastedText && (
                                         <textarea
-                                            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-2"
+                                            className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm mt-2"
                                             value={bulkPastedText}
                                             onChange={(e) => setBulkPastedText(e.target.value)}
                                             placeholder="Or paste JSON array..."
@@ -1826,7 +1826,7 @@ export default function CRCAdminPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Control statement</label>
                             <textarea
-                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                                 value={bulkEditFormData.control_statement || ""}
                                 onChange={(e) => setBulkEditFormData({ ...bulkEditFormData, control_statement: e.target.value })}
                             />

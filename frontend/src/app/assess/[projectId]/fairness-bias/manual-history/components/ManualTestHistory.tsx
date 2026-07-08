@@ -288,7 +288,7 @@ export const ManualTestHistory = ({ projectId }: ManualTestHistoryProps) => {
                         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent pointer-events-none flex items-end justify-center pb-4">
                             <button
                                 onClick={() => setIsExpanded(true)}
-                                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
                                 type="button"
                             >
                                 <ChevronRight className="w-4 h-4 rotate-90" />

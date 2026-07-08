@@ -58,7 +58,7 @@ function ScrollIndicatorWrapper({ children, maxHeightClass = "max-h-[400px]" }: 
       <CardContent
         ref={containerRef}
         onScroll={handleScroll}
-        className={`p-4 space-y-4 bg-background/20 overflow-y-auto ${maxHeightClass}`}
+        className={`p-4 space-y-4 bg-muted/10 overflow-y-auto ${maxHeightClass}`}
       >
         {children}
       </CardContent>
@@ -260,7 +260,7 @@ export function WizardConfirmation({ projectId, onApplyComplete, onAdjustAnswers
       {/* Grid: Risk Tier & Frameworks */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Risk Classification */}
-        <Card className="md:col-span-2 border border-border/50 bg-background/40">
+        <Card className="md:col-span-2 border border-border/50 bg-card/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold text-muted-foreground uppercase tracking-wider">Risk Classification</CardTitle>
           </CardHeader>
@@ -280,7 +280,7 @@ export function WizardConfirmation({ projectId, onApplyComplete, onAdjustAnswers
         </Card>
 
         {/* Frameworks & Controls */}
-        <Card className="border border-border/50 bg-background/40">
+        <Card className="border border-border/50 bg-card/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold text-muted-foreground uppercase tracking-wider">Applicable Frameworks</CardTitle>
           </CardHeader>
@@ -366,17 +366,17 @@ export function WizardConfirmation({ projectId, onApplyComplete, onAdjustAnswers
                                 <Label htmlFor={`risk-${idx}`} className="font-bold text-sm sm:text-base text-foreground/90 cursor-pointer">
                                   {risk.title}
                                 </Label>
-                                <Badge variant="outline" className="text-[10px] uppercase font-bold py-0 bg-background">
+                                <Badge variant="outline" className="text-[10px] uppercase font-bold py-0 bg-muted">
                                   {risk.category}
                                 </Badge>
-                                <Badge className={`text-[10px] uppercase font-extrabold py-0 bg-background ${
+                                <Badge className={`text-[10px] uppercase font-extrabold py-0 bg-muted ${
                                   risk.rating === "Critical" || risk.rating === "High" ? "text-red-400 border-red-500/20" : "text-amber-400 border-amber-500/20"
                                 }`}>
                                   {risk.rating} Rating
                                 </Badge>
                               </div>
                               <p className="text-xs sm:text-sm text-muted-foreground mt-2">{risk.description}</p>
-                              <div className="mt-3 text-xs bg-background/50 border border-border/30 p-2.5 rounded-lg">
+                              <div className="mt-3 text-xs bg-muted/30 border border-border/30 p-2.5 rounded-lg">
                                 <span className="font-bold text-foreground block mb-0.5">Proposed Mitigation:</span>
                                 {risk.mitigation_plan}
                               </div>
@@ -438,7 +438,7 @@ export function WizardConfirmation({ projectId, onApplyComplete, onAdjustAnswers
                               <Label htmlFor={`comp-${idx}`} className="font-bold text-sm sm:text-base text-foreground/90 cursor-pointer">
                                 {comp.component_name}
                               </Label>
-                              <Badge variant="outline" className="text-[10px] bg-background">
+                              <Badge variant="outline" className="text-[10px] bg-muted">
                                 {comp.component_type}
                               </Badge>
                               <Badge className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 py-0">
@@ -482,7 +482,7 @@ export function WizardConfirmation({ projectId, onApplyComplete, onAdjustAnswers
                 exit={{ height: 0 }}
                 className="overflow-hidden"
               >
-                <CardContent className="p-4 space-y-6 bg-background/20">
+                <CardContent className="p-4 space-y-6 bg-muted/20">
                   {/* Vuln Scope */}
                   <div className="space-y-2">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">

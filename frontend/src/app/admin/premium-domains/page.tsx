@@ -878,7 +878,7 @@ export default function PremiumDomainsAdmin() {
                                                                                                     [question.id]: e.target.value,
                                                                                                 }))
                                                                                             }
-                                                                                            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm resize-none focus:ring-2 focus:ring-ring focus:border-input"
+                                                                                            className="w-full px-3 py-2 rounded-lg border border-input bg-transparent text-foreground text-sm resize-none focus:ring-2 focus:ring-ring focus:border-input"
                                                                                             rows={3}
                                                                                         />
                                                                                         <div className="flex gap-2">
@@ -890,7 +890,7 @@ export default function PremiumDomainsAdmin() {
                                                                                                         [question.id]: e.target.value,
                                                                                                     }))
                                                                                                 }
-                                                                                                className="px-2 py-1 rounded border border-input bg-background text-foreground text-sm"
+                                                                                                className="px-2 py-1 rounded border border-input bg-transparent text-foreground text-sm"
                                                                                             >
                                                                                                 <option value="1">Level 1</option>
                                                                                                 <option value="2">Level 2</option>
@@ -904,7 +904,7 @@ export default function PremiumDomainsAdmin() {
                                                                                                         [question.id]: e.target.value,
                                                                                                     }))
                                                                                                 }
-                                                                                                className="px-2 py-1 rounded border border-input bg-background text-foreground text-sm"
+                                                                                                className="px-2 py-1 rounded border border-input bg-transparent text-foreground text-sm"
                                                                                             >
                                                                                                 <option value="A">Stream A</option>
                                                                                                 <option value="B">Stream B</option>
@@ -1028,7 +1028,7 @@ export default function PremiumDomainsAdmin() {
                                     type="text"
                                     value={practiceForm.title}
                                     onChange={(e) => setPracticeForm({ ...practiceForm, title: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-input"
+                                    className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground focus:ring-2 focus:ring-ring focus:border-input"
                                     placeholder="Enter practice title"
                                 />
                             </div>
@@ -1041,7 +1041,7 @@ export default function PremiumDomainsAdmin() {
                                     value={practiceForm.description}
                                     onChange={(e) => setPracticeForm({ ...practiceForm, description: e.target.value })}
                                     rows={3}
-                                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
+                                    className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
                                     placeholder="Enter practice description"
                                 />
                             </div>
@@ -1083,7 +1083,7 @@ export default function PremiumDomainsAdmin() {
                                         id="question-level"
                                         value={questionForm.level}
                                         onChange={(e) => setQuestionForm({ ...questionForm, level: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-input"
+                                        className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground focus:ring-2 focus:ring-ring focus:border-input"
                                     >
                                         <option value="1">Level 1</option>
                                         <option value="2">Level 2</option>
@@ -1098,7 +1098,7 @@ export default function PremiumDomainsAdmin() {
                                         id="question-stream"
                                         value={questionForm.stream}
                                         onChange={(e) => setQuestionForm({ ...questionForm, stream: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-input"
+                                        className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground focus:ring-2 focus:ring-ring focus:border-input"
                                     >
                                         <option value="A">Stream A</option>
                                         <option value="B">Stream B</option>
@@ -1114,7 +1114,7 @@ export default function PremiumDomainsAdmin() {
                                     value={questionForm.question_text}
                                     onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })}
                                     rows={4}
-                                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
+                                    className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
                                     placeholder="Enter question text"
                                 />
                             </div>
@@ -1127,7 +1127,7 @@ export default function PremiumDomainsAdmin() {
                                     value={questionForm.description}
                                     onChange={(e) => setQuestionForm({ ...questionForm, description: e.target.value })}
                                     rows={2}
-                                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
+                                    className="w-full px-4 py-2 rounded-lg border border-input bg-transparent text-foreground resize-none focus:ring-2 focus:ring-ring focus:border-input"
                                     placeholder="Enter question description"
                                 />
                             </div>

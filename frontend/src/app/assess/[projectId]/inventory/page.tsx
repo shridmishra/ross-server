@@ -612,7 +612,7 @@ export default function ComponentInventoryPage() {
             placeholder="Search components..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 rounded-xl border-border/60 bg-background/50 focus-visible:ring-primary/25 focus-visible:border-primary"
+            className="pl-10 pr-4 rounded-xl border-border/60 bg-transparent focus-visible:ring-primary/25 focus-visible:border-primary"
           />
         </div>
 
@@ -620,7 +620,7 @@ export default function ComponentInventoryPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full flex-1">
           {/* Type Filter */}
           <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-background/50">
+            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -635,7 +635,7 @@ export default function ComponentInventoryPage() {
 
           {/* Provider Filter */}
           <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-background/50">
+            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Providers" />
             </SelectTrigger>
             <SelectContent>
@@ -650,7 +650,7 @@ export default function ComponentInventoryPage() {
 
           {/* Risk Filter */}
           <Select value={selectedRisk} onValueChange={setSelectedRisk}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-background/50">
+            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Risks" />
             </SelectTrigger>
             <SelectContent>
@@ -665,7 +665,7 @@ export default function ComponentInventoryPage() {
 
           {/* Status Filter */}
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-background/50">
+            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>

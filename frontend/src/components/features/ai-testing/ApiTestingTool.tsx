@@ -464,7 +464,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 disabled={jobStarting}
                 className={`
                   w-full px-4 py-3 rounded-xl border transition-colors
-                  bg-background
+                  bg-transparent
                   ${isValidUrl
                     ? "border-input focus:border-primary"
                     : "border-destructive focus:border-destructive"
@@ -499,7 +499,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 disabled={jobStarting}
                 className={`
                   w-full px-4 py-3 rounded-xl border transition-colors font-mono text-sm resize-y
-                  bg-background
+                  bg-transparent
                   border-input focus:border-primary
                   text-foreground
                   placeholder-muted-foreground
@@ -535,7 +535,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 aria-invalid={Boolean(responseKeyError)}
                 className={`
                   w-full px-4 py-3 rounded-xl border transition-colors font-mono text-sm
-                  bg-background
+                  bg-transparent
                   ${responseKeyError ? "border-destructive focus:border-destructive" : "border-input focus:border-primary"}
                   text-foreground
                   placeholder-muted-foreground
@@ -572,7 +572,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   disabled={jobStarting}
                   className={`
                     w-full px-4 py-3 rounded-xl border transition-colors
-                    bg-background
+                    bg-transparent
                     border-input focus:border-primary
                     text-foreground
                     placeholder-muted-foreground
@@ -599,7 +599,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   disabled={jobStarting}
                   className={`
                     w-full px-4 py-3 rounded-xl border transition-colors
-                    bg-background
+                    bg-transparent
                     border-input focus:border-primary
                     text-foreground
                     focus:outline-none focus:ring-2 focus:ring-primary
@@ -641,7 +641,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   disabled={jobStarting}
                   className={`
                     w-full px-4 py-3 rounded-xl border transition-colors
-                    bg-background
+                    bg-transparent
                     border-input focus:border-primary
                     text-foreground
                     placeholder-muted-foreground
@@ -668,7 +668,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       <div className="text-xs font-medium text-muted-foreground mb-1">
                         API Endpoint URL
                       </div>
-                      <div className="text-sm font-mono text-foreground bg-background px-3 py-2 rounded border border-border break-all">
+                      <div className="text-sm font-mono text-foreground bg-card px-3 py-2 rounded border border-border break-all">
                         {apiEndpoint}
                       </div>
                     </div>
@@ -678,7 +678,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       <div className="text-xs font-medium text-muted-foreground mb-1">
                         Request Body Template
                       </div>
-                      <pre className="text-xs sm:text-sm font-mono text-foreground bg-background px-3 py-2 rounded border border-border whitespace-pre-wrap break-words">
+                      <pre className="text-xs sm:text-sm font-mono text-foreground bg-card px-3 py-2 rounded border border-border whitespace-pre-wrap break-words">
                         {requestTemplate}
                       </pre>
                     </div>
@@ -688,7 +688,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       <div className="text-xs font-medium text-muted-foreground mb-1">
                         Response Key Path
                       </div>
-                      <div className="text-sm font-mono text-foreground bg-background px-3 py-2 rounded border border-border">
+                      <div className="text-sm font-mono text-foreground bg-card px-3 py-2 rounded border border-border">
                         {responseKey}
                       </div>
                     </div>
@@ -698,7 +698,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       <div className="text-xs font-medium text-muted-foreground mb-1">
                         API Key Placement
                       </div>
-                      <div className="text-sm text-foreground bg-background px-3 py-2 rounded border border-border">
+                      <div className="text-sm text-foreground bg-card px-3 py-2 rounded border border-border">
                         {API_KEY_OPTIONS.find((option) => option.value === apiKeyPlacement)?.label}
                       </div>
                     </div>
@@ -708,7 +708,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       <div className="text-xs font-medium text-muted-foreground mb-1">
                         Field Name
                       </div>
-                      <div className="text-sm font-mono text-foreground bg-background px-3 py-2 rounded border border-border break-all">
+                      <div className="text-sm font-mono text-foreground bg-card px-3 py-2 rounded border border-border break-all">
                         {trimmedApiKeyFieldName || API_KEY_FIELD_HINTS[apiKeyPlacement]}
                       </div>
                     </div>
@@ -734,7 +734,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       we also append an <code>api_key</code> field containing your key.
                     </li>
                   </ul>
-                  <pre className="text-xs font-mono text-primary/90 bg-background rounded-lg border border-primary/20 p-3 whitespace-pre-wrap">
+                  <pre className="text-xs font-mono text-primary/90 bg-card rounded-lg border border-primary/20 p-3 whitespace-pre-wrap">
                     {`{
   "model": "gpt-4o-mini",
   "messages": [
@@ -757,7 +757,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                       {COPY[mode].howToResponseOutput}
                     </li>
                   </ul>
-                  <pre className="text-xs font-mono text-primary/90 bg-background rounded-lg border border-primary/20 p-3 whitespace-pre-wrap">
+                  <pre className="text-xs font-mono text-primary/90 bg-card rounded-lg border border-primary/20 p-3 whitespace-pre-wrap">
                     {`{
   "choices": [
     {

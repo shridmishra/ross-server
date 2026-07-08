@@ -137,7 +137,7 @@ export default function PathSelectionModal({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="bg-background rounded-3xl shadow-2xl border border-border overflow-hidden"
+          className="bg-card rounded-3xl shadow-2xl border border-border overflow-hidden"
         >
           {/* Header */}
           <div className="text-center px-8 pt-8 pb-4">

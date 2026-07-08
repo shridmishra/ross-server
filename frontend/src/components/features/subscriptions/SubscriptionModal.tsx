@@ -220,7 +220,7 @@ export default function SubscriptionModal({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="bg-background rounded-3xl p-8 shadow-xl border border-border"
+          className="bg-card rounded-3xl p-8 shadow-xl border border-border"
         >
           {/* Header */}
           <DialogHeader className="text-center mb-8">
@@ -306,7 +306,7 @@ export default function SubscriptionModal({
                 Small Teams
               </Badge>
 
-              <Card className="h-full flex flex-col border-border/50 bg-background/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 rounded-3xl shadow-lg hover:shadow-primary/5 group-hover:bg-background/80">
+              <Card className="h-full flex flex-col border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 rounded-3xl shadow-lg hover:shadow-primary/5 group-hover:bg-card/85">
                 <CardHeader className="text-center pb-4">
                   <div className="flex items-center justify-center mb-4">
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -400,7 +400,7 @@ export default function SubscriptionModal({
                 </Badge>
               </motion.div>
 
-              <Card className="h-full flex flex-col border-primary/20 bg-background/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-primary/10 ring-1 ring-primary/20 group-hover:bg-background/80">
+              <Card className="h-full flex flex-col border-primary/20 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-primary/10 ring-1 ring-primary/20 group-hover:bg-card/85">
                 <CardHeader className="text-center pb-4">
                   <div className="flex items-center justify-center mb-4">
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">

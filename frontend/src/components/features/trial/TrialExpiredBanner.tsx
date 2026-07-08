@@ -41,7 +41,7 @@ export default function TrialExpiredBanner() {
       <>
         <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/20 border border-muted flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="bg-background p-3 rounded-xl shadow-sm">
+            <div className="bg-card p-3 rounded-xl shadow-sm">
               <IconClock className="w-6 h-6 text-muted-foreground" />
             </div>
             <div>
@@ -92,7 +92,7 @@ export default function TrialExpiredBanner() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-background/50 border-primary/10">
+          <Card className="bg-card/50 border-primary/10">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                 <IconFolder className="w-5 h-5" />
@@ -104,7 +104,7 @@ export default function TrialExpiredBanner() {
             </CardContent>
           </Card>
           
-          <Card className="bg-background/50 border-primary/10">
+          <Card className="bg-card/50 border-primary/10">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
                 <IconRobot className="w-5 h-5" />
@@ -116,7 +116,7 @@ export default function TrialExpiredBanner() {
             </CardContent>
           </Card>
 
-          <Card className="bg-background/50 border-primary/10">
+          <Card className="bg-card/50 border-primary/10">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
                 <IconChartBar className="w-5 h-5" />
@@ -128,7 +128,7 @@ export default function TrialExpiredBanner() {
             </CardContent>
           </Card>
 
-          <Card className="bg-background/50 border-primary/10">
+          <Card className="bg-card/50 border-primary/10">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
                 <IconUsers className="w-5 h-5" />

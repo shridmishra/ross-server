@@ -223,7 +223,7 @@ export function SystemProfileWizard({ projectId, isOpen, onClose }: SystemProfil
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleSaveAndExit()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden border border-border/80 bg-background/95 backdrop-blur-md shadow-2xl p-6">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md shadow-2xl p-6">
         <DialogHeader className="pb-4 border-b border-border/40">
           <div className="flex justify-between items-center">
             <div>
