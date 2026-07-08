@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { IconFolder, IconRobot, IconBriefcase, IconLoader2 } from "@tabler/icons-react";
+import { IconFolder, IconCpu, IconBriefcase, IconLoader2 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,7 +101,7 @@ export default function ProjectEditForm({
           >
             <SelectTrigger id="ai-system-type" className="w-full">
               <div className="flex items-center gap-2 min-w-0 w-full">
-                <IconRobot className="h-4 w-4 text-muted-foreground shrink-0" />
+                <IconCpu className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="truncate">
                   <SelectValue placeholder="Select AI System Type" />
                 </span>

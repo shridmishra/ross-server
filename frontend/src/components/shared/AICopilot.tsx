@@ -7,7 +7,6 @@ import {
   IconMessageChatbot,
   IconX,
   IconSend2,
-  IconRobot,
 } from "@tabler/icons-react";
 import { apiService } from "@/lib/api";
 import "./AICopilot.css";
@@ -283,7 +282,7 @@ export default function AICopilot() {
             <div className="copilot-header">
               <div className="copilot-header-left">
                 <div className="copilot-header-icon">
-                  <IconRobot size={18} strokeWidth={2} />
+                  <IconMessageChatbot size={18} strokeWidth={2} />
                 </div>
                 <div>
                   <div className="copilot-header-title">Mira</div>

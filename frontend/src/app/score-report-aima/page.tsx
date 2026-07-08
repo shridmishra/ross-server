@@ -17,7 +17,6 @@ import {
   IconStar,
   IconDownload,
   IconLoader,
-  IconSparkles,
   IconBrain,
   IconCheck,
   IconTrendingUp,
@@ -484,7 +483,7 @@ export default function ScoreReportPage() {
                             {/* AI Insights Section */}
                             <div className="mb-8 p-6 rounded-2xl bg-primary/5 border border-primary/10">
                               <div className="flex items-center gap-2 mb-4">
-                                <IconSparkles className="w-4 h-4 text-primary fill-primary/20" />
+                                <IconBrain className="w-4 h-4 text-primary fill-primary/20" />
                                 <h4 className="text-sm font-black text-foreground tracking-tight uppercase">AI Insights & Recommendations</h4>
                                 {generatingInsights && !insights[domain.domainId] && (
                                   <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase animate-pulse ml-auto">

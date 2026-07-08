@@ -21,10 +21,10 @@ import {
   IconInfoCircle,
   IconEye,
   IconEyeOff,
-  IconSparkles,
   IconSearch,
   IconChevronDown,
   IconChevronUp,
+  IconMessageChatbot,
 } from "@tabler/icons-react";
 import { SimplePageSkeleton } from "@/components/Skeleton";
 import { showToast } from "@/lib/toast";
@@ -375,7 +375,7 @@ export default function AdminChatbotSettings() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <IconSparkles className="w-6 h-6 text-primary animate-pulse" />
+              <IconMessageChatbot className="w-6 h-6 text-primary animate-pulse" />
               <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
                 Chatbot Settings
               </h1>
@@ -617,7 +617,7 @@ export default function AdminChatbotSettings() {
           <Card className="w-full max-w-xl border border-border shadow-2xl rounded-2xl overflow-hidden bg-card animate-in fade-in zoom-in-95 duration-200">
             <CardHeader className="bg-muted/30 border-b border-border/60 py-4 px-6">
               <CardTitle id="modal-title" className="text-2xl font-bold flex items-center gap-2">
-                <IconSparkles className="w-5 h-5 text-primary" />
+                <IconMessageChatbot className="w-5 h-5 text-primary" />
                 {modalMode === "add" ? "Create New Instruction" : "Edit Instruction Settings"}
               </CardTitle>
               <CardDescription>

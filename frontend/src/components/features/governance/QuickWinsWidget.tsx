@@ -10,7 +10,8 @@ import {
   IconCheck,
   IconClock,
   IconChevronRight,
-  IconSparkles,
+  IconCircleCheck,
+  IconTarget,
   IconFileText
 } from "@tabler/icons-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,7 +161,7 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
         <Card className="border border-emerald-500/20 bg-gradient-to-br from-emerald-950/10 via-background to-background">
           <CardContent className="p-8 text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto border border-emerald-500/20">
-              <IconSparkles className="w-6 h-6 text-emerald-500" />
+              <IconCircleCheck className="w-6 h-6 text-emerald-500" />
             </div>
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-foreground">🎉 All quick wins completed!</h3>
@@ -198,7 +199,7 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <div className="space-y-1">
             <CardTitle className="text-base font-bold flex items-center gap-1.5 text-foreground">
-              <IconSparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <IconTarget className="w-4 h-4 text-amber-500 fill-amber-500" />
               ⚡ Quick Wins: Recommended for this week
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">

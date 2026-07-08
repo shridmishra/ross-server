@@ -13,6 +13,7 @@ import {
   IconX,
   IconArrowRight,
   IconFolderOpen,
+  IconFolder,
   IconLoader2,
 } from "@tabler/icons-react";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -254,8 +255,13 @@ export default function PremiumFeaturesPage() {
       <Dialog open={!!selectedFeature} onOpenChange={(open) => !open && closeModal()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              {selectedFeature && FEATURE_CONFIGS[selectedFeature].title}
+            <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
+              {selectedFeature && (
+                <>
+                  <IconFolderOpen className="w-6 h-6 text-primary shrink-0" />
+                  <span>{FEATURE_CONFIGS[selectedFeature].title}</span>
+                </>
+              )}
             </DialogTitle>
             <DialogDescription>
               {selectedFeature && FEATURE_CONFIGS[selectedFeature].description}
@@ -302,22 +308,25 @@ export default function PremiumFeaturesPage() {
                     <Button
                       variant="ghost"
                       onClick={() => handleProjectClick(project.id)}
-                      className="w-full justify-start h-auto py-4 px-4 hover:bg-primary/5"
+                      className="w-full justify-start h-auto py-4 px-4 hover:bg-primary/5 border border-border/20 rounded-xl flex items-center"
                     >
+                      <div className="mr-3 p-2 bg-primary/10 rounded-lg text-primary shrink-0">
+                        <IconFolder className="w-5 h-5" />
+                      </div>
                       <div className="flex-1 min-w-0 text-left">
-                        <h4 className="font-medium truncate">
+                        <h4 className="font-semibold truncate text-foreground">
                           {project.name}
                         </h4>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">
                           {project.description || "No description"}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary">
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Badge variant="secondary" className="text-[10px] py-0 px-2 font-normal">
                             {project.ai_system_type || "General AI System"}
                           </Badge>
                         </div>
                       </div>
-                      <IconArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
+                      <IconArrowRight className="w-5 h-5 text-muted-foreground/60 flex-shrink-0 ml-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
                 ))}

@@ -13,7 +13,7 @@ import {
   IconUsers,
   IconLoader2,
   IconArrowRight,
-  IconSparkles,
+  IconCompass,
   IconFolder,
 } from "@tabler/icons-react";
 import { apiService } from "../../../lib/api";
@@ -148,7 +148,7 @@ export default function PathSelectionModal({
               className="mb-4 flex justify-center"
             >
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full">
-                <IconSparkles className="w-9 h-9 text-primary" />
+                <IconCompass className="w-9 h-9 text-primary" />
               </div>
             </motion.div>
             <motion.h2
@@ -225,6 +225,7 @@ export default function PathSelectionModal({
                   </>
                 ) : (
                   <>
+                    <IconBrain className="w-5 h-5 mr-2" />
                     Continue with AIMA
                     <IconArrowRight className="w-4 h-4 ml-2" />
                   </>

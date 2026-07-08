@@ -636,8 +636,8 @@ button:enabled,
 
   /* Section accent colors for sidebar */
   --section-free: oklch(60% 0.18 142);
-  --section-premium: oklch(60% 0.18 70);
-  --section-settings: oklch(53% 0.04 250);
+  --section-premium: oklch(79% 0.21 82);
+  --section-settings: var(--primary);
   --section-admin: oklch(50% 0.25 295);
 }
 
@@ -723,8 +723,8 @@ button:enabled,
 
   /* Section accent colors for sidebar */
   --section-free: oklch(72% 0.18 140);
-  --section-premium: oklch(76% 0.18 75);
-  --section-settings: oklch(69% 0.02 250);
+  --section-premium: oklch(86% 0.18 80);
+  --section-settings: var(--primary);
   --section-admin: oklch(58% 0.25 295);
 }
 
@@ -799,7 +799,7 @@ button:enabled,
 /* --- Dashboard Section (Standard Primary Blue) --- */
 .sidebar-btn-dashboard[data-active="true"] {
   border-left: 4px solid var(--primary) !important;
-  background-color: var(--sidebar-accent) !important;
+  background-color: color-mix(in oklch, var(--primary) 8%, transparent) !important;
   color: var(--primary) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -828,7 +828,7 @@ button:enabled,
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-free[data-active="true"] {
   border-left: 4px solid var(--section-free) !important;
-  background-color: oklch(60% 0.18 142 / 12%) !important;
+  background-color: color-mix(in oklch, var(--section-free) 12%, transparent) !important;
   color: var(--section-free) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -839,25 +839,25 @@ button:enabled,
   color: var(--section-free) !important;
 }
 
-/* --- Premium Section (Gold/Amber) --- */
+/* --- Premium Section (Yellow) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-premium {
-  color: oklch(60% 0.18 70 / 75%) !important;
+  color: color-mix(in oklch, var(--section-premium) 75%, transparent) !important;
 }
 .sidebar-btn-premium svg {
-  color: oklch(60% 0.18 70 / 70%) !important;
+  color: color-mix(in oklch, var(--section-premium) 70%, transparent) !important;
 }
 .sidebar-btn-premium:hover {
-  background-color: oklch(60% 0.18 70 / 8%) !important;
-  color: oklch(60% 0.18 70) !important;
+  background-color: color-mix(in oklch, var(--section-premium) 8%, transparent) !important;
+  color: var(--section-premium) !important;
 }
 .sidebar-btn-premium:hover svg {
-  color: oklch(60% 0.18 70) !important;
+  color: var(--section-premium) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-premium[data-active="true"] {
   border-left: 4px solid var(--section-premium) !important;
-  background-color: oklch(60% 0.18 70 / 12%) !important;
+  background-color: color-mix(in oklch, var(--section-premium) 12%, transparent) !important;
   color: var(--section-premium) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -868,25 +868,25 @@ button:enabled,
   color: var(--section-premium) !important;
 }
 
-/* --- Settings Section (Slate-Gray) --- */
+/* --- Settings Section (Slate-Gray / Primary Blue) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-settings {
-  color: oklch(53% 0.04 250 / 75%) !important;
+  color: color-mix(in oklch, var(--section-settings) 75%, transparent) !important;
 }
 .sidebar-btn-settings svg {
-  color: oklch(53% 0.04 250 / 70%) !important;
+  color: color-mix(in oklch, var(--section-settings) 70%, transparent) !important;
 }
 .sidebar-btn-settings:hover {
-  background-color: oklch(53% 0.04 250 / 8%) !important;
-  color: oklch(53% 0.04 250) !important;
+  background-color: color-mix(in oklch, var(--section-settings) 8%, transparent) !important;
+  color: var(--section-settings) !important;
 }
 .sidebar-btn-settings:hover svg {
-  color: oklch(53% 0.04 250) !important;
+  color: var(--section-settings) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-settings[data-active="true"] {
   border-left: 4px solid var(--section-settings) !important;
-  background-color: oklch(53% 0.04 250 / 12%) !important;
+  background-color: color-mix(in oklch, var(--section-settings) 12%, transparent) !important;
   color: var(--section-settings) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -900,22 +900,22 @@ button:enabled,
 /* --- Admin Section (Purple) --- */
 /* Inactive State: Soft color-coded theme */
 .sidebar-btn-admin {
-  color: oklch(50% 0.25 295 / 75%) !important;
+  color: color-mix(in oklch, var(--section-admin) 75%, transparent) !important;
 }
 .sidebar-btn-admin svg {
-  color: oklch(50% 0.25 295 / 70%) !important;
+  color: color-mix(in oklch, var(--section-admin) 70%, transparent) !important;
 }
 .sidebar-btn-admin:hover {
-  background-color: oklch(50% 0.25 295 / 8%) !important;
-  color: oklch(50% 0.25 295) !important;
+  background-color: color-mix(in oklch, var(--section-admin) 8%, transparent) !important;
+  color: var(--section-admin) !important;
 }
 .sidebar-btn-admin:hover svg {
-  color: oklch(50% 0.25 295) !important;
+  color: var(--section-admin) !important;
 }
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-admin[data-active="true"] {
   border-left: 4px solid var(--section-admin) !important;
-  background-color: oklch(50% 0.25 295 / 12%) !important;
+  background-color: color-mix(in oklch, var(--section-admin) 12%, transparent) !important;
   color: var(--section-admin) !important;
   font-weight: 700 !important;
   padding-left: 0.5rem !important;
@@ -927,13 +927,13 @@ button:enabled,
 }
 
 /* Custom Google Brand Cards - Solid subtle backgrounds */
-.card-google-blue {
-  background-color: oklch(56% 0.21 254 / 4%) !important;
-  border: 1px solid oklch(56% 0.21 254 / 15%) !important;
+.card-google-indigo {
+  background-color: oklch(56% 0.15 275 / 4%) !important;
+  border: 1px solid oklch(56% 0.15 275 / 15%) !important;
 }
-.dark .card-google-blue {
-  background-color: oklch(73% 0.14 250 / 6%) !important;
-  border: 1px solid oklch(73% 0.14 250 / 20%) !important;
+.dark .card-google-indigo {
+  background-color: oklch(73% 0.12 270 / 6%) !important;
+  border: 1px solid oklch(73% 0.12 270 / 20%) !important;
 }
 
 .card-google-red {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { IconClock, IconChartBar, IconFolder, IconRobot, IconUsers } from "@tabler/icons-react";
+import { IconClock, IconChartBar, IconFolder, IconUsers, IconCrown, IconCpu } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,9 +53,10 @@ export default function TrialExpiredBanner() {
           </div>
           <Button 
             onClick={() => setShowSubscriptionModal(true)}
-            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
+            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-1.5"
           >
-            Upgrade to Premium
+            <IconCrown className="w-4.5 h-4.5" />
+            <span>Upgrade to Premium</span>
           </Button>
         </div>
         <SubscriptionModal
@@ -85,9 +86,10 @@ export default function TrialExpiredBanner() {
           <Button 
             size="lg"
             onClick={() => setShowSubscriptionModal(true)}
-            className="w-full md:w-auto font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+            className="w-full md:w-auto font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5"
           >
-            Upgrade to Continue
+            <IconCrown className="w-5 h-5" />
+            <span>Upgrade to Continue</span>
           </Button>
         </div>
 
@@ -107,7 +109,7 @@ export default function TrialExpiredBanner() {
           <Card className="bg-card/50 border-primary/10">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-                <IconRobot className="w-5 h-5" />
+                <IconCpu className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{summary.questionsAnswered}</p>

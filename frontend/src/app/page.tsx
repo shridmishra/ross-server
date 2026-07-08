@@ -12,7 +12,6 @@ import {
   IconUsers,
   IconTarget,
   IconArrowRight,
-  IconSparkles,
   IconCircleCheck,
   IconLogin,
   IconDashboard,
@@ -529,7 +528,7 @@ export default function Home() {
             <Card className="bg-card border-border">
               <CardContent className="p-12">
                 <div className="flex items-center justify-center mb-6">
-                  <IconSparkles className="w-12 h-12 text-primary" />
+                  <IconTarget className="w-12 h-12 text-primary" />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
                   <span className="text-primary">
