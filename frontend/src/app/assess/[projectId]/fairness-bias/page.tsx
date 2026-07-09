@@ -17,12 +17,15 @@ import {
   Circle,
   FileText,
   BarChart3,
+  Scale,
 } from "lucide-react";
 import SubscriptionModal from "../../../../components/features/subscriptions/SubscriptionModal";
 import { FairnessTestSkeleton, SimplePageSkeleton } from "../../../../components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { ManualTestHistory } from "./manual-history/components/ManualTestHistory";
 import InfoSection from "@/components/features/governance/InfoSection";
+import { useAssessmentContext } from "../../../../contexts/AssessmentContext";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 interface FairnessQuestion {
   label: string;
@@ -40,6 +43,7 @@ export default function FairnessBiasTest() {
   const params = useParams();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { projectName } = useAssessmentContext();
 
   const [fairnessQuestions, setFairnessQuestions] = useState<FairnessQuestion[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(true);
@@ -55,6 +59,10 @@ export default function FairnessBiasTest() {
   const currentQuestionRef = useRef<HTMLDivElement>(null);
 
   const isPremium = user?.subscription_status ? PREMIUM_STATUS.includes(user.subscription_status as typeof PREMIUM_STATUS[number]) : false;
+
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
   useEffect(() => {
     if (!loading && user) {
@@ -288,7 +296,7 @@ export default function FairnessBiasTest() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background relative">
+    <div className="absolute inset-0 flex overflow-hidden bg-background">
       {!isPremium && showSubscriptionModal && (
         <SubscriptionModal
           isOpen={true}
@@ -298,7 +306,7 @@ export default function FairnessBiasTest() {
         />
       )}
 
-      <div className={`w-80 bg-card border-r border-border h-screen overflow-y-auto ${!isPremium ? 'blur-md pointer-events-none select-none' : ''}`}>
+      <div className={`w-80 bg-card border-r border-border h-full overflow-y-auto ${!isPremium ? 'blur-md pointer-events-none select-none' : ''}`}>
         <div className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="w-6 h-6 text-primary" />
@@ -438,33 +446,57 @@ export default function FairnessBiasTest() {
         </div>
       </div>
 
-      <div className={`flex-1 flex flex-col ${!isPremium ? 'blur-md pointer-events-none select-none' : ''}`}>
-        <div className="bg-card border-b border-border p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">
-                {currentCategory?.label || "Loading..."}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Question {currentQuestionOrdinal} of {totalQuestions} • Prompt{" "}
-                {currentPromptIndex + 1} of {currentCategory?.totalPrompts || 0}
-              </p>
+      <div className={`flex-1 flex flex-col h-full overflow-hidden ${!isPremium ? 'blur-md pointer-events-none select-none' : ''}`}>
+        {/* Header */}
+        <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+          <div className="max-w-7xl mx-auto flex flex-col gap-2">
+            {/* Top: Breadcrumb */}
+            <div className="flex items-center justify-between text-xs">
+              <Breadcrumb
+                projectName={projectName || "Loading..."}
+                projectHref={projectBreadcrumbHref}
+                items={[{ label: "Manual Prompt Testing" }]}
+              />
             </div>
-            <Button
-              onClick={handleEvaluateAssessment}
-              isLoading={isEvaluating}
-              disabled={answeredQuestions === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-sm"
-            >
-              {isEvaluating ? (
-                "Evaluating..."
-              ) : (
-                <>
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Evaluate Assessment
-                </>
-              )}
-            </Button>
+
+            {/* Bottom: Main row */}
+            <div className="flex items-center justify-between gap-4 mt-1">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => router.back()}
+                  type="button"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back
+                </button>
+                <div className="h-5 w-px bg-border shrink-0" />
+                <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                  <Scale className="w-4 h-4 text-primary shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <h1 className="text-sm font-bold text-foreground truncate">
+                    Manual Prompt Testing
+                  </h1>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  onClick={handleEvaluateAssessment}
+                  isLoading={isEvaluating}
+                  disabled={answeredQuestions === 0}
+                  className="btn-primary rounded-full px-5 py-1.5 text-xs font-bold shadow-sm hover:shadow-md transition-all border-none flex items-center gap-1.5 animate-all"
+                >
+                  {isEvaluating ? (
+                    "Evaluating..."
+                  ) : (
+                    <>
+                      <BarChart3 className="w-3.5 h-3.5" />
+                      Evaluate Assessment
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -526,7 +558,7 @@ export default function FairnessBiasTest() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-card rounded-2xl shadow-lg border border-border p-8 mb-8"
+                className="card-google-blue rounded-2xl shadow-sm border border-blue-500/25 p-8 mb-8"
               >
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-foreground leading-relaxed">
@@ -576,9 +608,12 @@ export default function FairnessBiasTest() {
                     }}
                     placeholder="Type or paste your response here..."
                   />
-                  <div className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-lg">
-                    <strong>Security:</strong> Your notes are automatically sanitized to
-                    prevent malicious content. HTML tags and scripts are not allowed.
+                  <div className="mt-2 text-xs text-warning-foreground bg-warning/10 border border-warning/20 p-3 rounded-xl flex items-start gap-2">
+                    <span className="shrink-0 mt-0.5">⚠️</span>
+                    <div>
+                      <strong>Security:</strong> Your notes are automatically sanitized to
+                      prevent malicious content. HTML tags and scripts are not allowed.
+                    </div>
                   </div>
                 </div>
 

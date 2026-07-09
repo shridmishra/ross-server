@@ -30,6 +30,8 @@ import SubscriptionModal from "@/components/features/subscriptions/SubscriptionM
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { showToast } from "@/lib/toast";
 import { QuickWinsWidget } from "@/components/features/governance/QuickWinsWidget";
+import { ArrowLeft } from "lucide-react";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // --- Helpers ---
 
@@ -138,26 +140,27 @@ function FrameworkCard({
   title,
   data,
   icon,
-  accentColor,
+  themeClass,
+  borderClass,
 }: {
   title: string;
   data: CRCFrameworkResult;
   icon: string;
-  accentColor: string;
+  themeClass: string;
+  borderClass: string;
 }) {
   const tier = getReadinessTier(data.percentage);
   return (
-    <Card className="relative overflow-hidden">
-      <div className={`absolute top-0 left-0 right-0 h-1 ${accentColor}`} />
+    <Card className={`relative overflow-hidden ${themeClass} ${borderClass} shadow-md`}>
       <CardHeader className="pb-3 pt-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">{icon}</span>
             <CardTitle className="text-sm font-semibold">{title}</CardTitle>
           </div>
-          <Badge variant="outline" className={`text-xs ${tier.color} border-current/20`}>
+          <span className={`text-xs px-2 py-0.5 border rounded-full font-semibold ${tier.color} border-current/20`}>
             {tier.label}
-          </Badge>
+          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -405,44 +408,60 @@ export default function CRCDashboardPage() {
     return "border-green-500/20 bg-green-500/10 text-green-600 dark:text-green-400";
   };
 
-  return (
-    <div className="flex-1 bg-background">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-        >
-          <div>
-            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
-              CRC Dashboard
-            </p>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Compliance Readiness Dashboard
-            </h1>
-            {projectName && (
-              <p className="text-sm text-muted-foreground mt-0.5">{projectName}</p>
-            )}
+  return (
+    <div className="flex-1 flex flex-col w-full bg-background">
+      {/* Header */}
+      <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+        <div className="max-w-7xl mx-auto flex flex-col gap-2">
+          {/* Top: Breadcrumb */}
+          <div className="flex items-center justify-between text-xs">
+            <Breadcrumb
+              projectName={projectName || "Loading..."}
+              projectHref={projectBreadcrumbHref}
+              items={[{ label: "Compliance Readiness Controls (CRC)" }]}
+            />
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="flex gap-2">
+
+          {/* Bottom: Main row */}
+          <div className="flex items-center justify-between gap-4 mt-1">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.back()}
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+              <div className="h-5 w-px bg-border shrink-0" />
+              <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                <IconShieldCheck className="w-4 h-4 text-primary shrink-0" style={{ color: "var(--section-premium)" }} />
+                <h1 className="text-sm font-bold text-foreground truncate">
+                  Compliance Readiness Dashboard
+                </h1>
+              </div>
+            </div>
+
+            {/* Export & Assessment Actions */}
+            <div className="flex items-center gap-2 shrink-0">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={handleExportFullPdf}
                         disabled={isExportingFull || isExportingSummary || isLocked || !hasResponses}
-                        className="gap-2"
+                        className="gap-1.5 h-8 text-xs font-semibold px-3 rounded-lg bg-blue-500/25 text-blue-700 dark:text-blue-300 border border-blue-500/40 hover:bg-blue-500/35 shadow-xs transition-colors disabled:opacity-50"
                       >
                         {isExportingFull ? (
-                          <IconLoader2 className="w-4 h-4 animate-spin" />
+                          <IconLoader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <IconDownload className="w-4 h-4" />
+                          <IconDownload className="w-3.5 h-3.5 text-blue-700 dark:text-blue-300" />
                         )}
                         {isLocked
                           ? "Preparing..."
@@ -456,7 +475,7 @@ export default function CRCDashboardPage() {
                     <p className="max-w-xs text-xs">
                       {isLocked
                         ? "Preparing your dashboard data..."
-                        : "Complete dashboard export with all categories, controls, and section narratives. Use for internal record-keeping or detailed audits. Typically 8 to 20 pages depending on project progress."}
+                        : "Complete dashboard export with all categories, controls, and section narratives."}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -467,22 +486,21 @@ export default function CRCDashboardPage() {
                   <TooltipTrigger asChild>
                     <span>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={handleExportSummaryPdf}
                         disabled={isExportingFull || isExportingSummary || isLocked || !hasResponses}
-                        className="gap-2"
+                        className="gap-1.5 h-8 text-xs font-semibold px-3 rounded-lg bg-yellow-500/25 text-amber-800 dark:text-yellow-400 border border-yellow-500/40 hover:bg-yellow-500/35 shadow-xs transition-colors disabled:opacity-50"
                       >
                         {isExportingSummary ? (
-                          <IconLoader2 className="w-4 h-4 animate-spin" />
+                          <IconLoader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <IconDownload className="w-4 h-4" />
+                          <IconDownload className="w-3.5 h-3.5 text-amber-800 dark:text-yellow-400" />
                         )}
                         {isLocked
                           ? "Preparing..."
                           : isExportingSummary
                           ? "Exporting..."
-                          : "Download Summary PDF"}
+                          : "Download Summary"}
                       </Button>
                     </span>
                   </TooltipTrigger>
@@ -490,21 +508,25 @@ export default function CRCDashboardPage() {
                     <p className="max-w-xs text-xs">
                       {isLocked
                         ? "Preparing your dashboard data..."
-                        : "Two-page executive summary for board meetings, customer assurance, and high-level reviews. Use when you need a short, branded artifact."}
+                        : "Lightweight summary of readiness percentages and compliance status per category."}
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
-              <Button size="sm" asChild className="gap-2">
+              <Button size="sm" asChild className="gap-1.5 h-8 text-xs font-semibold px-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xs">
                 <Link href={`/assess/${projectId}/crc`}>
                   {hasResponses ? "Continue" : "Start"} Assessment
-                  <IconArrowRight className="w-4 h-4" />
+                  <IconArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto space-y-8">
 
         {/* Incomplete Warning */}
         {!complete && hasResponses && (
@@ -644,8 +666,11 @@ export default function CRCDashboardPage() {
 
             {/* Risk Summary Badges Section */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Risk Summary</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+                  <IconAlertCircle className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <span>Risk Summary</span>
+                </h2>
                 <p className="text-sm text-muted-foreground">Open risks from the Risk Register</p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -661,9 +686,9 @@ export default function CRCDashboardPage() {
                         <span className="text-2xl font-bold tabular-nums text-foreground">
                           {badge.count}
                         </span>
-                        <Badge variant="outline" className={`mt-2 text-xs font-semibold px-2 py-0.5 border ${badge.bg}`}>
+                        <span className={`mt-2 text-xs font-semibold px-2.5 py-0.5 border rounded-full ${badge.bg}`}>
                           {badge.label}
-                        </Badge>
+                        </span>
                       </CardContent>
                     </Card>
                   </Link>
@@ -674,8 +699,11 @@ export default function CRCDashboardPage() {
             {/* Evidence Progress Section (Feature I) */}
             {evidenceProgress && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Evidence Progress</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+                    <IconShieldCheck className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+                    <span>Evidence Progress</span>
+                  </h2>
                   <p className="text-sm text-muted-foreground">Audit readiness & evidence metrics</p>
                 </div>
                 <Card>
@@ -753,14 +781,20 @@ export default function CRCDashboardPage() {
 
             {/* Framework Readiness Cards */}
             <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4">Framework Readiness</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+                  <IconShieldCheck className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <span>Framework Readiness</span>
+                </h2>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <FrameworkCard
                     title="EU AI Act"
                     data={fw.eu_ai_act || defaultFramework}
                     icon="🇪🇺"
-                    accentColor="bg-blue-500"
+                    themeClass="card-google-blue"
+                    borderClass="border-blue-500/25"
                   />
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
@@ -768,7 +802,8 @@ export default function CRCDashboardPage() {
                     title="NIST AI RMF"
                     data={fw.nist_ai_rmf || defaultFramework}
                     icon="🏛️"
-                    accentColor="bg-indigo-500"
+                    themeClass="card-google-purple"
+                    borderClass="border-purple-500/25"
                   />
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -776,7 +811,8 @@ export default function CRCDashboardPage() {
                     title="ISO 42001"
                     data={fw.iso_42001 || defaultFramework}
                     icon="📋"
-                    accentColor="bg-emerald-500"
+                    themeClass="card-google-green"
+                    borderClass="border-success/40"
                   />
                 </motion.div>
               </div>
@@ -784,8 +820,11 @@ export default function CRCDashboardPage() {
 
             {/* Category Breakdown */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Category Breakdown</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+                  <IconInfoCircle className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <span>Category Breakdown</span>
+                </h2>
                 <p className="text-sm text-muted-foreground">{categories.length} categories</p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">

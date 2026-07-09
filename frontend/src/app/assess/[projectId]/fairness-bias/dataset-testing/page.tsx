@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Upload, Trash2, RefreshCw, FileText } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, RefreshCw, FileText, Lock, Scale } from "lucide-react";
 import { apiService } from "@/lib/api";
-import { Lock } from "lucide-react";
 import { getDatasetTestingReportKey } from "./storage";
 import { DatasetUploadSection } from "./components/DatasetUploadSection";
 import { ReportHistory } from "./components/ReportHistory";
+import { useAssessmentContext } from "@/contexts/AssessmentContext";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import type { DatasetEvaluationResponse, PreviewData, DatasetReportPayload } from "./types";
 
 const PRIVACY_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
@@ -110,9 +111,14 @@ const DatasetTestingPage = () => {
   const router = useRouter();
   const params = useParams<{ projectId: string }>();
   const projectId = params.projectId;
+  const { projectName, isPremium } = useAssessmentContext();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const privacyTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
   const [fileMeta, setFileMeta] = useState<{ name: string; size: number; uploadedAt: Date } | null>(null);
   const [csvText, setCsvText] = useState("");
@@ -303,8 +309,43 @@ const DatasetTestingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pt-4">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+        <div className="max-w-7xl mx-auto flex flex-col gap-2">
+          {/* Top: Breadcrumb */}
+          <div className="flex items-center justify-between text-xs">
+            <Breadcrumb
+              projectName={projectName || "Loading..."}
+              projectHref={projectBreadcrumbHref}
+              items={[{ label: "Dataset Testing" }]}
+            />
+          </div>
+
+          {/* Bottom: Main row */}
+          <div className="flex items-center justify-between gap-4 mt-1">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.back()}
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+              <div className="h-5 w-px bg-border shrink-0" />
+              <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                <Scale className="w-4 h-4 text-primary shrink-0" style={{ color: "var(--section-premium)" }} />
+                <h1 className="text-sm font-bold text-foreground truncate">
+                  Dataset Testing & Evaluation
+                </h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1">
 
 
         {/* Error state - subscription check failed */}

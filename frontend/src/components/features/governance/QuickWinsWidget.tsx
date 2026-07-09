@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { apiService, type QuickWinItem } from "@/lib/api";
+import { SystemProfileWizard } from "../wizard/SystemProfileWizard";
 
 interface QuickWinsWidgetProps {
   projectId: string;
@@ -32,6 +33,7 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
   const [loading, setLoading] = useState(true);
   const [wizardRequired, setWizardRequired] = useState(false);
   const [displayItems, setDisplayItems] = useState<DisplayItem[]>([]);
+  const [showWizardModal, setShowWizardModal] = useState(false);
   const requestSeqRef = useRef(0);
   const replaceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
@@ -119,14 +121,10 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="relative overflow-hidden border border-indigo-500/20 bg-gradient-to-br from-indigo-950/20 via-background to-background backdrop-blur-md">
-          {/* Glassmorphic glowing accent */}
-          <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
-          
+        <Card className="relative overflow-hidden border border-blue-500/25 bg-blue-500/5 dark:bg-blue-950/10 backdrop-blur-md">
           <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row items-center md:justify-between gap-6">
             <div className="space-y-2 text-center md:text-left max-w-xl">
-              <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20 px-2.5 py-0.5">
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20 px-2.5 py-0.5">
                 ⚡ CRC Optimization
               </Badge>
               <CardTitle className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -138,15 +136,23 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
               </CardDescription>
             </div>
             <div className="shrink-0">
-              <Button asChild size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/20 border-none rounded-xl font-semibold gap-2">
-                <Link href={`/assess/${projectId}/crc/welcome`}>
-                  Start System Profile
-                  <IconArrowRight className="w-4 h-4" />
-                </Link>
+              <Button onClick={() => setShowWizardModal(true)} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs border-none rounded-xl font-semibold gap-2 transition-colors">
+                Start System Profile
+                <IconArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
+        {showWizardModal && (
+          <SystemProfileWizard
+            projectId={projectId}
+            isOpen={showWizardModal}
+            onClose={() => {
+              setShowWizardModal(false);
+              fetchQuickWins();
+            }}
+          />
+        )}
       </motion.div>
     );
   }
@@ -158,7 +164,7 @@ export function QuickWinsWidget({ projectId }: QuickWinsWidgetProps) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="border border-emerald-500/20 bg-gradient-to-br from-emerald-950/10 via-background to-background">
+        <Card className="border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-950/10">
           <CardContent className="p-8 text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto border border-emerald-500/20">
               <IconCircleCheck className="w-6 h-6 text-emerald-500" />

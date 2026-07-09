@@ -633,7 +633,7 @@ export default function DashboardPage() {
                       whileHover={{ y: -5 }}
                     >
                       <Card className={`h-full flex flex-col justify-between hover:shadow-xl transition-all duration-300 border ${theme.border} ${theme.shadow} ${
-                        ["card-google-indigo", "card-google-red", "card-google-yellow", "card-google-green", "card-google-purple"][index % 5]
+                        ["card-google-blue", "card-google-red", "card-google-yellow", "card-google-green", "card-google-purple"][index % 5]
                       }`}>
                         <CardHeader className="pb-3 flex-none">
                           <div className="flex justify-between items-start w-full min-w-0">

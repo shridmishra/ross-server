@@ -707,11 +707,14 @@ function SidebarContentComponent() {
   }, [currentDomainId, currentPracticeId, currentQuestionIndex]);
 
   // CRC category expansion sync
+  // Collapse all other categories when navigating to a new one to prevent endless scrolling
   useEffect(() => {
     if (currentCategory) {
       setExpandedCrcCategories(prev => {
-        if (prev[currentCategory]) return prev;
-        return { ...prev, [currentCategory]: true };
+        // If only the current category is expanded and nothing else, skip update
+        const keys = Object.keys(prev).filter(k => prev[k]);
+        if (keys.length === 1 && keys[0] === currentCategory) return prev;
+        return { [currentCategory]: true };
       });
     }
   }, [currentCategory]);
@@ -1030,10 +1033,7 @@ function SidebarContentComponent() {
                                     ? handleProjectNav(`/vulnerability-assessment`)
                                     : openSubscriptionModal("Unlock Premium to Access AI Vulnerability Assessment", "Upgrade to premium to unlock this feature and many more advanced capabilities.")}
                                   isActive={routeFlags.isVulnerabilityPage}
-                                  className={cn(
-                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
-                                    routeFlags.isVulnerabilityPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
-                                  )}
+                                  className="sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200"
                                 >
                                   <IconShield className="size-5 shrink-0 text-[var(--section-premium)]" />
                                   <span className={cn("text-[13px] truncate ml-1", routeFlags.isVulnerabilityPage ? "text-foreground font-semibold" : "text-foreground/80")}>
@@ -1053,10 +1053,7 @@ function SidebarContentComponent() {
                                       : openSubscriptionModal("Unlock Premium to Access Compliance Readiness Controls (CRC)", "Upgrade to premium.");
                                   }}
                                   isActive={routeFlags.isCrcPage}
-                                  className={cn(
-                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
-                                    routeFlags.isCrcPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
-                                  )}
+                                  className="sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200"
                                 >
                                   <IconChevronRight className={cn("h-3.5 w-3.5 transition-transform text-muted-foreground shrink-0", isCrcExpanded && "rotate-90")} />
                                   <IconShieldCheck className="size-5 shrink-0 text-[var(--section-premium)]" />
@@ -1079,7 +1076,7 @@ function SidebarContentComponent() {
                                         <SidebarMenuSubItem>
                                           <SidebarMenuSubButton
                                             onClick={() => premiumStatus ? handleProjectNav(`/crc/dashboard`) : openSubscriptionModal()}
-                                            className="h-7 px-2 group/cat"
+                                            className="sidebar-btn-premium h-7 px-2 group/cat"
                                             isActive={pathname?.endsWith("/crc/dashboard") || false}
                                           >
                                             <IconDashboard className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--section-premium)" }} />
@@ -1092,7 +1089,7 @@ function SidebarContentComponent() {
                                         <SidebarMenuSubItem>
                                           <SidebarMenuSubButton
                                             onClick={() => premiumStatus ? handleProjectNav(`/crc/risks`) : openSubscriptionModal()}
-                                            className="h-7 px-2 group/cat"
+                                            className="sidebar-btn-premium h-7 px-2 group/cat"
                                             isActive={pathname?.endsWith("/crc/risks") || false}
                                           >
                                             <IconClipboardCheck className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--section-premium)" }} />
@@ -1125,12 +1122,12 @@ function SidebarContentComponent() {
                                                   onClick={() => {
                                                     if (premiumStatus) {
                                                       handleProjectNav(`/crc?category=${encodeURIComponent(cat)}`);
-                                                      setExpandedCrcCategories(prev => ({ ...prev, [cat]: true }));
+                                                      setExpandedCrcCategories({ [cat]: true });
                                                     } else {
                                                       openSubscriptionModal();
                                                     }
                                                   }}
-                                                  className="h-7 px-2 flex-1 group/cat"
+                                                  className="sidebar-btn-premium h-7 px-2 flex-1 group/cat"
                                                   isActive={currentCategory === cat}
                                                 >
                                                   <IconFolder className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--section-premium)" }} />
@@ -1149,7 +1146,7 @@ function SidebarContentComponent() {
                                                       <SidebarMenuSubItem key={control.id}>
                                                         <SidebarMenuSubButton
                                                           onClick={() => premiumStatus ? handleProjectNav(`/crc?controlId=${control.id}`) : openSubscriptionModal()}
-                                                          className="h-6 px-2 group/control"
+                                                          className="sidebar-btn-premium h-6 px-2 group/control"
                                                           isActive={currentControlId === control.id}
                                                         >
                                                           {isAnswered ? (
@@ -1182,10 +1179,7 @@ function SidebarContentComponent() {
                                     ? handleProjectNav(`/inventory`)
                                     : openSubscriptionModal("Unlock Premium to Access AI Component Inventory")}
                                   isActive={routeFlags.isInventoryPage}
-                                  className={cn(
-                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
-                                    routeFlags.isInventoryPage && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
-                                  )}
+                                  className="sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200"
                                 >
                                   <IconTable className="size-5 shrink-0 text-[var(--section-premium)]" />
                                   <span className={cn("text-[13px] truncate ml-1", routeFlags.isInventoryPage ? "text-foreground font-semibold" : "text-foreground/80")}>
@@ -1203,10 +1197,7 @@ function SidebarContentComponent() {
                                     handleProjectNav(`/fairness-bias/options`);
                                   }}
                                   isActive={routeFlags.isFairnessPage && !routeFlags.isVulnerabilityPage}
-                                  className={cn(
-                                    "sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200",
-                                    (routeFlags.isFairnessPage && !routeFlags.isVulnerabilityPage) && "border-l-[3px] border-primary bg-sidebar-accent/60 text-sidebar-accent-foreground pl-1.5 font-semibold rounded-l-none rounded-r-md"
-                                  )}
+                                  className="sidebar-btn-premium group/premium-btn h-8 px-2 transition-all duration-200"
                                 >
                                   <IconChevronRight className={cn("h-3.5 w-3.5 transition-transform text-muted-foreground shrink-0", isFairnessExpanded && "rotate-90")} />
                                   <IconScale className="size-5 shrink-0 text-[var(--section-premium)]" />
@@ -1227,7 +1218,7 @@ function SidebarContentComponent() {
                                         <SidebarMenuSubItem>
                                           <SidebarMenuSubButton
                                             onClick={() => premiumStatus ? handleProjectNav(`/fairness-bias`) : openSubscriptionModal("Unlock Premium to Access Manual Prompt Testing")}
-                                            className="h-7 px-2 group/fairness"
+                                            className="sidebar-btn-premium h-7 px-2 group/fairness"
                                             isActive={(routeFlags.isFairnessRootPage || routeFlags.isFairnessPage) && !routeFlags.isApiEndpointPage && !routeFlags.isDatasetTestingPage && !routeFlags.isFairnessOptionsPage}
                                           >
                                             <IconMessageReport className="h-3.5 w-3.5 text-[var(--section-premium)] shrink-0" />
@@ -1241,7 +1232,7 @@ function SidebarContentComponent() {
                                         <SidebarMenuSubItem>
                                           <SidebarMenuSubButton
                                             onClick={() => premiumStatus ? handleProjectNav(`/fairness-bias/api-endpoint`) : openSubscriptionModal("Unlock Premium to Access API Automated Testing")}
-                                            className="h-7 px-2 group/fairness"
+                                            className="sidebar-btn-premium h-7 px-2 group/fairness"
                                             isActive={routeFlags.isApiEndpointPage}
                                           >
                                             <IconApi className="h-3.5 w-3.5 text-[var(--section-premium)] shrink-0" />
@@ -1253,7 +1244,7 @@ function SidebarContentComponent() {
                                         <SidebarMenuSubItem>
                                           <SidebarMenuSubButton
                                             onClick={() => premiumStatus ? handleProjectNav(`/fairness-bias/dataset-testing`) : openSubscriptionModal("Unlock Premium to Access Dataset Testing")}
-                                            className="h-7 px-2 group/fairness"
+                                            className="sidebar-btn-premium h-7 px-2 group/fairness"
                                             isActive={routeFlags.isDatasetTestingPage}
                                           >
                                             <IconDatabase className="h-3.5 w-3.5 text-[var(--section-premium)] shrink-0" />
@@ -1449,8 +1440,8 @@ function SidebarContentComponent() {
                   
                   {/* Notifications Submenu */}
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="flex items-center cursor-pointer">
-                      <IconBell className="size-4 mr-2 text-primary" />
+                    <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer">
+                      <IconBell className="size-4 shrink-0 text-primary" />
                       <span>Notifications</span>
                       {myInvitations.length > 0 && (
                         <span className="ml-auto bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -1489,8 +1480,8 @@ function SidebarContentComponent() {
 
                   {/* Theme Toggle (Inline inside dropdown) */}
                   <DropdownMenuItem onClick={(e) => { e.preventDefault(); toggleTheme(); }} className="flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center">
-                      {theme === "dark" ? <IconSun className="size-4 mr-2 text-primary" /> : <IconMoon className="size-4 mr-2 text-primary" />}
+                    <div className="flex items-center gap-2">
+                      {theme === "dark" ? <IconSun className="size-4 shrink-0 text-primary" /> : <IconMoon className="size-4 shrink-0 text-primary" />}
                       <span>Theme</span>
                     </div>
                     <Switch checked={theme === "dark"} className="pointer-events-none scale-75" />
@@ -1500,8 +1491,8 @@ function SidebarContentComponent() {
                   
                   {/* Profile Settings */}
                   <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex items-center cursor-pointer">
-                      <IconSettings className="size-4 mr-2" />
+                    <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+                      <IconSettings className="size-4 shrink-0" />
                       <span>Profile Settings</span>
                     </Link>
                   </DropdownMenuItem>
@@ -1509,8 +1500,8 @@ function SidebarContentComponent() {
                   <DropdownMenuSeparator />
                   
                   {/* Sign Out */}
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
-                    <IconLogout className="size-4 mr-2" />
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer">
+                    <IconLogout className="size-4 shrink-0" />
                     <span>Sign out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

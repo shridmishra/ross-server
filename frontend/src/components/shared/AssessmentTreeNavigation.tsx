@@ -465,11 +465,14 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
   }, [activeDomainId, currentPracticeId, currentQuestionIndex]);
 
   // Synchronize CRC category expansion with the current route-selected category
+  // Collapse all other categories when navigating to a new one to prevent endless scrolling
   useEffect(() => {
     if (currentCategory) {
       setExpandedCrcCategories(prev => {
-        if (prev[currentCategory]) return prev;
-        return { ...prev, [currentCategory]: true };
+        // If only the current category is expanded and nothing else, skip update
+        const keys = Object.keys(prev).filter(k => prev[k]);
+        if (keys.length === 1 && keys[0] === currentCategory) return prev;
+        return { [currentCategory]: true };
       });
     }
   }, [currentCategory]);
@@ -833,7 +836,7 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
                                                     onClick={() => {
                                                       if (premiumStatus) {
                                                         router.push(`/assess/${projectId}/crc?category=${encodeURIComponent(cat)}`);
-                                                        setExpandedCrcCategories(prev => ({ ...prev, [cat]: true }));
+                                                        setExpandedCrcCategories({ [cat]: true });
                                                       } else {
                                                         openSubscriptionModal("Unlock Premium to Access Compliance Readiness Controls (CRC)", "Upgrade to premium to unlock this feature and many more advanced capabilities.");
                                                       }

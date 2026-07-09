@@ -33,7 +33,7 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
 
   const benefits = [
     {
-      icon: <ShieldCheck className="h-5 w-5 text-indigo-500" />,
+      icon: <ShieldCheck className="h-5 w-5 text-primary" />,
       title: "EU AI Act Risk Classification",
       description: "Determine if your system falls under Prohibited, High, Limited, or Minimal risk tiers.",
     },
@@ -62,25 +62,21 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
         animate="visible"
         className="w-full max-w-4xl"
       >
-        <Card className="relative overflow-hidden border border-indigo-500/20 bg-card/50 backdrop-blur-xl shadow-2xl">
-          {/* Decorative gradients */}
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-
+        <Card className="relative overflow-hidden border border-border/80 bg-card backdrop-blur-xl shadow-2xl">
           <CardHeader className="text-center pb-4 relative z-10">
             <motion.div variants={itemVariants} className="flex justify-center mb-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                 <Sparkles className="h-3.5 w-3.5" /> Premium Onboarding Flow
               </span>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-indigo-200 to-indigo-400 bg-clip-text text-transparent sm:text-4xl">
+              <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
                 Personalize Your Compliance Experience
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants} className="max-w-2xl mx-auto mt-3">
-              <CardDescription className="text-base sm:text-lg text-muted-foreground/90">
-                Before accessing <span className="font-semibold text-indigo-400">{featureName}</span>, configure your AI System Profile. This tailors the platform's automation, templates, and rules to your specific use case.
+              <CardDescription className="text-base sm:text-lg text-muted-foreground">
+                Before accessing <span className="font-semibold text-primary">{featureName}</span>, configure your AI System Profile. This tailors the platform's automation, templates, and rules to your specific use case.
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -148,9 +144,9 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
                 </div>
 
                 {/* Mock Integrations */}
-                <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-lg flex justify-between items-center">
-                  <span className="text-xs font-medium text-indigo-300">Mira Copilot context updated</span>
-                  <span className="text-[10px] bg-indigo-500/20 text-indigo-400 font-bold px-2 py-0.5 rounded">Active</span>
+                <div className="p-3 bg-primary/5 border border-primary/10 rounded-lg flex justify-between items-center">
+                  <span className="text-xs font-medium text-primary/95">Mira Copilot context updated</span>
+                  <span className="text-[10px] bg-primary/20 text-primary font-bold px-2 py-0.5 rounded">Active</span>
                 </div>
               </div>
             </motion.div>
@@ -160,7 +156,7 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
             <motion.div variants={itemVariants} className="w-full max-w-md">
               <Button
                 onClick={onStart}
-                className="w-full py-6 bg-indigo-600 text-white hover:bg-indigo-500 font-semibold shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+                className="w-full py-6 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-xs flex items-center justify-center gap-2"
               >
                 Configure AI Profile <ArrowRight className="h-4 w-4" />
               </Button>
@@ -168,7 +164,7 @@ export function PreWizardScreen({ featureName, onStart }: PreWizardScreenProps) 
 
             <motion.div variants={itemVariants} className="text-center max-w-sm">
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-indigo-400">Required:</span> This setup is needed to unlock your premium features. Takes about 5 minutes — you can save and resume anytime.
+                <span className="font-semibold text-primary">Required:</span> This setup is needed to unlock your premium features. Takes about 5 minutes — you can save and resume anytime.
               </p>
             </motion.div>
           </CardFooter>

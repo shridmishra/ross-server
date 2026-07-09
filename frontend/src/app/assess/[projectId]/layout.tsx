@@ -61,7 +61,11 @@ function AssessmentLayoutContent({ children }: { children: React.ReactNode }) {
 
     const isMainAssessment = pathname === `/assess/${projectId}`;
     const { isAimaQuestionPage } = getRouteFlags(pathname);
-    const hideLayoutBreadcrumb = isMainAssessment || isAimaQuestionPage;
+    const isCrcPage = pathname.includes("/crc");
+    const isInventoryPage = pathname.includes("/inventory");
+    const isFairnessPage = pathname.includes("/fairness-bias");
+    const isApiTestingPage = pathname.includes("/vulnerability-assessment");
+    const hideLayoutBreadcrumb = isMainAssessment || isAimaQuestionPage || isCrcPage || isInventoryPage || isFairnessPage || isApiTestingPage;
 
     return (
         <div className="flex flex-col min-h-full">

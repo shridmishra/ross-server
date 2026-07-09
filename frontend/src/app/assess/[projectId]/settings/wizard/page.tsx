@@ -140,11 +140,10 @@ export default function ProjectWizardSettingsPage() {
 
       {/* Summary Banner */}
       {engineOutput && (
-        <Card className="border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl" />
+        <Card className="border border-blue-500/25 bg-blue-500/5 relative overflow-hidden">
           <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1 relative z-10">
-              <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Active Classification</span>
+              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Active Classification</span>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-lg text-foreground">EU Risk Tier:</h3>
                 <Badge className={`font-extrabold text-xs border ${getRiskColor(engineOutput.eu_risk_tier)}`}>
@@ -178,7 +177,7 @@ export default function ProjectWizardSettingsPage() {
               onClick={() => setActiveSection(sec.id)}
               className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold transition-all border ${
                 activeSection === sec.id
-                  ? "bg-indigo-600/10 text-indigo-400 border-indigo-500/20"
+                  ? "bg-primary/10 text-primary border-primary/20"
                   : "bg-transparent hover:bg-muted text-muted-foreground border-transparent"
               }`}
             >
@@ -209,7 +208,7 @@ export default function ProjectWizardSettingsPage() {
             <Button
               onClick={handleSaveAndReRun}
               disabled={savingSettings}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 flex items-center gap-1.5"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5"
             >
               {savingSettings ? (
                 <>

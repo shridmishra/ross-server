@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentContext } from "@/contexts/AssessmentContext";
 import SubscriptionModal from "@/components/features/subscriptions/SubscriptionModal";
 import VendorAssessmentModal from "@/components/features/inventory/VendorAssessmentModal";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { AssessmentSkeleton } from "@/components/Skeleton";
 import { showToast } from "@/lib/toast";
 
@@ -94,12 +95,35 @@ const STATUS_BADGES: Record<string, string> = {
   Deprecated: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
 };
 
+const getRiskCardTheme = (tier: string) => {
+  if (tier === "Critical" || tier === "High") {
+    return {
+      bg: "card-google-red",
+      border: "border-destructive/35"
+    };
+  }
+  if (tier === "Medium") {
+    return {
+      bg: "card-google-yellow",
+      border: "border-warning/50"
+    };
+  }
+  return {
+    bg: "card-google-green",
+    border: "border-success/40"
+  };
+};
+
 export default function ComponentInventoryPage() {
   const router = useRouter();
   const params = useParams();
   const projectId = params.projectId as string;
   const { user, loading: authLoading } = useAuth();
-  const { isPremium, loading: contextLoading } = useAssessmentContext();
+  const { isPremium, projectName, loading: contextLoading } = useAssessmentContext();
+
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
   // State variables
   const [components, setComponents] = useState<InventoryComponent[]>([]);
@@ -505,54 +529,74 @@ export default function ComponentInventoryPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-background p-6 space-y-6">
-      {/* Header breadcrumb */}
-      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-        <Link href={isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`} className="hover:text-foreground transition-colors">
-          Project Dashboard
-        </Link>
-        <span>/</span>
-        <span className="text-foreground font-medium">AI Component Inventory</span>
+    <div className="flex-1 flex flex-col w-full">
+      {/* Header */}
+      <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+        <div className="max-w-7xl mx-auto flex flex-col gap-2">
+          {/* Top: Breadcrumb */}
+          <div className="flex items-center justify-between text-xs">
+            <Breadcrumb
+              projectName={projectName || "Loading..."}
+              projectHref={projectBreadcrumbHref}
+              items={[{ label: "AI Component Inventory" }]}
+            />
+          </div>
+
+          {/* Bottom: Main row */}
+          <div className="flex items-center justify-between gap-4 mt-1">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.back()}
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+              >
+                <IconArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+              <div className="h-5 w-px bg-border shrink-0" />
+              <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                <IconTable className="w-4 h-4 text-primary shrink-0" style={{ color: "var(--section-premium)" }} />
+                <h1 className="text-sm font-bold text-foreground truncate">
+                  AI Component Inventory
+                </h1>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                disabled={components.length === 0}
+                className="rounded-full border border-border/60 hover:bg-muted/50 text-foreground/80 hover:text-foreground shadow-2xs font-semibold px-4 py-1.5 text-xs"
+              >
+                <IconDownload className="h-4 w-4 mr-1" />
+                Export CSV
+              </Button>
+              <Button
+                onClick={openAddForm}
+                className="btn-primary rounded-full px-5 py-1.5 text-xs font-bold shadow-sm hover:shadow-md transition-all border-none"
+              >
+                <IconPlus className="h-4 w-4 mr-1" />
+                Add Component
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Main Title & Action Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            AI Component Inventory
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm max-w-2xl">
-            Document and maintain audit evidence for every AI model, system, dataset, and vector database in use. Required for EU AI Act Annex IV and ISO 42001 compliance.
-          </p>
-        </div>
-        <div className="flex items-center space-x-3 self-start md:self-auto">
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={components.length === 0}
-            className="flex items-center gap-2 border-primary/20 hover:bg-primary/5 hover:text-primary rounded-xl"
-          >
-            <IconDownload className="h-4 w-4" />
-            Export CSV
-          </Button>
-          <Button
-            onClick={openAddForm}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm hover:shadow-md transition-all border-none"
-          >
-            <IconPlus className="h-4 w-4" />
-            Add Component
-          </Button>
-        </div>
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto space-y-6">
+        <p className="text-muted-foreground text-sm max-w-3xl">
+          Document and maintain audit evidence for every AI model, system, dataset, and vector database in use. Required for EU AI Act Annex IV and ISO 42001 compliance.
+        </p>
 
       {/* Dashboard summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative bg-card/50 backdrop-blur-sm border border-border/60 hover:border-primary/30 rounded-2xl p-5 shadow-sm transition-all duration-300 overflow-hidden group"
+          className="relative card-google-blue border border-blue-500/25 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/20 opacity-40 group-hover:opacity-100 transition-opacity" />
           <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
             Total AI Components
           </div>
@@ -568,9 +612,8 @@ export default function ComponentInventoryPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="relative bg-card/50 backdrop-blur-sm border border-border/60 hover:border-primary/30 rounded-2xl p-5 shadow-sm transition-all duration-300 overflow-hidden group"
+          className="relative card-google-purple border border-purple-500/25 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/20 opacity-40 group-hover:opacity-100 transition-opacity" />
           <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
             Third-Party Vendor Dependencies
           </div>
@@ -582,25 +625,29 @@ export default function ComponentInventoryPage() {
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative bg-card/50 backdrop-blur-sm border border-border/60 hover:border-primary/30 rounded-2xl p-5 shadow-sm transition-all duration-300 overflow-hidden group"
-        >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/20 opacity-40 group-hover:opacity-100 transition-opacity" />
-          <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
-            Highest Risk Tier
-          </div>
-          <div className="mt-2">
-            <Badge className={`px-2.5 py-1 text-sm font-bold border rounded-lg ${RISK_BADGES[summary.highestRiskTier] || RISK_BADGES.Low}`}>
-              {summary.highestRiskTier}
-            </Badge>
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-1.5">
-            Based on data categories and model types
-          </p>
-        </motion.div>
+        {(() => {
+          const riskTheme = getRiskCardTheme(summary.highestRiskTier);
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className={`relative ${riskTheme.bg} border ${riskTheme.border} rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group`}
+            >
+              <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">
+                Highest Risk Tier
+              </div>
+              <div className="mt-2">
+                <span className={`px-2.5 py-1 text-sm font-bold border rounded-lg ${RISK_BADGES[summary.highestRiskTier] || RISK_BADGES.Low}`}>
+                  {summary.highestRiskTier}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                Based on data categories and model types
+              </p>
+            </motion.div>
+          );
+        })()}
       </div>
 
       {/* Filter and search Bar */}
@@ -755,14 +802,14 @@ export default function ComponentInventoryPage() {
                       <TableCell className="text-sm text-foreground/80">{comp.componentType}</TableCell>
                       <TableCell className="text-sm text-foreground/85">{comp.provider}</TableCell>
                       <TableCell>
-                        <Badge className={`px-2 py-0.5 text-xs font-semibold border rounded-md ${RISK_BADGES[comp.riskTier] || RISK_BADGES.Low}`}>
+                        <span className={`px-2 py-0.5 text-xs font-semibold border rounded-md ${RISK_BADGES[comp.riskTier] || RISK_BADGES.Low}`}>
                           {comp.riskTier}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`px-2 py-0.5 text-xs font-semibold border rounded-md ${STATUS_BADGES[comp.status] || STATUS_BADGES.Active}`}>
+                        <span className={`px-2 py-0.5 text-xs font-semibold border rounded-md ${STATUS_BADGES[comp.status] || STATUS_BADGES.Active}`}>
                           {comp.status}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
@@ -1441,6 +1488,7 @@ export default function ComponentInventoryPage() {
           onCompleted={fetchData}
         />
       )}
+    </div>
     </div>
   );
 }

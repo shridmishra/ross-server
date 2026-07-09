@@ -48,7 +48,7 @@ export default function PremiumFeaturesPage() {
     <div className="flex-1 flex flex-col h-full">
       {/* Premium Features Content */}
       <div className="flex-1 overflow-y-auto bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="py-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -77,6 +77,7 @@ export default function PremiumFeaturesPage() {
               description="Automated scanning for security risks in models."
               href={`/assess/${projectId}/vulnerability-assessment`}
               delay={0.1}
+              index={0}
             />
 
             {/* Card 2: Automated Bias & Fairness Testing */}
@@ -86,6 +87,7 @@ export default function PremiumFeaturesPage() {
               description="Detect and mitigate algorithmic bias across datasets."
               href={`/assess/${projectId}/fairness-bias/options`}
               delay={0.2}
+              index={4}
             />
 
             {/* Card 3: Actionable Governance Controls */}
@@ -95,6 +97,7 @@ export default function PremiumFeaturesPage() {
               description="Manage compliance status across multiple frameworks."
               href={`/assess/${projectId}/crc/welcome`}
               delay={0.3}
+              index={2}
             />
           </div>
 
@@ -103,7 +106,7 @@ export default function PremiumFeaturesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-card rounded-3xl p-8 shadow-xl border border-border mb-8"
+            className="card-google-yellow rounded-3xl p-8 shadow-xl border border-warning/50 mb-8"
           >
             <div className="flex items-center gap-4 mb-4">
               <IconCrown className="w-8 h-8 text-primary" />
