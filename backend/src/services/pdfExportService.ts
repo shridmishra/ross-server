@@ -14,9 +14,12 @@ CONSTRAINTS:
  * Aggregates all project details, compliance stats, risks, components, vendors, and fairness metrics.
  */
 async function getRawProjectData(projectId: string) {
-    // 1. Project name and description
+    // 1. Project details and owner subscription status
     const projectRes = await pool.query(
-        "SELECT name, description FROM projects WHERE id = $1",
+        `SELECT p.name, p.description, u.subscription_status as owner_subscription 
+         FROM projects p 
+         JOIN users u ON p.user_id = u.id 
+         WHERE p.id = $1`,
         [projectId]
     );
     if (projectRes.rows.length === 0) {
@@ -163,6 +166,7 @@ export async function generateFullPdfData(projectId: string) {
     const timestamp = new Date().toISOString();
     const projectName = data.project.name;
     const projectDescription = data.project.description || "";
+    const isPremium = ["basic_premium", "pro_premium", "trial"].includes(data.project.owner_subscription || "");
 
     // Build the sections for Claude narrative calls
     const systemProfileData = {
@@ -283,63 +287,71 @@ export async function generateFullPdfData(projectId: string) {
         }
     };
 
-    // Parallel calls to Claude for all 8 narratives
+    // Parallel calls to Claude/Gemini for all 8 narratives
     const narrativeCalls = [
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing the system profile details. Mention regulatory role, risks, and governance scope. Do not exceed 6 sentences.`,
             sectionData: systemProfileData,
             projectName,
-            sectionLabel: "System Profile"
+            sectionLabel: "System Profile",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summary analyzing the overall readiness level, evidence compliance rate, and current open risks count. Do not exceed 6 sentences.`,
             sectionData: heroMetricsData,
             projectName,
-            sectionLabel: "Hero Metrics"
+            sectionLabel: "Hero Metrics",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing the framework readiness percentages and metrics across EU AI Act, NIST AI RMF, and ISO 42001. Do not exceed 6 sentences.`,
             sectionData: frameworkReadinessData,
             projectName,
-            sectionLabel: "Framework Readiness"
+            sectionLabel: "Framework Readiness",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing the category-level readiness. Highlight areas of strength and those that need focus. Do not exceed 6 sentences.`,
             sectionData: categoryBreakdownData,
             projectName,
-            sectionLabel: "Category Breakdown"
+            sectionLabel: "Category Breakdown",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing the risk register profile, severities, and high-level risk items. Do not exceed 6 sentences.`,
             sectionData: riskRegisterData,
             projectName,
-            sectionLabel: "Risk Register"
+            sectionLabel: "Risk Register",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing the component inventory, model categories, and risk distribution. Do not exceed 6 sentences.`,
             sectionData: componentInventoryData,
             projectName,
-            sectionLabel: "Component Inventory"
+            sectionLabel: "Component Inventory",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing third-party vendor risk assessments and their security posture. Do not exceed 6 sentences.`,
             sectionData: vendorAssessmentsData,
             projectName,
-            sectionLabel: "Vendor Assessments"
+            sectionLabel: "Vendor Assessments",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a narrative summarizing bias testing, toxicity findings, and dataset verification reports. Do not exceed 6 sentences.`,
             sectionData: biasAndVulnerabilityData,
             projectName,
-            sectionLabel: "Bias & Vulnerability"
+            sectionLabel: "Bias & Vulnerability",
+            isPremium
         })
     ];
 
@@ -437,6 +449,7 @@ export async function generateSummaryPdfData(projectId: string) {
     const timestamp = new Date().toISOString();
     const projectName = data.project.name;
     const projectDescription = data.project.description || "";
+    const isPremium = ["basic_premium", "pro_premium", "trial"].includes(data.project.owner_subscription || "");
 
     // System Profile Summary
     const systemProfileSummary = {
@@ -487,7 +500,7 @@ export async function generateSummaryPdfData(projectId: string) {
         highRiskComponents: highComponents
     };
 
-    // Parallel calls to Claude for Summary PDF (7 narratives)
+    // Parallel calls to Claude/Gemini for Summary PDF (7 narratives)
     const narrativeCalls = [
         // System profile - STRICT 2 sentences
         generateAndValidateNarrative({
@@ -495,21 +508,24 @@ export async function generateSummaryPdfData(projectId: string) {
             userPrompt: `Generate a concise, EXACTLY 2-sentence summary of the system profile. Sentence 1: describe system name, role, and use. Sentence 2: state its EU and internal risk tiers. Do NOT write more than 2 sentences.`,
             sectionData: systemProfileSummary,
             projectName,
-            sectionLabel: "System Profile Summary"
+            sectionLabel: "System Profile Summary",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate an executive narrative summary of overall readiness, evidence completion, and open risks. Limit to 3 sentences.`,
             sectionData: heroMetricsSummary,
             projectName,
-            sectionLabel: "Hero Metrics Summary"
+            sectionLabel: "Hero Metrics Summary",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a concise narrative summary of framework alignment percentages. Limit to 3 sentences.`,
             sectionData: frameworkReadinessSummary,
             projectName,
-            sectionLabel: "Framework Readiness Summary"
+            sectionLabel: "Framework Readiness Summary",
+            isPremium
         }),
         // Top strengths explanation
         generateAndValidateNarrative({
@@ -517,7 +533,8 @@ export async function generateSummaryPdfData(projectId: string) {
             userPrompt: `Explain the top 3 strengths (highest-scoring governance categories) in a single executive paragraph. Do not exceed 3 sentences.`,
             sectionData: topStrengths,
             projectName,
-            sectionLabel: "Strengths Narrative"
+            sectionLabel: "Strengths Narrative",
+            isPremium
         }),
         // Priority gaps explanation
         generateAndValidateNarrative({
@@ -525,21 +542,24 @@ export async function generateSummaryPdfData(projectId: string) {
             userPrompt: `Explain the top 3 priority compliance gaps (lowest-scoring governance categories) in a single executive paragraph. Do not exceed 3 sentences.`,
             sectionData: topGaps,
             projectName,
-            sectionLabel: "Gaps Narrative"
+            sectionLabel: "Gaps Narrative",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a brief executive narrative on the system risk register posture. Limit to 3 sentences.`,
             sectionData: riskRegisterSummary,
             projectName,
-            sectionLabel: "Risk Snapshot Narrative"
+            sectionLabel: "Risk Snapshot Narrative",
+            isPremium
         }),
         generateAndValidateNarrative({
             systemPrompt: NARRATIVE_SYSTEM_PROMPT,
             userPrompt: `Generate a brief executive narrative on the system component inventory and vendor risk posture. Limit to 3 sentences.`,
             sectionData: componentSummary,
             projectName,
-            sectionLabel: "Component Snapshot Narrative"
+            sectionLabel: "Component Snapshot Narrative",
+            isPremium
         })
     ];
 

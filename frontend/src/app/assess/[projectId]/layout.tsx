@@ -45,14 +45,22 @@ function AssessmentLayoutContent({ children }: { children: React.ReactNode }) {
         );
     }
 
+    const isCrcPage = pathname.includes("/crc");
+    const isInventoryPage = pathname.includes("/inventory");
+    const isFairnessPage = pathname.includes("/fairness-bias");
+    const isVulnerabilityAssessmentPage = pathname.includes("/vulnerability-assessment");
+    const isPremiumDomainsPage = pathname.includes("/premium-domains");
+    const isPremiumFeaturesPage = pathname.includes("/premium-features");
+    const isSettingsPage = pathname.includes("/settings");
+
     const isPremiumRoute = 
-        (pathname.includes("/crc") ||
-         pathname.includes("/inventory") ||
-         pathname.includes("/fairness-bias") ||
-         pathname.includes("/vulnerability-assessment") ||
-         pathname.includes("/premium-domains") ||
-         pathname.includes("/premium-features")) &&
-        !pathname.includes("/settings");
+        (isCrcPage ||
+         isInventoryPage ||
+         isFairnessPage ||
+         isVulnerabilityAssessmentPage ||
+         isPremiumDomainsPage ||
+         isPremiumFeaturesPage) &&
+        !isSettingsPage;
 
     // For premium users, the project breadcrumb link goes to CRC dashboard (not AIMA)
     const projectBreadcrumbHref = premiumStatus
@@ -61,14 +69,22 @@ function AssessmentLayoutContent({ children }: { children: React.ReactNode }) {
 
     const isMainAssessment = pathname === `/assess/${projectId}`;
     const { isAimaQuestionPage } = getRouteFlags(pathname);
-    const hideLayoutBreadcrumb = isMainAssessment || isAimaQuestionPage;
+    const hideLayoutBreadcrumb = isMainAssessment || isAimaQuestionPage || isCrcPage || isInventoryPage || isFairnessPage || isVulnerabilityAssessmentPage;
+
+    const renderedChildren = isPremiumRoute ? (
+        <WizardGateProvider projectId={projectId} featureName={getBreadcrumbLabel(pathname)}>
+            {children}
+        </WizardGateProvider>
+    ) : (
+        children
+    );
 
     return (
         <div className="flex flex-col min-h-full">
             {/* Main Content Area — navigation now lives in the unified left sidebar */}
             <div className="flex-1">
                 {hideLayoutBreadcrumb ? (
-                    children
+                    renderedChildren
                 ) : (
                     <div className="px-8 py-6 max-w-7xl w-full mx-auto">
                         <Breadcrumb
@@ -81,13 +97,7 @@ function AssessmentLayoutContent({ children }: { children: React.ReactNode }) {
                             ]}
                         />
                         <div className="mt-2 flex-1">
-                            {isPremiumRoute ? (
-                                <WizardGateProvider projectId={projectId} featureName={getBreadcrumbLabel(pathname)}>
-                                    {children}
-                                </WizardGateProvider>
-                            ) : (
-                                children
-                            )}
+                            {renderedChildren}
                         </div>
                     </div>
                 )}

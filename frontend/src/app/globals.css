@@ -972,3 +972,13 @@ button:enabled,
   border: 1px solid oklch(69% 0.18 300 / 20%) !important;
 }
 
+.card-google-blue {
+  background-color: oklch(56% 0.15 250 / 4%) !important;
+  border: 1px solid oklch(56% 0.15 250 / 15%) !important;
+}
+.dark .card-google-blue {
+  background-color: oklch(70% 0.14 250 / 6%) !important;
+  border: 1px solid oklch(70% 0.14 250 / 20%) !important;
+}
+
+

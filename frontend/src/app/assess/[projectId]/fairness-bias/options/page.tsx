@@ -12,11 +12,14 @@ import {
   Upload,
   Github,
   CheckCircle,
+  Scale,
 } from "lucide-react";
 import SubscriptionModal from "../../../../../components/features/subscriptions/SubscriptionModal";
 import { OptionsGridSkeleton } from "../../../../../components/Skeleton";
 import { apiService } from "../../../../../lib/api";
 import InfoSection from "@/components/features/governance/InfoSection";
+import { useAssessmentContext } from "../../../../../contexts/AssessmentContext";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 type TestMethod =
   | "prompt-response"
@@ -50,15 +53,26 @@ export interface DatasetReport {
   selections?: ReportSelections;
 }
 
+const CARD_THEMES_OPTIONS = {
+  "prompt-response": { bg: "card-google-blue", border: "border-blue-500/25" },
+  "api-endpoint": { bg: "card-google-purple", border: "border-purple-500/25" },
+  "dataset-testing": { bg: "card-google-green", border: "border-success/40" },
+};
+
 export default function FairnessBiasOptions() {
   const params = useParams();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { projectName } = useAssessmentContext();
   const projectId = params.projectId as string;
   const [selectedMethod, setSelectedMethod] = useState<TestMethod>(null);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const isPremium = user?.subscription_status ? PREMIUM_STATUS.includes(user.subscription_status as typeof PREMIUM_STATUS[number]) : false;
+
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
   // Show subscription modal for non-premium users
   useEffect(() => {
@@ -192,19 +206,49 @@ export default function FairnessBiasOptions() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="flex-1 flex flex-col w-full relative">
       {/* Blurred Content */}
-      <div className={isPremium ? "" : "blur-sm pointer-events-none select-none"}>
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="mb-8 text-center">
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Choose Your Testing Method
-            </h2>
-            <p className="text-muted-foreground">
-              Select one of the following options to proceed with fairness and bias testing
-            </p>
+      <div className={`flex-1 flex flex-col w-full ${isPremium ? "" : "blur-sm pointer-events-none select-none"}`}>
+        {/* Header */}
+        <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+          <div className="max-w-7xl mx-auto flex flex-col gap-2">
+            {/* Top: Breadcrumb */}
+            <div className="flex items-center justify-between text-xs">
+              <Breadcrumb
+                projectName={projectName || "Loading..."}
+                projectHref={projectBreadcrumbHref}
+                items={[{ label: "Bias & Fairness Testing" }]}
+              />
+            </div>
+
+            {/* Bottom: Main row */}
+            <div className="flex items-center justify-between gap-4 mt-1">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => router.back()}
+                  type="button"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back
+                </button>
+                <div className="h-5 w-px bg-border shrink-0" />
+                <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                  <Scale className="w-4 h-4 shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <h1 className="text-sm font-bold text-foreground truncate">
+                    Bias & Fairness Testing Options
+                  </h1>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto space-y-8">
+          <p className="text-muted-foreground text-sm max-w-3xl">
+            Select one of the following options to proceed with fairness and bias testing.
+          </p>
 
           <div className="mb-12 max-w-5xl mx-auto">
             <InfoSection
@@ -250,6 +294,7 @@ export default function FairnessBiasOptions() {
             {options.map((option, index) => {
               const Icon = option.icon;
               const isSelected = selectedMethod === option.id;
+              const theme = CARD_THEMES_OPTIONS[option.id as keyof typeof CARD_THEMES_OPTIONS] || { bg: "bg-card", border: "border-border" };
 
               return (
                 <motion.div
@@ -260,12 +305,12 @@ export default function FairnessBiasOptions() {
                   onClick={() => isPremium && handleMethodSelect(option.id)}
                   className={`
                     relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-200
-                    bg-card
+                    ${theme.bg}
                     ${isSelected
                       ? "border-primary shadow-lg scale-105"
-                      : "border-border hover:border-primary/50 hover:shadow-md"
+                      : `${theme.border} hover:border-primary/50 hover:shadow-md`
                     }
-                    ${!isPremium ? "cursor-not-allowed" : ""}
+                    ${!isPremium ? "cursor-not-allowed opacity-80" : ""}
                   `}
                 >
                   {/* Selection Indicator */}
@@ -303,9 +348,9 @@ export default function FairnessBiasOptions() {
               onClick={handleContinue}
               disabled={!selectedMethod || !isPremium}
               className={`
-                px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-200
+                px-8 py-3 rounded-full font-bold text-sm transition-all duration-200
                 ${selectedMethod && isPremium
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/95 shadow-md hover:shadow-lg"
                   : "bg-muted text-muted-foreground cursor-not-allowed"
                 }
               `}
@@ -320,7 +365,10 @@ export default function FairnessBiasOptions() {
           {isPremium && (
             <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-foreground">Recent Evaluations</h2>
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+                  <FileText className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <span>Recent Evaluations</span>
+                </h2>
                 {recentReports.length > 0 && (
                   <button
                     type="button"

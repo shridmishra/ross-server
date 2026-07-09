@@ -8,7 +8,7 @@ import { AssessmentSkeleton } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { FALLBACK_PRICES } from "@/lib/constants";
 import SubscriptionModal from "@/components/features/subscriptions/SubscriptionModal";
-import { IconArrowLeft, IconLoader2 } from "@tabler/icons-react";
+import { IconArrowLeft, IconLoader2, IconShield } from "@tabler/icons-react";
 
 export default function CRCWelcomePage() {
   const params = useParams();
@@ -44,26 +44,29 @@ export default function CRCWelcomePage() {
 
   return (
     <div className="flex-1 bg-background">
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-3xl mx-auto py-6 space-y-8">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => router.push(isPremium ? `/assess/${projectId}/crc/dashboard` : `/assess/${projectId}`)}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
           >
-            <IconArrowLeft className="w-4 h-4" />
+            <IconArrowLeft className="w-3.5 h-3.5" />
             Back
           </button>
         </div>
 
-        <header className="space-y-3">
-          <p className="text-sm font-semibold text-primary">Premium</p>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">About Compliance Readiness Controls (CRC)</h1>
-          <p className="text-muted-foreground">
-            Read how CRC works in MATUR, then open the guided controls when you are ready. Basic premium lists at{" "}
-            {FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.
-          </p>
-        </header>
+        <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+            <IconShield className="w-6 h-6 shrink-0" style={{ color: "var(--section-premium)" }} />
+            <span>Compliance Readiness Controls (CRC)</span>
+          </h2>
+          <span className="text-xs font-semibold text-primary uppercase tracking-wider">Premium</span>
+        </div>
+        <p className="text-muted-foreground -mt-2">
+          Read how CRC works in MATUR, then open the guided controls when you are ready. Basic premium lists at{" "}
+          {FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.
+        </p>
 
         <article className="prose prose-neutral dark:prose-invert max-w-none text-foreground space-y-8 [&_p]:leading-relaxed [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-0">
           <section className="space-y-3">

@@ -1295,7 +1295,14 @@ const generateInsightsAsync = async (
         }
     }
 
-    const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-pro"];
+    const defaultGemini = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const modelsToTry = [defaultGemini];
+    if (defaultGemini !== "gemini-2.5-flash") {
+      modelsToTry.push("gemini-2.5-flash");
+    }
+    if (defaultGemini !== "gemini-2.5-pro") {
+      modelsToTry.push("gemini-2.5-pro");
+    }
 
     // Generate insights for each missing domain sequentially
     for (const [index, domain] of domainsToProcess.entries()) {

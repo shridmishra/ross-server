@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ReactNode, KeyboardEvent } from "react";
 import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { CARD_THEMES } from "@/lib/constants";
 
 interface FeatureCardProps {
     icon: ReactNode;
@@ -11,6 +12,7 @@ interface FeatureCardProps {
     description: string;
     href: string;
     delay: number;
+    index: number;
 }
 
 export function FeatureCard({
@@ -19,6 +21,7 @@ export function FeatureCard({
     description,
     href,
     delay,
+    index,
 }: FeatureCardProps) {
     const router = useRouter();
 
@@ -30,6 +33,10 @@ export function FeatureCard({
             handleClick();
         }
     };
+
+    const themeIndex = index % CARD_THEMES.length;
+    const theme = CARD_THEMES[themeIndex];
+    const cardBgClass = theme.bg || "bg-card";
 
     return (
         <motion.div
@@ -44,7 +51,7 @@ export function FeatureCard({
             whileHover={{ y: -5, scale: 1.02 }}
             className="will-change-transform focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-background rounded-3xl"
         >
-            <Card className="cursor-pointer hover:shadow-2xl hover:border-primary transition-shadow h-full">
+            <Card className={`cursor-pointer hover:shadow-2xl transition-all h-full ${cardBgClass} ${theme.border} ${theme.shadow}`}>
                 <CardContent className="p-8">
                     <div className="rounded-2xl flex items-center justify-center mb-6 mx-auto relative">
                         {icon}

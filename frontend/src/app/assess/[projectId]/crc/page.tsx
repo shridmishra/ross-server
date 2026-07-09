@@ -21,6 +21,7 @@ import {
   IconInfoCircle,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SecureTextarea } from "@/components/shared/SecureTextarea";
 import { AssessmentSkeleton } from "@/components/Skeleton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ import { PREMIUM_STATUS } from "@/lib/constants";
 import SubscriptionModal from "@/components/features/subscriptions/SubscriptionModal";
 import CommentsPanel from "@/components/shared/CommentsPanel";
 import { apiService } from "@/lib/api";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // --- Interfaces ---
 
@@ -86,6 +88,46 @@ const ANSWER_OPTIONS = [
   { value: 3, label: "Not Sure", description: "Implementation status unknown" },
 ];
 
+const getCrcOptionColors = (value: number, isSelected: boolean) => {
+  if (value === 0) { // No
+    return {
+      labelClass: isSelected
+        ? "border-destructive bg-destructive/5 dark:bg-destructive/10"
+        : "border-border hover:border-destructive/40 hover:bg-destructive/2 dark:hover:bg-destructive/2",
+      radioClass: isSelected
+        ? "border-destructive bg-destructive"
+        : "border-border bg-transparent",
+    };
+  } else if (value === 0.5) { // Partially
+    return {
+      labelClass: isSelected
+        ? "border-warning bg-warning/5 dark:bg-warning/10"
+        : "border-border hover:border-warning/40 hover:bg-warning/2 dark:hover:bg-warning/2",
+      radioClass: isSelected
+        ? "border-warning bg-warning"
+        : "border-border bg-transparent",
+    };
+  } else if (value === 1) { // Yes
+    return {
+      labelClass: isSelected
+        ? "border-success bg-success/5 dark:bg-success/10"
+        : "border-border hover:border-success/40 hover:bg-success/2 dark:hover:bg-success/2",
+      radioClass: isSelected
+        ? "border-success bg-success"
+        : "border-border bg-transparent",
+    };
+  } else { // NA (2) and Not Sure (3) - neutral blue accent
+    return {
+      labelClass: isSelected
+        ? "border-primary bg-primary/5 dark:bg-primary/10"
+        : "border-border hover:border-primary/40 hover:bg-primary/2 dark:hover:bg-primary/2",
+      radioClass: isSelected
+        ? "border-primary bg-primary"
+        : "border-border bg-transparent",
+    };
+  }
+};
+
 // --- Main Page Component ---
 
 export default function CRCAssessmentPage() {
@@ -104,12 +146,17 @@ export default function CRCAssessmentPage() {
     handleCrcNoteSave,
     handleEvidenceStatusChange,
     isPremium,
+    projectName,
     loading: contextLoading,
     saving,
     isReadOnly,
     submitCrcProject,
     submitting,
   } = useAssessmentContext();
+
+  const projectBreadcrumbHref = isPremium
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
 
   const [localNotes, setLocalNotes] = useState<Record<string, string>>({});
   const [showDetails, setShowDetails] = useState(false);
@@ -134,6 +181,7 @@ export default function CRCAssessmentPage() {
 
   useEffect(() => {
     setUrlInput(currentResponse?.evidenceUrl || "");
+    setShowDetails(false);
   }, [currentControl?.id, currentResponse?.evidenceUrl]);
 
 
@@ -210,80 +258,109 @@ export default function CRCAssessmentPage() {
   const currentNote = localNotes[currentControl.id] ?? currentResponse?.notes ?? "";
 
   return (
-    <div className="flex-1 flex h-full overflow-hidden">
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col w-full">
         {/* Header */}
-        <div className="bg-background border-b border-border p-4 flex-none">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                type="button"
-                className="flex items-center gap-2 ml-2 text-primary hover:text-primary/80 transition-colors"
-              >
-                <IconArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-              <div className="h-6 w-px bg-border" />
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Compliance Readiness Controls (CRC)</h1>
-                <p className="text-sm text-muted-foreground">
-                  {currentControl.category_name} • Control {currentIndex + 1} of {totalControls}
-                </p>
-                <Link
-                  href={`/assess/${projectId}/crc/welcome`}
-                  className="text-xs text-primary hover:text-primary/80 font-medium mt-1 inline-block"
-                >
-                  About this assessment
-                </Link>
-              </div>
-              {isReadOnly && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-muted-foreground text-xs font-medium ml-4">
-                  <IconLock size={12} />
-                  View Only
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
+        <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+          <div className="max-w-7xl mx-auto flex flex-col gap-2">
+            {/* Top: Breadcrumb */}
+            <div className="flex items-center justify-between text-xs">
+              <Breadcrumb
+                projectName={projectName || "Loading..."}
+                projectHref={projectBreadcrumbHref}
+                items={[{ label: "Compliance Readiness Controls (CRC)" }]}
+              />
+
               {saving && (
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <IconLoader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-2 text-xs text-primary font-medium animate-pulse" style={{ color: "var(--section-premium)" }}>
+                  <IconLoader2 className="w-3.5 h-3.5 animate-spin" />
                   Saving...
                 </div>
               )}
-              {!isReadOnly && (
+            </div>
+
+            {/* Bottom: Main row */}
+            <div className="flex items-center justify-between gap-4 mt-1">
+              <div className="flex items-center gap-3 min-w-0">
                 <button
+                  onClick={() => router.back()}
                   type="button"
-                  onClick={submitCrcProject}
-                  disabled={submitting || answeredControls < totalControls}
-                  title={
-                    answeredControls < totalControls
-                      ? `Answer all controls (${answeredControls}/${totalControls}) before submitting`
-                      : "Finalize this CRC assessment"
-                  }
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
                 >
-                  {submitting ? (
-                    <>
-                      <IconLoader2 className="w-4 h-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <IconShieldCheck className="w-4 h-4" />
-                      Submit Assessment
-                    </>
-                  )}
+                  <IconArrowLeft className="w-3.5 h-3.5" />
+                  Back
                 </button>
-              )}
+                <div className="h-5 w-px bg-border shrink-0" />
+                <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                  <IconShieldCheck className="w-4 h-4 text-primary shrink-0" style={{ color: "var(--section-premium)" }} />
+                  <h1 className="text-sm font-bold text-foreground truncate">
+                    {currentControl.category_name}
+                  </h1>
+                  <span className="text-muted-foreground/30 text-xs shrink-0">|</span>
+                  <span className="text-xs text-muted-foreground font-medium truncate max-w-[120px] sm:max-w-xs">
+                    {currentControl.control_title}
+                  </span>
+                  <span
+                    className="inline-flex items-center text-[9px] py-0.5 px-2 rounded-full font-semibold border shrink-0"
+                    style={{
+                      backgroundColor: "color-mix(in oklch, var(--section-premium) 10%, transparent)",
+                      color: "var(--section-premium)",
+                      borderColor: "color-mix(in oklch, var(--section-premium) 20%, transparent)",
+                    }}
+                  >
+                    Control {currentIndex + 1} of {totalControls}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {isReadOnly && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted border border-border text-muted-foreground text-[10px] font-medium">
+                    <IconLock size={10} />
+                    View Only
+                  </div>
+                )}
+                <Link
+                  href={`/assess/${projectId}/crc/welcome`}
+                  className="text-xs font-semibold px-3 py-1.5 border border-border/60 hover:bg-muted rounded-lg text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+                >
+                  About CRC
+                </Link>
+                {!isReadOnly && (
+                  <Button
+                    onClick={submitCrcProject}
+                    type="button"
+                    disabled={submitting || answeredControls < totalControls}
+                    title={
+                      answeredControls < totalControls
+                        ? `Answer all controls (${answeredControls}/${totalControls}) before submitting`
+                        : "Finalize this CRC assessment"
+                    }
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold shadow-xs border-none"
+                    style={{
+                      backgroundColor: "var(--section-premium)",
+                      color: "black",
+                    }}
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconShieldCheck className="w-3.5 h-3.5 text-black" />
+                        <span>Submit Assessment</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Question Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 px-8 py-6">
           <div className="max-w-4xl mx-auto">
             {/* Progress Bar */}
             <div className="mb-8">
@@ -532,47 +609,49 @@ export default function CRCAssessmentPage() {
 
               {/* Answer Radio Buttons — Yes / Partially / No */}
               <div className="space-y-3">
-                {ANSWER_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`flex items-start p-4 rounded-xl border-2 transition-all duration-200 ${currentAnswer === option.value
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      } ${isReadOnly ? "cursor-not-allowed opacity-80" : "cursor-pointer"}`}
-                  >
-                    <div className="relative flex items-center justify-center mt-1">
-                      <input
-                        type="radio"
-                        name={`answer-${currentControl.id}`}
-                        value={option.value}
-                        checked={currentAnswer === option.value}
-                        disabled={isReadOnly}
-                        onChange={() => handleCrcAnswerChange(currentControl.id, option.value)}
-                        className="sr-only peer"
-                      />
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 peer-focus-visible:ring peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-1 ${currentAnswer === option.value
-                        ? "border-primary bg-primary"
-                        : "border-border bg-transparent"
-                        }`}>
-                        {currentAnswer === option.value && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-2 h-2 rounded-full bg-white"
-                          />
-                        )}
+                {ANSWER_OPTIONS.map((option) => {
+                  const isSelected = currentAnswer === option.value;
+                  const colors = getCrcOptionColors(option.value, isSelected);
+                  return (
+                    <label
+                      key={option.value}
+                      className={`flex items-start p-4 rounded-xl border-2 transition-all duration-200 ${colors.labelClass} ${
+                        isReadOnly
+                          ? "cursor-not-allowed opacity-80"
+                          : "cursor-pointer hover:shadow-xs hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.995]"
+                      }`}
+                    >
+                      <div className="relative flex items-center justify-center mt-1">
+                        <input
+                          type="radio"
+                          name={`answer-${currentControl.id}`}
+                          value={option.value}
+                          checked={isSelected}
+                          disabled={isReadOnly}
+                          onChange={() => handleCrcAnswerChange(currentControl.id, option.value)}
+                          className="sr-only peer"
+                        />
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-1 ${colors.radioClass}`}>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="w-2 h-2 rounded-full bg-white"
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <div className="text-sm font-medium text-foreground">
-                        {option.label}
+                      <div className="ml-3 flex-1">
+                        <div className="text-sm font-semibold text-foreground">
+                          {option.label}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {option.description}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {option.description}
-                      </div>
-                    </div>
-                  </label>
-                ))}
+                    </label>
+                  );
+                })}
               </div>
 
               {/* Evidence Tracker Section (Feature I) */}
@@ -587,29 +666,34 @@ export default function CRCAssessmentPage() {
                     <label htmlFor="evidence-status-select" className="block text-xs text-muted-foreground mb-1.5">
                       Select Status
                     </label>
-                    <select
-                      id="evidence-status-select"
-                      disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null}
-                      value={currentResponse?.evidenceStatus || "No Evidence"}
-                      onChange={async (e) => {
-                        if (currentAnswer === undefined || currentAnswer === null) {
-                          showToast.error("Please answer the control question before managing evidence");
-                          return;
-                        }
-                        const newStatus = e.target.value as any;
-                        try {
-                          await handleEvidenceStatusChange(currentControl.id, newStatus);
-                        } catch (err) {
-                          // Handled in context
-                        }
-                      }}
-                      className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <option value="No Evidence">No Evidence</option>
-                      <option value="Template Downloaded">Template Downloaded</option>
-                      <option value="Evidence in Progress">Evidence in Progress</option>
-                      <option value="Evidence Complete">Evidence Complete</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="evidence-status-select"
+                        disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null}
+                        value={currentResponse?.evidenceStatus || "No Evidence"}
+                        onChange={async (e) => {
+                          if (currentAnswer === undefined || currentAnswer === null) {
+                            showToast.error("Please answer the control question before managing evidence");
+                            return;
+                          }
+                          const newStatus = e.target.value as any;
+                          try {
+                            await handleEvidenceStatusChange(currentControl.id, newStatus);
+                          } catch (err) {
+                            // Handled in context
+                          }
+                        }}
+                        className="w-full appearance-none px-3 pr-10 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <option value="No Evidence">No Evidence</option>
+                        <option value="Template Downloaded">Template Downloaded</option>
+                        <option value="Evidence in Progress">Evidence in Progress</option>
+                        <option value="Evidence Complete">Evidence Complete</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
+                        <IconChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Badge Display */}
@@ -780,10 +864,8 @@ export default function CRCAssessmentPage() {
               <h3 className="text-lg font-semibold mb-4 px-2">Project Notes & Collaboration</h3>
               <CommentsPanel projectId={projectId} objectType="PROJECT" objectId={projectId} />
             </div>
+            </div>
           </div>
         </div>
-      </div>
-
-    </div>
   );
 }

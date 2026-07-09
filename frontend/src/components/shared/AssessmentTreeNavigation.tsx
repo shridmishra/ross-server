@@ -28,6 +28,7 @@ import { PREMIUM_STATUS } from "../../lib/constants";
 import { CRCControl } from "../../lib/api";
 import { cn } from "@/lib/utils";
 import { getRouteFlags } from "../../lib/route-utils";
+import { useCrcCategoryExpansion } from "@/hooks/useCrcCategoryExpansion";
 import SubscriptionModal from "../features/subscriptions/SubscriptionModal";
 import {
   Sidebar,
@@ -341,9 +342,7 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
   const [isPremiumFeaturesExpanded, setIsPremiumFeaturesExpanded] = useState(isPremiumFeaturesExpandedInitial);
   const [isFairnessExpanded, setIsFairnessExpanded] = useState(!!isFairnessPage);
   const [isCrcExpanded, setIsCrcExpanded] = useState(!!isCrcPage);
-  const [expandedCrcCategories, setExpandedCrcCategories] = useState<Record<string, boolean>>(
-    currentCategory ? { [currentCategory]: true } : {}
-  );
+  const { expandedCrcCategories, setExpandedCrcCategories } = useCrcCategoryExpansion(currentCategory);
   const [isSettingsExpanded, setIsSettingsExpanded] = useState(isSettingsExpandedInitial);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("Choose Your Plan");
@@ -464,15 +463,7 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
     return () => window.clearTimeout(timeoutId);
   }, [activeDomainId, currentPracticeId, currentQuestionIndex]);
 
-  // Synchronize CRC category expansion with the current route-selected category
-  useEffect(() => {
-    if (currentCategory) {
-      setExpandedCrcCategories(prev => {
-        if (prev[currentCategory]) return prev;
-        return { ...prev, [currentCategory]: true };
-      });
-    }
-  }, [currentCategory]);
+
 
   const toggleDomain = (domainId: string) => {
     setExpandedDomainId((prev) => (prev === domainId ? null : domainId));
@@ -833,7 +824,7 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
                                                     onClick={() => {
                                                       if (premiumStatus) {
                                                         router.push(`/assess/${projectId}/crc?category=${encodeURIComponent(cat)}`);
-                                                        setExpandedCrcCategories(prev => ({ ...prev, [cat]: true }));
+                                                        setExpandedCrcCategories({ [cat]: true });
                                                       } else {
                                                         openSubscriptionModal("Unlock Premium to Access Compliance Readiness Controls (CRC)", "Upgrade to premium to unlock this feature and many more advanced capabilities.");
                                                       }

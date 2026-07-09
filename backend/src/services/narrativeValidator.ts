@@ -237,9 +237,10 @@ export async function generateAndValidateNarrative(
         sectionData: any;
         projectName: string;
         sectionLabel: string;
+        isPremium?: boolean;
     }
 ): Promise<{ narrative: string; success: boolean }> {
-    const { systemPrompt, userPrompt, sectionData, projectName, sectionLabel } = params;
+    const { systemPrompt, userPrompt, sectionData, projectName, sectionLabel, isPremium = true } = params;
     
     let currentFeedback = "";
     let attempts = 0;
@@ -256,7 +257,8 @@ export async function generateAndValidateNarrative(
                 systemPrompt,
                 userPrompt: fullUserPrompt,
                 maxTokens: 512,
-                label: `${sectionLabel} Narrative (Attempt ${attempts})`
+                label: `${sectionLabel} Narrative (Attempt ${attempts})`,
+                forceProvider: isPremium ? undefined : 'gemini'
             });
 
             const validation = validateNarrative(generated, sectionData, projectName);

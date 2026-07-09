@@ -13,6 +13,14 @@ import {
   AlertCircle,
   Shield,
   Lock,
+  ArrowLeft,
+  Scale,
+  Code,
+  Key,
+  Terminal,
+  Sliders,
+  Tag,
+  ChevronDown,
 } from "lucide-react";
 import { FALLBACK_PRICES, isPremiumStatus } from "@/lib/constants";
 import {
@@ -23,6 +31,8 @@ import SubscriptionModal from "@/components/features/subscriptions/SubscriptionM
 import { ApiEndpointSkeleton } from "@/components/Skeleton";
 import { ApiHistory } from "@/app/assess/[projectId]/fairness-bias/api-history/components/ApiHistory";
 import InfoSection from "@/components/features/governance/InfoSection";
+import { useAssessmentContext } from "@/contexts/AssessmentContext";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 const DEFAULT_REQUEST_TEMPLATE = `{
   "contents": [
@@ -117,8 +127,15 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
   const params = useParams();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { projectName } = useAssessmentContext();
   const projectId = params.projectId as string;
   const basePath = mode === "vulnerability" ? `/assess/${projectId}/vulnerability-assessment` : `/assess/${projectId}/fairness-bias/api-endpoint`;
+
+  const projectBreadcrumbHref = isPremiumStatus(user?.subscription_status)
+    ? `/assess/${projectId}/crc/dashboard`
+    : `/assess/${projectId}`;
+
+  const headerLabel = mode === "vulnerability" ? "AI Vulnerability Assessment" : "API Automated Fairness Testing";
 
   const [apiEndpoint, setApiEndpoint] = useState("");
   const [requestTemplate, setRequestTemplate] = useState(DEFAULT_REQUEST_TEMPLATE);
@@ -269,16 +286,53 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
     return <ApiEndpointSkeleton />;
   }
 
+  const HeaderIcon = mode === "vulnerability" ? Shield : Scale;
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Actions Area */}
-      <div className="max-w-4xl mx-auto px-6 pt-4 flex justify-end">
-        <Button
-          onClick={() => router.push(`${basePath}/pending-jobs`)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
-        >
-          Show all pending jobs
-        </Button>
+    <div className="flex-1 flex flex-col w-full">
+      {/* Header */}
+      <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+        <div className="max-w-7xl mx-auto flex flex-col gap-2">
+          {/* Top: Breadcrumb */}
+          <div className="flex items-center justify-between text-xs">
+            <Breadcrumb
+              projectName={projectName || "Loading..."}
+              projectHref={projectBreadcrumbHref}
+              items={[{ label: headerLabel }]}
+            />
+          </div>
+
+          {/* Bottom: Main row */}
+          <div className="flex items-center justify-between gap-4 mt-1">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.back()}
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-900 border border-border/60 hover:bg-muted text-xs text-foreground/80 hover:text-foreground transition-all shadow-2xs shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+              <div className="h-5 w-px bg-border shrink-0" />
+              <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                <HeaderIcon className="w-4 h-4 shrink-0" style={{ color: "var(--section-premium)" }} />
+                <h1 className="text-sm font-bold text-foreground truncate">
+                  {COPY[mode].heroTitle}
+                </h1>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => router.push(`${basePath}/pending-jobs`)}
+                className="flex items-center gap-2 rounded-full border border-border/60 hover:bg-muted/50 text-foreground/80 hover:text-foreground shadow-2xs font-semibold px-4 py-1.5 text-xs"
+              >
+                Show all pending jobs
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <SubscriptionModal
@@ -289,15 +343,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
       />
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            {COPY[mode].heroTitle}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {COPY[mode].heroDescription}
-          </p>
-        </div>
+      <div className="flex-1 px-8 py-6 max-w-4xl w-full mx-auto space-y-6">
+        <p className="text-muted-foreground text-sm">
+          {COPY[mode].heroDescription}
+        </p>
 
         <div className="mb-8 space-y-4">
           {mode === "api-testing" && (
@@ -431,7 +480,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl border border-border p-8 mb-8"
+          className="card-google-blue border border-blue-500/25 rounded-2xl p-8 mb-8"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-info/20 flex items-center justify-center">
@@ -451,9 +500,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
             <div>
               <label
                 htmlFor="api-endpoint"
-                className="block text-sm font-medium text-foreground mb-2"
+                className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
               >
-                {COPY[mode].endpointLabel}
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <span>{COPY[mode].endpointLabel}</span>
               </label>
               <input
                 id="api-endpoint"
@@ -463,7 +513,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 placeholder="https://api.example.com/v1/chat"
                 disabled={jobStarting}
                 className={`
-                  w-full px-4 py-3 rounded-xl border transition-colors
+                  w-full px-4 py-3 rounded-2xl border transition-colors
                   bg-transparent
                   ${isValidUrl
                     ? "border-input focus:border-primary"
@@ -486,9 +536,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
             <div>
               <label
                 htmlFor="request-template"
-                className="block text-sm font-medium text-foreground mb-2"
+                className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
               >
-                {COPY[mode].requestTemplateLabel}
+                <Code className="w-4 h-4 text-muted-foreground" />
+                <span>{COPY[mode].requestTemplateLabel}</span>
               </label>
               <textarea
                 id="request-template"
@@ -498,7 +549,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 spellCheck={false}
                 disabled={jobStarting}
                 className={`
-                  w-full px-4 py-3 rounded-xl border transition-colors font-mono text-sm resize-y
+                  w-full px-4 py-3 rounded-2xl border transition-colors font-mono text-sm resize-y
                   bg-transparent
                   border-input focus:border-primary
                   text-foreground
@@ -521,9 +572,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
             <div>
               <label
                 htmlFor="response-key-path"
-                className="block text-sm font-medium text-foreground mb-2"
+                className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
               >
-                {COPY[mode].responsePathLabel}
+                <Terminal className="w-4 h-4 text-muted-foreground" />
+                <span>{COPY[mode].responsePathLabel}</span>
               </label>
               <input
                 id="response-key-path"
@@ -534,7 +586,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                 disabled={jobStarting}
                 aria-invalid={Boolean(responseKeyError)}
                 className={`
-                  w-full px-4 py-3 rounded-xl border transition-colors font-mono text-sm
+                  w-full px-4 py-3 rounded-2xl border transition-colors font-mono text-sm
                   bg-transparent
                   ${responseKeyError ? "border-destructive focus:border-destructive" : "border-input focus:border-primary"}
                   text-foreground
@@ -558,9 +610,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
               <div>
                 <label
                   htmlFor="api-key-value"
-                  className="block text-sm font-medium text-foreground mb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
                 >
-                  API Key
+                  <Key className="w-4 h-4 text-muted-foreground" />
+                  <span>API Key</span>
                 </label>
                 <input
                   id="api-key-value"
@@ -571,12 +624,12 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   placeholder="Paste your provider API key"
                   disabled={jobStarting}
                   className={`
-                    w-full px-4 py-3 rounded-xl border transition-colors
+                    w-full px-4 py-3 rounded-2xl border transition-colors
                     bg-transparent
                     border-input focus:border-primary
                     text-foreground
                     placeholder-muted-foreground
-                    focus:outline-none focus:ring-2 focus:ring-primary
+                    focus:outline-none focus:ring-2 focus:ring-primary/20
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
                 />
@@ -588,30 +641,29 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
               <div>
                 <label
                   htmlFor="api-key-placement"
-                  className="block text-sm font-medium text-foreground mb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
                 >
-                  API Key Placement
+                  <Sliders className="w-4 h-4 text-muted-foreground" />
+                  <span>API Key Placement</span>
                 </label>
-                <select
-                  id="api-key-placement"
-                  value={apiKeyPlacement}
-                  onChange={(e) => setApiKeyPlacement(e.target.value as ApiKeyPlacement)}
-                  disabled={jobStarting}
-                  className={`
-                    w-full px-4 py-3 rounded-xl border transition-colors
-                    bg-transparent
-                    border-input focus:border-primary
-                    text-foreground
-                    focus:outline-none focus:ring-2 focus:ring-primary
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
-                >
-                  {API_KEY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="api-key-placement"
+                    value={apiKeyPlacement}
+                    onChange={(e) => setApiKeyPlacement(e.target.value as ApiKeyPlacement)}
+                    disabled={jobStarting}
+                    className="w-full pl-4 pr-10 py-3 rounded-2xl border border-input focus:border-primary text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed bg-background appearance-none transition-colors"
+                  >
+                    {API_KEY_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
                 {requiresApiKey && !trimmedApiKey && (
                   <p className="mt-2 text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
@@ -628,9 +680,10 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
               <div>
                 <label
                   htmlFor="api-key-field-name"
-                  className="block text-sm font-medium text-foreground mb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
                 >
-                  Field name for this placement
+                  <Tag className="w-4 h-4 text-muted-foreground" />
+                  <span>Field name for this placement</span>
                 </label>
                 <input
                   id="api-key-field-name"
@@ -640,12 +693,12 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   placeholder={API_KEY_FIELD_HINTS[apiKeyPlacement]}
                   disabled={jobStarting}
                   className={`
-                    w-full px-4 py-3 rounded-xl border transition-colors
+                    w-full px-4 py-3 rounded-2xl border transition-colors
                     bg-transparent
                     border-input focus:border-primary
                     text-foreground
                     placeholder-muted-foreground
-                    focus:outline-none focus:ring-2 focus:ring-primary
+                    focus:outline-none focus:ring-2 focus:ring-primary/20
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
                 />
@@ -658,8 +711,8 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
 
             {/* API Configuration Summary */}
             {(apiEndpoint || requestTemplate || responseKey) && (
-              <div className="bg-muted/30 border border-border rounded-xl p-6">
-                <h3 className="text-sm font-semibold text-foreground mb-4">
+              <div className="card-google-purple border border-purple-500/25 rounded-xl p-6">
+                <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-4">
                   API Configuration Summary
                 </h3>
                 <div className="space-y-4">
@@ -785,7 +838,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   onClick={handleTestModel}
                   isLoading={jobStarting}
                   disabled={!canSubmit || jobStarting}
-                  className="w-full sm:w-2/3 py-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  className="w-full sm:w-2/3 py-6 rounded-2xl font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                 >
                   {jobStarting ? (
                     "Scheduling..."
@@ -801,7 +854,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
                   onClick={handleSecurityScan}
                   disabled={!canSubmit || jobStarting}
                   variant="default"
-                  className="w-full sm:w-2/3 py-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  className="w-full sm:w-2/3 py-6 rounded-2xl font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                 >
                   {jobStarting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -831,7 +884,7 @@ export default function ApiTestingTool({ mode }: ApiTestingToolProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl border border-dashed border-border p-6 mb-8"
+          className="card-google-yellow border border-dashed border-warning/35 rounded-2xl p-6 mb-8"
         >
           <h3 className="text-lg font-semibold text-foreground mb-2">
             What happens next?

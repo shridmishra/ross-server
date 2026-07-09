@@ -52,47 +52,34 @@ export const DatasetUploadSection = ({
 }: DatasetUploadSectionProps) => {
     return (
         <>
-            <section className="bg-background">
-                <div className="max-w-7xl mx-auto px-6 py-12 grid gap-8 lg:grid-cols-[minmax(0,1fr),380px]">
-                    <div className="space-y-6">
-                        <p className="text-sm font-semibold text-primary">Fairness & Bias Evaluation</p>
-                        <h2 className="text-3xl font-bold text-foreground leading-tight">
-                            Upload a CSV
-                        </h2>
+            <main className="max-w-7xl mx-auto px-6 py-8 space-y-10">
+                <InfoSection
+                    title="About Dataset Testing"
+                    description={`This premium path analyzes a CSV you upload for statistical fairness signals and representation gaps before prompts reach a model. MATUR also asks Gemini to explain key metrics such as fairness, bias, toxicity, relevancy, and faithfulness for the sample. Basic premium lists at ${FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.`}
+                    limitations="Results only reflect the file you uploaded. They cannot predict new bias introduced during training or behavior on data that was not in the file."
+                    defaultExpanded
+                >
+                    <div className="space-y-2">
+                        <p className="text-sm font-semibold text-foreground">Why premium includes this</p>
+                        <p>
+                            You get a guided upload, automatic purge after inactivity, and a stored narrative alongside
+                            table metrics so reviewers can show what the dataset looked like at a point in time.
+                        </p>
                     </div>
-                </div>
-            </section>
-
-            <main className="max-w-7xl mx-auto px-6 pb-16 space-y-10 -mt-8">
-                <div className="max-w-4xl">
-                    <InfoSection
-                        title="About Dataset Testing"
-                        description={`This premium path analyzes a CSV you upload for statistical fairness signals and representation gaps before prompts reach a model. MATUR also asks Gemini to explain key metrics such as fairness, bias, toxicity, relevancy, and faithfulness for the sample. Basic premium lists at ${FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.`}
-                        limitations="Results only reflect the file you uploaded. They cannot predict new bias introduced during training or behavior on data that was not in the file."
-                        defaultExpanded
-                    >
-                        <div className="space-y-2">
-                            <p className="text-sm font-semibold text-foreground">Why premium includes this</p>
-                            <p>
-                                You get a guided upload, automatic purge after inactivity, and a stored narrative alongside
-                                table metrics so reviewers can show what the dataset looked like at a point in time.
-                            </p>
-                        </div>
-                        <div className="space-y-2 pt-4 border-t border-border/50">
-                            <p className="text-sm font-semibold text-foreground">How the evaluation runs</p>
-                            <p>
-                                The service parses your columns, computes statistical fairness measures on the table, then
-                                sends a structured summary to Gemini for plain language commentary on the headline metrics.
-                            </p>
-                        </div>
-                    </InfoSection>
-                </div>
+                    <div className="space-y-2 pt-4 border-t border-border/50">
+                        <p className="text-sm font-semibold text-foreground">How the evaluation runs</p>
+                        <p>
+                            The service parses your columns, computes statistical fairness measures on the table, then
+                            sends a structured summary to Gemini for plain language commentary on the headline metrics.
+                        </p>
+                    </div>
+                </InfoSection>
                 <section className="grid gap-8 lg:grid-cols-1">
-                    <Card className="shadow-xl overflow-hidden">
-                        <CardHeader className="bg-primary text-primary-foreground">
-                            <p className="text-sm uppercase tracking-wide text-primary-foreground/80">Dataset Testing</p>
-                            <CardTitle className="text-2xl text-primary-foreground">Upload & Evaluate</CardTitle>
-                            <CardDescription className="text-primary-foreground/80">We only use your CSV for this session and purge it automatically.</CardDescription>
+                    <Card className="shadow-2xs overflow-hidden border border-border/60">
+                        <CardHeader className="border-b border-primary/20 bg-primary/5">
+                            <p className="text-xs font-bold uppercase tracking-wider text-primary">Dataset Testing</p>
+                            <CardTitle className="text-xl font-bold text-foreground mt-1">Upload & Evaluate</CardTitle>
+                            <CardDescription className="text-xs text-primary/80">We only use your CSV for this session and purge it automatically.</CardDescription>
                         </CardHeader>
 
                         <CardContent className="p-6 space-y-6">
@@ -100,7 +87,7 @@ export const DatasetUploadSection = ({
                                 htmlFor={inputId}
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}
-                                className="border-2 border-dashed border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-colors bg-muted/60"
+                                className="border-2 border-dashed border-primary/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-all bg-primary/5 hover:bg-primary/10"
                             >
                                 <Upload className="w-10 h-10 text-primary mb-3" />
                                 <p className="text-foreground font-medium">Drop CSV here or browse</p>
@@ -130,19 +117,19 @@ export const DatasetUploadSection = ({
 
                             {fileMeta && hasFile && (
                                 <div className="grid gap-4 md:grid-cols-3">
-                                    <Card>
+                                    <Card className="card-google-blue border border-blue-500/25 shadow-2xs">
                                         <CardContent className="p-4">
                                             <p className="text-xs text-muted-foreground uppercase tracking-wide">Filename</p>
                                             <p className="font-medium text-foreground truncate">{fileMeta.name}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card>
+                                    <Card className="card-google-purple border border-purple-500/25 shadow-2xs">
                                         <CardContent className="p-4">
                                             <p className="text-xs text-muted-foreground uppercase tracking-wide">Filesize</p>
                                             <p className="font-medium text-foreground">{formatBytes(fileMeta.size)}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card>
+                                    <Card className="card-google-green border border-success/40 shadow-2xs">
                                         <CardContent className="p-4">
                                             <p className="text-xs text-muted-foreground uppercase tracking-wide">Uploaded</p>
                                             <p className="font-medium text-foreground">
@@ -185,7 +172,7 @@ export const DatasetUploadSection = ({
                 </section>
 
                 {preview.headers.length > 0 && (
-                    <Card className="shadow-xl">
+                    <Card className="shadow-2xs border border-border/60">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div>

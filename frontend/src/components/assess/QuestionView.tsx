@@ -342,7 +342,7 @@ export default function QuestionView() {
     return (
         <div className="flex-1 flex flex-col w-full">
             {/* HEADER */}
-            <div className="bg-background border-b border-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
+            <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
                 <div className="max-w-7xl mx-auto flex flex-col gap-2">
                     {/* Top: Breadcrumb */}
                     <div className="flex items-center justify-between text-xs">

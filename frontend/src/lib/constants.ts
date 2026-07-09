@@ -57,6 +57,7 @@ export const AI_SYSTEM_TYPES = [
 export const CARD_THEMES = [
   { // Indigo / Purple-Blue
     id: "indigo",
+    bg: "card-google-blue",
     border: "border-indigo-500/25",
     shadow: "hover:shadow-indigo-500/5",
     btnPrimary: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 border-0 font-bold",
@@ -68,6 +69,7 @@ export const CARD_THEMES = [
   },
   { // Red
     id: "red",
+    bg: "card-google-red",
     border: "border-destructive/35",
     shadow: "hover:shadow-destructive/5",
     btnPrimary: "bg-destructive/15 text-destructive dark:text-red-400 hover:bg-destructive/25 border-0 font-bold",
@@ -79,6 +81,7 @@ export const CARD_THEMES = [
   },
   { // Yellow
     id: "yellow",
+    bg: "card-google-yellow",
     border: "border-warning/50",
     shadow: "hover:shadow-warning/5",
     btnPrimary: "bg-warning/20 text-warning-foreground dark:text-warning hover:bg-warning/30 border-0 font-bold",
@@ -90,6 +93,7 @@ export const CARD_THEMES = [
   },
   { // Green
     id: "green",
+    bg: "card-google-green",
     border: "border-success/40",
     shadow: "hover:shadow-success/5",
     btnPrimary: "bg-success/15 text-success dark:text-success hover:bg-success/25 border-0 font-bold",
@@ -101,6 +105,7 @@ export const CARD_THEMES = [
   },
   { // Purple
     id: "purple",
+    bg: "card-google-purple",
     border: "border-purple-500/25",
     shadow: "hover:shadow-purple-500/5",
     btnPrimary: "bg-purple-500/15 text-purple-700 dark:text-purple-300 hover:bg-purple-500/25 border-0 font-bold",

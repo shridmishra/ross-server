@@ -227,14 +227,14 @@ export function SystemProfileWizard({ projectId, isOpen, onClose }: SystemProfil
         <DialogHeader className="pb-4 border-b border-border/40">
           <div className="flex justify-between items-center">
             <div>
-              <DialogTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-indigo-400 bg-clip-text text-transparent">
+              <DialogTitle className="text-xl font-bold text-foreground">
                 AI System Profile Wizard
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                 Setup your compliance and risk parameters
               </DialogDescription>
             </div>
-            <span className="text-xs font-semibold bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">
+            <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20">
               Section {currentSection} of 6
             </span>
           </div>
