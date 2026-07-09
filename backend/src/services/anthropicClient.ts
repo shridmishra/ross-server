@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-const DEFAULT_CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest";
+const DEFAULT_CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
 const CLAUDE_MODELS_TO_TRY = [
     DEFAULT_CLAUDE_MODEL,
     "claude-3-5-sonnet-20241022",
