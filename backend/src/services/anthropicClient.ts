@@ -5,11 +5,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-const DEFAULT_CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
+const DEFAULT_CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 const CLAUDE_MODELS_TO_TRY = [
     DEFAULT_CLAUDE_MODEL,
-    "claude-3-5-sonnet-20241022",
-    "claude-3-5-sonnet-latest"
+    "claude-sonnet-4-6",
+    "claude-sonnet-4-5-20250929"
 ];
 
 const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -144,11 +144,11 @@ export async function callClaude(options: ClaudeCallOptions): Promise<string> {
         const geminiModels = [defaultGemini, "gemini-2.5-pro"];
         modelsToTry = geminiModels.map(m => ({ modelName: m, provider: 'gemini' }));
     } else if (forceProvider === 'anthropic') {
-        const defaultClaude = process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest";
-        const claudeModels = [defaultClaude, "claude-3-5-sonnet-20241022", "claude-3-5-sonnet-latest"];
+        const defaultClaude = process.env.CLAUDE_MODEL || "claude-sonnet-5";
+        const claudeModels = [defaultClaude, "claude-sonnet-4-6", "claude-sonnet-4-5-20250929"];
         modelsToTry = claudeModels.map(m => ({ modelName: m, provider: 'anthropic' }));
     } else {
-        const defaultClaude = process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest";
+        const defaultClaude = process.env.CLAUDE_MODEL || "claude-sonnet-5";
         const defaultGemini = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
         const claudeProvider = defaultClaude.startsWith("gemini-") ? "gemini" as const : "anthropic" as const;
@@ -156,11 +156,11 @@ export async function callClaude(options: ClaudeCallOptions): Promise<string> {
         modelsToTry.push({ modelName: defaultClaude, provider: claudeProvider });
 
         if (claudeProvider === "anthropic") {
-            if (defaultClaude !== "claude-3-5-sonnet-20241022") {
-                modelsToTry.push({ modelName: "claude-3-5-sonnet-20241022", provider: "anthropic" });
+            if (defaultClaude !== "claude-sonnet-4-6") {
+                modelsToTry.push({ modelName: "claude-sonnet-4-6", provider: "anthropic" });
             }
-            if (defaultClaude !== "claude-3-5-sonnet-latest") {
-                modelsToTry.push({ modelName: "claude-3-5-sonnet-latest", provider: "anthropic" });
+            if (defaultClaude !== "claude-sonnet-4-5-20250929") {
+                modelsToTry.push({ modelName: "claude-sonnet-4-5-20250929", provider: "anthropic" });
             }
         }
 
