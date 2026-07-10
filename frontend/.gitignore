@@ -1,1 +1,7 @@
 .vercel
+
+# Playwright's default output dir (used when outputDir isn't picked up, e.g.
+# run without the config or from an older run) — e2e/.artifacts/ is the one
+# actually configured in playwright.config.js and is already gitignored under
+# e2e/.gitignore, but this is the default path and has been committed before.
+/test-results/
