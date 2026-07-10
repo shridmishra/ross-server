@@ -11,7 +11,7 @@ captured once by `auth.setup.js` and reused by the specs.
 
 ```bash
 cd frontend
-npm install -D @playwright/test dotenv
+npm install                              # @playwright/test + dotenv are already in package.json
 npx playwright install --with-deps chromium
 cp e2e/.env.e2e.example e2e/.env.e2e     # then fill in a TEST account
 ```
