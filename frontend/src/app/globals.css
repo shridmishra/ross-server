@@ -981,4 +981,66 @@ button:enabled,
   border: 1px solid oklch(70% 0.14 250 / 20%) !important;
 }
 
+/* Custom Auth Submit Button style */
+.btn-auth-submit {
+  margin: 28px 0px 0px;
+  display: flex;
+  position: relative;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: 100%;
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22.5px;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  background-image: linear-gradient(rgb(80, 81, 85) 0%, rgb(62, 63, 68) 52%, rgb(51, 52, 56) 100%) !important;
+  border-radius: 10px;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset, rgba(17, 17, 20, 0.06) 0px 1px 2px 0px !important;
+  filter: blur(0px);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-auth-submit:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Custom Auth Input style */
+.input-auth {
+  padding: 0px 16px;
+  display: block !important;
+  height: 50px !important;
+  width: 100% !important;
+
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  line-height: 21.75px !important;
+  color: rgb(17, 17, 17) !important;
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  border: 1px solid rgba(15, 17, 21, 0.07) !important;
+  border-radius: 10px !important;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.9) 0px 1px 0px 0px inset, rgba(17, 17, 20, 0.024) 0px 1px 3px 0px !important;
+}
+
+/* For dark mode placeholder & text support on auth input */
+.dark .input-auth {
+  color: rgb(240, 240, 240) !important;
+  background-color: rgba(20, 20, 20, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: rgba(255, 255, 255, 0.05) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 3px 0px !important;
+}
+
 

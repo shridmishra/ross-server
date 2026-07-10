@@ -5,14 +5,13 @@ import { useAuth } from "../../contexts/AuthContext";
 import { showToast } from "../../lib/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { PasswordStrengthIndicator } from "../../components/auth/PasswordStrengthIndicator";
-import { IconEye, IconEyeOff, IconLoader2, IconUser, IconBuilding, IconMail, IconLock } from "@tabler/icons-react";
+import { IconEye, IconEyeOff, IconLoader2, IconUser, IconBuilding, IconMail, IconLock, IconArrowRight, IconInfoCircle } from "@tabler/icons-react";
 import { ALLOWED_SPECIAL_CHARS } from "../../lib/passwordValidation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function AuthPage() {
@@ -24,6 +23,7 @@ export default function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const { login, register, mfaRequired, setMfaRequired } = useAuth();
+  const [showRequirements, setShowRequirements] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -39,18 +39,10 @@ export default function AuthPage() {
 
   const validateRedirect = (url: string | null): string => {
     if (!url) return "/dashboard";
-    
-    // Check if it's a safe relative path
-    // Starts with / but not // (which is a protocol-relative URL)
-    // Does not contain :// (which marks an absolute URL)
     const isSafeRelative = url.startsWith("/") && !url.startsWith("//") && !url.includes("://");
-    
     if (!isSafeRelative) return "/dashboard";
-    
-    // Optional: Restrict to allowed prefixes
     const allowedPrefixes = ["/dashboard", "/profile", "/assess", "/invite"];
     const isWhitelisted = allowedPrefixes.some(prefix => url.startsWith(prefix));
-    
     return isWhitelisted ? url : "/dashboard";
   };
 
@@ -92,9 +84,6 @@ export default function AuthPage() {
         });
 
         showToast.success("Registration successful! Please check your email for verification.");
-        // Best-effort: sessionStorage can throw in restricted browsers (Safari
-        // private mode, storage-disabled, quota). Don't let that block the
-        // redirect — the URL fallback still carries the email.
         try {
           sessionStorage.setItem('pendingVerificationEmail', formData.email);
         } catch (storageErr) {
@@ -122,315 +111,411 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-8"
-        >
-          <h2 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">
-              {isLogin ? "Welcome Back" : "Get Started"}
-            </span>
-          </h2>
-          <p className="text-muted-foreground">
-            {isLogin ? "Sign in to your account" : "Create your account"}
-          </p>
-        </motion.div>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          {isLogin ? (
-            <>
-              Or{" "}
-              <Button
-                variant="link"
-                className="p-0 h-auto font-medium text-primary dark:text-primary"
-                onClick={() => router.push("/auth?isLogin=false")}
-              >
-                create a new account
-              </Button>
-            </>
-          ) : (
-            <>
-              Or{" "}
-              <Button
-                variant="link"
-                className="p-0 h-auto font-medium text-primary dark:text-primary"
-                onClick={() => router.push("/auth?isLogin=true")}
-              >
-                sign in to existing account
-              </Button>
-            </>
-          )}
-        </p>
-      </div>
+    <div className="min-h-screen flex w-full bg-white dark:bg-black p-[14px]">
+      {/* Left Pane - Form */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-between py-4 px-6 sm:px-10 bg-white dark:bg-black overflow-y-auto">
+        <div className="flex justify-between items-center w-full mb-4">
+          <Link href="/" className="flex items-center">
+            <span className="text-lg font-bold tracking-tight text-foreground">MATUR.ai</span>
+          </Link>
+          <Link href={isLogin ? "/auth?isLogin=false" : "/auth?isLogin=true"} className="text-sm font-semibold text-foreground hover:underline">
+            {isLogin ? "Sign up" : "Sign in"}
+          </Link>
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <Card className="glass-effect border-0">
-            <CardContent className="pt-6">
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {!isLogin && (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">First Name</Label>
-                        <div className="relative">
-                          <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required={!isLogin}
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder="First Name"
-                            maxLength={50}
-                            pattern="^[^0-9]*$"
-                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("First name should not contain numbers")}
-                            onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
-                            className="h-12 pl-10"
-                          />
-                        </div>
-                      </div>
+        {/* Center Form Container */}
+        <div className="w-full max-w-md mx-auto my-auto py-2">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-4"
+          >
+            <h2 className="text-3xl font-bold mb-1 tracking-tight text-foreground">
+              {isLogin ? "Welcome Back" : "Create your account"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isLogin ? "Sign in to your account" : "Enter the details below"}
+            </p>
+          </motion.div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <div className="relative">
-                          <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="lastName"
-                            name="lastName"
-                            type="text"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            placeholder="Last Name"
-                            maxLength={50}
-                            pattern="^[^0-9]*$"
-                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("Last name should not contain numbers")}
-                            onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
-                            className="h-12 pl-10"
-                          />
-                        </div>
-                      </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {!isLogin && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="name" className="text-sm flex items-center gap-1.5 mb-1">
+                        <IconUser className="h-4 w-4 text-muted-foreground" />
+                        First Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required={!isLogin}
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="First Name"
+                        maxLength={50}
+                        pattern="^[^0-9]*$"
+                        onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("First name should not contain numbers")}
+                        onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
+                        className="h-[50px] text-sm input-auth"
+                      />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="organization">Organization (Optional)</Label>
-                      <div className="relative">
-                        <IconBuilding className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="organization"
-                          name="organization"
-                          type="text"
-                          value={formData.organization}
-                          onChange={handleChange}
-                          className="h-12 pl-10"
-                        />
-                      </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="lastName" className="text-sm flex items-center gap-1.5 mb-1">
+                        <IconUser className="h-4 w-4 text-muted-foreground" />
+                        Last Name
+                      </Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Last Name"
+                        maxLength={50}
+                        pattern="^[^0-9]*$"
+                        onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("Last name should not contain numbers")}
+                        onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
+                        className="h-[50px] text-sm input-auth"
+                      />
                     </div>
-                  </>
-                )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email address</Label>
-                  <div className="relative">
-                    <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <div className="space-y-1">
+                    <Label htmlFor="organization" className="text-sm flex items-center gap-1.5 mb-1">
+                      <IconBuilding className="h-4 w-4 text-muted-foreground" />
+                      Organization (Optional)
+                    </Label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={formData.email}
+                      id="organization"
+                      name="organization"
+                      type="text"
+                      value={formData.organization}
                       onChange={handleChange}
-                      className="h-12 pl-10"
+                      className="h-[50px] text-sm input-auth"
                     />
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="h-12 pl-10 pr-12"
-                    />
+              <div className="space-y-1">
+                <Label htmlFor="email" className="text-sm flex items-center gap-1.5 mb-1">
+                  <IconMail className="h-4 w-4 text-muted-foreground" />
+                  Email address
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="h-[50px] text-sm input-auth"
+                />
+              </div>
+
+              {isLogin ? (
+                // Login Password Row (Includes Forgot password)
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <Label htmlFor="password" className="text-sm flex items-center gap-1.5">
+                      <IconLock className="h-4 w-4 text-muted-foreground" />
+                      Password
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center"
+                    >
+                      {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="h-[50px] text-sm input-auth"
+                  />
+                  <div className="flex justify-end mt-1">
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setShowPassword(prev => !prev)
-                      }}
+                      variant="link"
+                      className="p-0 h-auto text-sm text-black dark:text-white hover:underline font-normal"
+                      onClick={() => router.push("/auth/forgot-password")}
                     >
-                      {showPassword ? <IconEyeOff className="h-4 w-4 text-muted-foreground" /> : <IconEye className="h-4 w-4 text-muted-foreground" />}
+                      Forgot password?
                     </Button>
                   </div>
                 </div>
-
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+              ) : (
+                // Registration Password Row (Side-by-side Password and Confirm Password)
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <Label htmlFor="password" className="text-sm flex items-center gap-1.5">
+                        <IconLock className="h-4 w-4 text-muted-foreground" />
+                        Password
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowRequirements(prev => !prev)}
+                          className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center"
+                          title="Password requirements"
+                        >
+                          <IconInfoCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(prev => !prev)}
+                          className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center"
+                        >
+                          {showPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
                     <div className="relative">
-                      <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
                         autoComplete="new-password"
                         required
-                        value={formData.confirmPassword}
+                        value={formData.password}
                         onChange={handleChange}
-                        className="h-12 pl-10 pr-12"
+                        onFocus={() => setShowRequirements(true)}
+                        onBlur={() => setTimeout(() => setShowRequirements(false), 200)}
+                        className="h-[50px] text-sm input-auth"
                       />
-                      <Button
+                      <AnimatePresence>
+                        {showRequirements && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="absolute right-0 z-50 mt-1 w-[280px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3.5 shadow-xl text-xs space-y-2"
+                          >
+                            <h4 className="font-semibold text-foreground">Password requirements:</h4>
+                            <ul className="space-y-1.5 text-muted-foreground">
+                              <li className="flex items-center gap-1.5">
+                                <span className={formData.password.length >= 8 ? "text-green-500 font-semibold" : ""}>
+                                  ✓ At least 8 characters
+                                </span>
+                              </li>
+                              <li className="flex items-center gap-1.5">
+                                <span className={/[A-Z]/.test(formData.password) ? "text-green-500 font-semibold" : ""}>
+                                  ✓ One uppercase letter (A-Z)
+                                </span>
+                              </li>
+                              <li className="flex items-center gap-1.5">
+                                <span className={/[a-z]/.test(formData.password) ? "text-green-500 font-semibold" : ""}>
+                                  ✓ One lowercase letter (a-z)
+                                </span>
+                              </li>
+                              <li className="flex items-center gap-1.5">
+                                <span className={/[0-9]/.test(formData.password) ? "text-green-500 font-semibold" : ""}>
+                                  ✓ One number (0-9)
+                                </span>
+                              </li>
+                              <li className="flex items-center gap-1.5">
+                                <span className={/[!@#$%^&*]/.test(formData.password) ? "text-green-500 font-semibold" : ""}>
+                                  ✓ One special character (!@#$%^&*)
+                                </span>
+                              </li>
+                            </ul>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <Label htmlFor="confirmPassword" className="text-sm flex items-center gap-1.5">
+                        <IconLock className="h-4 w-4 text-muted-foreground" />
+                        Confirm Password
+                      </Label>
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setShowConfirmPassword(prev => !prev)
-                        }}
+                        onClick={() => setShowConfirmPassword(prev => !prev)}
+                        className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center"
                       >
-                        {showConfirmPassword ? <IconEyeOff className="h-4 w-4 text-muted-foreground" /> : <IconEye className="h-4 w-4 text-muted-foreground" />}
-                      </Button>
+                        {showConfirmPassword ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
+                      </button>
                     </div>
-                  </div>
-                )}
-
-                {/* Password Requirements - Only show during registration */}
-                {!isLogin && (
-                  <PasswordStrengthIndicator
-                    password={formData.password}
-                    userInfo={{ email: formData.email, name: formData.name }}
-                    showDetails={true}
-                  />
-                )}
-
-                {/* MFA Input - Only show during login when MFA is required */}
-                {isLogin && mfaRequired && (
-                  <div className="space-y-4">
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-bold">!</span>
-                        </div>
-                        <h3 className="text-primary font-semibold">
-                          Two-Factor Authentication Required
-                        </h3>
-                      </div>
-                      <p className="text-primary dark:text-primary/70 text-sm">
-                        Please enter your 6-digit authentication code or backup code
-                        to continue.
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="mfaCode">Authentication Code</Label>
-                      <Input
-                        id="mfaCode"
-                        name="mfaCode"
-                        type="text"
-                        placeholder="000000"
-                        maxLength={6}
-                        value={formData.mfaCode}
-                        onChange={handleChange}
-                        className="h-12 text-center text-2xl tracking-widest"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Enter the 6-digit code from your authenticator app
-                      </p>
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <Separator />
-                      </div>
-                      <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-card text-muted-foreground">
-                          Or
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="backupCode">Backup Code</Label>
-                      <Input
-                        id="backupCode"
-                        name="backupCode"
-                        type="text"
-                        placeholder="Enter backup code"
-                        value={formData.backupCode}
-                        onChange={handleChange}
-                        className="h-12"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Use a backup code if you don't have access to your
-                        authenticator app
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {error && (
-                  <div className="text-destructive text-sm text-center bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                    {error}
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-12 bg-primary hover:bg-primary/80 font-semibold"
-                >
-                  {loading ? (
-                    <>
-                      <IconLoader2 className="h-4 w-4 animate-spin" />
-                      Please wait...
-                    </>
-                  ) : isLogin ? (
-                    "Sign in"
-                  ) : (
-                    "Create account"
-                  )}
-                </Button>
-              </form>
-
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-card text-muted-foreground">Or</span>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="h-[50px] text-sm input-auth"
+                    />
                   </div>
                 </div>
+              )}
 
-                <div className="mt-6 text-center">
-                  <Button variant="link" asChild className="text-primary">
-                    <Link href="/">Back to home</Link>
-                  </Button>
+              {!isLogin && (
+                <PasswordStrengthIndicator
+                  password={formData.password}
+                  userInfo={{ email: formData.email, name: formData.name }}
+                  showDetails={false} // Hide details to keep it extremely compact and avoid overflow
+                />
+              )}
+
+              {isLogin && mfaRequired && (
+                <div className="space-y-3">
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">!</span>
+                      </div>
+                      <h3 className="text-primary text-xs font-semibold">
+                        Two-Factor Authentication Required
+                      </h3>
+                    </div>
+                    <p className="text-primary dark:text-primary/70 text-sm">
+                      Please enter your 6-digit authentication code or backup code.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="mfaCode" className="text-sm">Authentication Code</Label>
+                    <Input
+                      id="mfaCode"
+                      name="mfaCode"
+                      type="text"
+                      placeholder="000000"
+                      maxLength={6}
+                      value={formData.mfaCode}
+                      onChange={handleChange}
+                      className="h-[50px] text-center text-xl tracking-widest input-auth"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-2 bg-white dark:bg-black text-muted-foreground">
+                        Or
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="backupCode" className="text-sm">Backup Code</Label>
+                    <Input
+                      id="backupCode"
+                      name="backupCode"
+                      type="text"
+                      placeholder="Enter backup code"
+                      value={formData.backupCode}
+                      onChange={handleChange}
+                      className="h-[50px] text-sm input-auth"
+                    />
+                  </div>
                 </div>
+              )}
+
+              {error && (
+                <div className="text-destructive text-sm text-center bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-auth-submit"
+              >
+                {loading ? (
+                  <>
+                    <IconLoader2 className="h-4 w-4 animate-spin mr-1" />
+                    Please wait...
+                  </>
+                ) : isLogin ? (
+                  <>
+                    Sign in
+                    <IconArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                ) : (
+                  <>
+                    Create account
+                    <IconArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-muted-foreground space-y-3">
+              <div>
+                {isLogin ? (
+                  <>
+                    New to MATUR.ai?{" "}
+                    <Link href="/auth?isLogin=false" className="font-semibold text-foreground hover:underline">
+                      Create an account
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <Link href="/auth?isLogin=true" className="font-semibold text-foreground hover:underline">
+                      Sign in
+                    </Link>
+                  </>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <div>
+                <Link href="/" className="hover:text-foreground text-xs text-muted-foreground hover:underline">
+                  Back to home
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Footer Row */}
+        <div className="flex justify-between items-center w-full text-xs text-muted-foreground mt-4">
+          <span>&copy; {new Date().getFullYear()} MATUR.ai</span>
+          <div className="flex gap-3">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Pane - Image */}
+      <div className="hidden lg:block lg:w-[55%] relative">
+        <div className="w-full h-full rounded-[12px] overflow-hidden shadow-lg relative">
+          <img
+            src="/auth_bg_light.png"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover dark:hidden"
+          />
+          <img
+            src="/auth_bg_dark.jpg"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover hidden dark:block"
+          />
+        </div>
       </div>
     </div>
   );

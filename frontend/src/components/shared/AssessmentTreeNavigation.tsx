@@ -849,7 +849,7 @@ const AssessmentTreeNavigation: React.FC<AssessmentTreeNavigationProps> = ({
                                                 </div>
 
                                                 {isCatExpanded && catControls.length > 0 && (
-                                                  <SidebarMenuSub id={`crc-category-${catIdx}`} className="border-sidebar-border/50 mt-1 gap-0.5">
+                                                  <SidebarMenuSub id={`crc-category-${catIdx}`} className="border-sidebar-border/50 mt-1 gap-0.5 ml-[34px]">
                                                     {catControls.map((control: CRCControl) => {
                                                       const isAnswered = crcResponses[control.id] !== undefined;
                                                       return (
