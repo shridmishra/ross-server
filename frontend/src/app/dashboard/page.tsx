@@ -632,11 +632,8 @@ export default function DashboardPage() {
                       animate={{ opacity: 1, y: 0 }}
                       whileHover={{ y: -5 }}
                     >
-                      <Card
-                        className={`h-full flex flex-col justify-between hover:shadow-xl transition-all duration-300 cursor-pointer border ${theme.border} ${theme.shadow} ${
-                          ["card-google-blue", "card-google-red", "card-google-yellow", "card-google-green", "card-google-purple"][index % 5]
-                        }`}
-                        onClick={() => {
+                      {(() => {
+                        const handleProjectClick = () => {
                           if (project.status === 'completed') {
                             router.push(getProjectReportHref(project.id));
                           } else if (project.status === "not_started") {
@@ -645,8 +642,22 @@ export default function DashboardPage() {
                           } else {
                             router.push(getProjectEditHref(project.id));
                           }
-                        }}
-                      >
+                        };
+                        return (
+                          <Card
+                            role="button"
+                            tabIndex={0}
+                            className={`h-full flex flex-col justify-between hover:shadow-xl transition-all duration-300 cursor-pointer border ${theme.border} ${theme.shadow} ${
+                              ["card-google-blue", "card-google-red", "card-google-yellow", "card-google-green", "card-google-purple"][index % 5]
+                            }`}
+                            onClick={handleProjectClick}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleProjectClick();
+                              }
+                            }}
+                          >
                         <CardHeader className="pb-3 flex-none">
                           <div className="flex justify-between items-start w-full min-w-0">
                             <div className="flex-1 mr-2 min-w-0">
@@ -782,6 +793,8 @@ export default function DashboardPage() {
                           )}
                         </CardFooter>
                       </Card>
+                      );
+                      })()}
                     </motion.div>
                   );
                 })}

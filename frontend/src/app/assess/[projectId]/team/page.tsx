@@ -84,6 +84,7 @@ export default function TeamManagementPage() {
     const [members, setMembers] = useState<ProjectMember[]>([]);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
 
     // Invite state
@@ -108,8 +109,12 @@ export default function TeamManagementPage() {
         }
     }, [projectId, isAuthenticated, user?.id]);
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
+    const fetchData = useCallback(async (isRefresh = false) => {
+        if (isRefresh) {
+            setIsRefreshing(true);
+        } else {
+            setLoading(true);
+        }
         try {
             const [memRes, projectRes] = await Promise.all([
                 apiService.getProjectMembers(projectId),
@@ -146,7 +151,11 @@ export default function TeamManagementPage() {
             setIsOwner(false);
             setInvitations([]);
         } finally {
-            setLoading(false);
+            if (isRefresh) {
+                setIsRefreshing(false);
+            } else {
+                setLoading(false);
+            }
         }
     }, [projectId, user?.id, user?.email]);
 
@@ -363,11 +372,11 @@ export default function TeamManagementPage() {
                     <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={fetchData} 
-                        disabled={loading}
+                        onClick={() => fetchData(true)} 
+                        disabled={isRefreshing}
                         className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                     >
-                        <IconRefresh className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+                        <IconRefresh className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
                 </CardHeader>

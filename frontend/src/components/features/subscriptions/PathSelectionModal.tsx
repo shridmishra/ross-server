@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { TrialConfirmationModal } from "./TrialConfirmationModal";
+import { useTrialStart } from "./useTrialStart";
 import {
   IconCircleCheck,
   IconCrown,
@@ -81,8 +82,8 @@ export default function PathSelectionModal({
   onSelectPremium,
   onUpgradeClick,
 }: PathSelectionModalProps) {
-  const { user, refreshUser } = useAuth();
-  const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const { user } = useAuth();
+  const { confirmTrial, isStartingTrial } = useTrialStart();
   const [isSelectingAima, setIsSelectingAima] = useState(false);
   const [showTrialConfirm, setShowTrialConfirm] = useState(false);
 
@@ -117,20 +118,11 @@ export default function PathSelectionModal({
     setShowTrialConfirm(true);
   };
 
-  const handleConfirmTrial = async () => {
-    setIsStartingTrial(true);
-    try {
-      await apiService.startTrial();
-      await refreshUser();
-      showToast.success("🎉 Your 7-day free trial has started!");
+  const handleConfirmTrial = () => {
+    confirmTrial(() => {
       setShowTrialConfirm(false);
       onSelectPremium();
-    } catch (error: any) {
-      console.error("Failed to start trial:", error);
-      showToast.error(error.message || "Failed to start free trial.");
-    } finally {
-      setIsStartingTrial(false);
-    }
+    });
   };
 
   return (

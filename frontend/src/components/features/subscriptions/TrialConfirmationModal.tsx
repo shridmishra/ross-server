@@ -22,7 +22,7 @@ import {
 interface TrialConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => void | Promise<void>;
   isLoading?: boolean;
 }
 
@@ -67,6 +67,7 @@ export function TrialConfirmationModal({
           {!isLoading && (
             <button
               onClick={onClose}
+              aria-label="Close"
               className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors z-50"
             >
               <IconX className="w-5 h-5" />

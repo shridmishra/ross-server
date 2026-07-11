@@ -685,9 +685,13 @@ export default function CRCAssessmentPage() {
             {/* Supporting Card (Evidence, Notes, Collaboration) */}
             <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
               {/* Tab Headers */}
-              <div className="flex border-b border-border bg-muted/30">
+              <div role="tablist" className="flex border-b border-border bg-muted/30">
                 <button
                   type="button"
+                  id="tab-evidence"
+                  role="tab"
+                  aria-selected={activeTab === "evidence"}
+                  aria-controls="panel-evidence"
                   onClick={() => setActiveTab("evidence")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
                     activeTab === "evidence"
@@ -701,6 +705,10 @@ export default function CRCAssessmentPage() {
                 </button>
                 <button
                   type="button"
+                  id="tab-notes"
+                  role="tab"
+                  aria-selected={activeTab === "notes"}
+                  aria-controls="panel-notes"
                   onClick={() => setActiveTab("notes")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
                     activeTab === "notes"
@@ -714,6 +722,10 @@ export default function CRCAssessmentPage() {
                 </button>
                 <button
                   type="button"
+                  id="tab-comments"
+                  role="tab"
+                  aria-selected={activeTab === "comments"}
+                  aria-controls="panel-comments"
                   onClick={() => setActiveTab("comments")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
                     activeTab === "comments"
@@ -731,6 +743,9 @@ export default function CRCAssessmentPage() {
               <div className="p-6">
                 {activeTab === "evidence" && (
                   <motion.div
+                    id="panel-evidence"
+                    role="tabpanel"
+                    aria-labelledby="tab-evidence"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="space-y-4"
@@ -888,6 +903,9 @@ export default function CRCAssessmentPage() {
 
                 {activeTab === "notes" && (
                   <motion.div
+                    id="panel-notes"
+                    role="tabpanel"
+                    aria-labelledby="tab-notes"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="space-y-4"
@@ -915,6 +933,9 @@ export default function CRCAssessmentPage() {
 
                 {activeTab === "comments" && (
                   <motion.div
+                    id="panel-comments"
+                    role="tabpanel"
+                    aria-labelledby="tab-comments"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                   >

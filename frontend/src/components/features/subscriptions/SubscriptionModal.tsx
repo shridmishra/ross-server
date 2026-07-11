@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrialConfirmationModal } from "./TrialConfirmationModal";
+import { useTrialStart } from "./useTrialStart";
 import {
   IconCrown,
   IconBuilding,
@@ -61,29 +62,20 @@ export default function SubscriptionModal({
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
   const [showTrialConfirm, setShowTrialConfirm] = useState(false);
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
+  const { confirmTrial, isStartingTrial } = useTrialStart();
 
   const handleStartTrial = () => {
     setShowTrialConfirm(true);
   };
 
-  const handleConfirmTrial = async () => {
-    if (upgradingPlan !== null) return;
-    try {
-      setUpgradingPlan("trial");
-      await apiService.startTrial();
-      await refreshUser();
-      showToast.success("Free trial started successfully!");
+  const handleConfirmTrial = () => {
+    confirmTrial(() => {
       setShowTrialConfirm(false);
       onClose();
       // Optional: reload the page to refresh all state completely
       window.location.reload();
-    } catch (error: any) {
-      console.error("Failed to start trial:", error);
-      showToast.error(error.message || "Failed to start free trial.");
-    } finally {
-      setUpgradingPlan(null);
-    }
+    });
   };
 
   const saveReturnUrlForCheckout = () => {
@@ -276,10 +268,10 @@ export default function SubscriptionModal({
                 </div>
                 <Button
                   onClick={handleStartTrial}
-                  disabled={upgradingPlan !== null}
+                  disabled={upgradingPlan !== null || isStartingTrial}
                   className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8 shadow-md"
                 >
-                  {upgradingPlan === "trial" ? (
+                  {isStartingTrial ? (
                     <>
                       <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                       Starting...
@@ -500,7 +492,7 @@ export default function SubscriptionModal({
       isOpen={showTrialConfirm}
       onClose={() => setShowTrialConfirm(false)}
       onConfirm={handleConfirmTrial}
-      isLoading={upgradingPlan === "trial"}
+      isLoading={isStartingTrial}
     />
     </>
   );

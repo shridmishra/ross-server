@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrialConfirmationModal } from "./TrialConfirmationModal";
+import { useTrialStart } from "./useTrialStart";
 import {
   IconCrown,
   IconShield,
@@ -49,9 +50,9 @@ const HIGHLIGHTS = [
 ];
 
 export default function PremiumReEngagementPopup() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
+  const { confirmTrial, isStartingTrial } = useTrialStart();
   const [isVisible, setIsVisible] = useState(false);
-  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
@@ -96,21 +97,12 @@ export default function PremiumReEngagementPopup() {
     setShowTrialConfirm(true);
   };
 
-  const handleConfirmTrial = async () => {
-    setIsStartingTrial(true);
-    try {
-      await apiService.startTrial();
-      await refreshUser();
-      showToast.success("🎉 Your 7-day free trial has started!");
+  const handleConfirmTrial = () => {
+    confirmTrial(() => {
       setShowTrialConfirm(false);
       setIsVisible(false);
       window.location.reload();
-    } catch (error: any) {
-      console.error("Failed to start trial:", error);
-      showToast.error(error.message || "Failed to start free trial.");
-    } finally {
-      setIsStartingTrial(false);
-    }
+    });
   };
 
   if (!isVisible) return null;
