@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { IconCircleCheck, IconCircleX, IconLoader2 } from "@tabler/icons-react";
+import { IconCircleCheck, IconCircleX, IconLoader2, IconArrowRight } from "@tabler/icons-react";
 import { Skeleton } from "@/components/Skeleton";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -47,104 +45,136 @@ export default function VerifyEmailPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-8"
-        >
-          <h2 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">Email Verification</span>
-          </h2>
-          <p className="text-muted-foreground">
-            Verifying your email address
-          </p>
-        </motion.div>
+    <div className="min-h-screen flex w-full bg-white dark:bg-black p-[14px]">
+      {/* Left Pane - Form */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-between py-4 px-6 sm:px-10 bg-white dark:bg-black overflow-y-auto">
+        <div className="flex justify-between items-center w-full mb-4">
+          <Link href="/" className="flex items-center">
+            <span className="text-lg font-bold tracking-tight text-foreground">MATUR.ai</span>
+          </Link>
+          <Link href="/auth?isLogin=true" className="text-sm font-semibold text-foreground hover:underline">
+            Sign In
+          </Link>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <Card className="bg-card/80 backdrop-blur-lg shadow-xl border-border">
-            <CardContent className="py-8 px-4 sm:px-10">
-              <div className="text-center">
-                {status === "loading" && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-6"
-                  >
-                    <Skeleton variant="circular" width="4rem" height="4rem" className="mx-auto mb-4" />
-                    <Skeleton height="1.25rem" width="200px" className="mx-auto" />
-                  </motion.div>
-                )}
+        {/* Center Form Container */}
+        <div className="w-full max-w-md mx-auto my-auto py-2">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-4"
+          >
+            <h2 className="text-3xl font-bold mb-1 tracking-tight text-foreground">
+              Email Verification
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Verifying your email address
+            </p>
+          </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <div className="text-center">
+              {status === "loading" && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="mb-4"
+                >
+                  <Skeleton variant="circular" width="3.5rem" height="3.5rem" className="mx-auto mb-3" />
+                  <Skeleton height="1rem" width="160px" className="mx-auto" />
+                </motion.div>
+              )}
+
+              {status === "success" && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="mb-4"
+                >
+                  <IconCircleCheck className="w-12 h-12 text-success mx-auto" />
+                  <p className="mt-3 text-success text-sm font-medium">
+                    {message}
+                  </p>
+                </motion.div>
+              )}
+
+              {status === "error" && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="mb-4"
+                >
+                  <IconCircleX className="w-12 h-12 text-destructive mx-auto" />
+                  <p className="mt-3 text-destructive text-sm font-medium">
+                    {message}
+                  </p>
+                </motion.div>
+              )}
+
+              <div className="mt-6 space-y-3">
                 {status === "success" && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-6"
-                  >
-                    <IconCircleCheck className="w-16 h-16 text-success mx-auto" />
-                    <p className="mt-4 text-success font-medium">
-                      {message}
-                    </p>
-                  </motion.div>
+                  <Link href="/auth?isLogin=true" className="btn-auth-submit">
+                    Sign In to Your Account
+                    <IconArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
                 )}
 
                 {status === "error" && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-6"
-                  >
-                    <IconCircleX className="w-16 h-16 text-destructive mx-auto" />
-                    <p className="mt-4 text-destructive font-medium">
-                      {message}
-                    </p>
-                  </motion.div>
-                )}
-
-                <div className="mt-8 space-y-4">
-                  {status === "success" && (
-                    <Button asChild className="w-full bg-primary hover:bg-primary/90 h-12">
-                      <Link href="/auth?isLogin=true">
-                        Sign In to Your Account
+                  <div className="space-y-2">
+                    <Link href="/auth?isLogin=true" className="btn-auth-submit">
+                      Try Again
+                      <IconArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                    <Button asChild variant="secondary" className="w-full h-10 text-sm">
+                      <Link href="/">
+                        Back to Home
                       </Link>
                     </Button>
-                  )}
+                  </div>
+                )}
 
-                  {status === "error" && (
-                    <div className="space-y-3">
-                      <Button asChild className="w-full bg-primary hover:bg-primary/90 h-12">
-                        <Link href="/auth">
-                          Try Again
-                        </Link>
-                      </Button>
-                      <Button asChild variant="secondary" className="w-full h-12">
-                        <Link href="/">
-                          Back to Home
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-
-                  {status === "loading" && (
-                    <p className="text-sm text-muted-foreground">
-                      Please wait while we verify your email...
-                    </p>
-                  )}
-                </div>
+                {status === "loading" && (
+                  <p className="text-sm text-muted-foreground">
+                    Please wait while we verify your email...
+                  </p>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Footer Row */}
+        <div className="flex justify-between items-center w-full text-xs text-muted-foreground mt-4">
+          <span>&copy; {new Date().getFullYear()} MATUR.ai</span>
+          <div className="flex gap-3">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Pane - Image */}
+      <div className="hidden lg:block lg:w-[55%] relative">
+        <div className="w-full h-full rounded-[12px] overflow-hidden shadow-lg relative">
+          <img
+            src="/auth_bg_light.png"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover dark:hidden"
+          />
+          <img
+            src="/auth_bg_dark.jpg"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover hidden dark:block"
+          />
+        </div>
       </div>
     </div>
   );

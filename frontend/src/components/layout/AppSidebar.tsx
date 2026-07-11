@@ -1127,7 +1127,7 @@ function SidebarContentComponent() {
                                               </div>
 
                                               {isCatExpanded && catControls.length > 0 && (
-                                                <SidebarMenuSub className="border-sidebar-border/50 mt-0.5 gap-0">
+                                                <SidebarMenuSub className="border-sidebar-border/50 mt-0.5 gap-0 ml-7">
                                                   {catControls.map((control: CRCControl) => {
                                                     const isAnswered = crcResponses[control.id] !== undefined;
                                                     return (

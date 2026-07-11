@@ -9,7 +9,9 @@ import {
   IconCircleX,
   IconArrowLeft,
   IconRefresh,
-  IconClock
+  IconClock,
+  IconLoader2,
+  IconArrowRight
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -17,9 +19,7 @@ import { showToast } from "@/lib/toast";
 import { Skeleton } from "@/components/Skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
 export default function VerifyOTPPage() {
   const router = useRouter();
@@ -35,13 +35,6 @@ export default function VerifyOTPPage() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Get email from the URL query (preferred) or sessionStorage as fallback.
-  // The URL is read with decodeURIComponent — not URLSearchParams.get —
-  // because the latter follows form-encoded semantics and decodes "+" to a
-  // space, corrupting plus-addressed emails like user+tag@example.com.
-  // sessionStorage access is wrapped in try/catch so a hardened browser
-  // (private mode / disabled storage) can't break the bootstrap, and is
-  // only consulted when the URL has no email so a stale stored value
-  // can't override a fresh verification link.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const match = window.location.search.match(/[?&]email=([^&]*)/);
@@ -198,212 +191,191 @@ export default function VerifyOTPPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl floating-animation"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl floating-animation" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-primary/5 rounded-full blur-2xl floating-animation" style={{ animationDelay: '4s' }}></div>
-      </div>
+    <div className="min-h-screen flex w-full bg-white dark:bg-black p-[14px]">
+      {/* Left Pane - Form */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-between py-4 px-6 sm:px-10 bg-white dark:bg-black overflow-y-auto">
+        <div className="flex justify-between items-center w-full mb-4">
+          <Link href="/" className="flex items-center">
+            <span className="text-lg font-bold tracking-tight text-foreground">MATUR.ai</span>
+          </Link>
+          <Link href="/auth?isLogin=true" className="text-sm font-semibold text-foreground hover:underline">
+            Sign in
+          </Link>
+        </div>
 
-      <div className="relative sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-8"
-        >
-          <div className="mb-6">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="w-20 h-20 mx-auto bg-primary rounded-2xl flex items-center justify-center shadow-lg pulse-glow"
-            >
-              <IconShield className="w-10 h-10 text-primary-foreground" />
-            </motion.div>
+        {/* Center Form Container */}
+        <div className="w-full max-w-md mx-auto my-auto py-2">
+          {/* Progress Bar */}
+          <div className="flex gap-2 w-full mb-6">
+            <div className="h-[3px] flex-1 bg-black dark:bg-white rounded-full" />
+            <div className="h-[3px] flex-1 bg-black dark:bg-white rounded-full" />
+            <div className="h-[3px] flex-1 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
           </div>
 
-          <h2 className="text-4xl font-bold mb-2">
-            <span className="gradient-text">Verify Your Identity</span>
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Enter the 6-digit code sent to
-          </p>
-          <p className="text-primary font-semibold">
-            {email}
-          </p>
-        </motion.div>
+          {/* Back link */}
+          <div className="mb-4">
+            <Link href="/auth" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground font-medium">
+              <IconArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Link>
+          </div>
 
-        {/* Main Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <Card className="glass-effect border-0">
-            <CardContent className="pt-6">
-              <AnimatePresence mode="wait">
-                {success ? (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="text-center"
-                  >
-                    <IconCircleCheck className="w-16 h-16 text-success mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold text-success mb-2">
-                      Verification Successful!
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      Your account has been verified. Redirecting to dashboard...
-                    </p>
-                    <div className="flex justify-center">
-                      <Skeleton variant="circular" width="1.5rem" height="1.5rem" />
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-4"
+          >
+            <h2 className="text-3xl font-bold mb-1 tracking-tight text-foreground">
+              Check your inbox
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              We sent a 6 digit code to <span className="font-semibold text-foreground">{email}</span>.
+            </p>
+          </motion.div>
+
+          {/* Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <AnimatePresence mode="wait">
+              {success ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="text-center"
+                >
+                  <IconCircleCheck className="w-12 h-12 text-success mx-auto mb-3" />
+                  <h3 className="text-xl font-bold text-success mb-1">
+                    Verification Successful!
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Your account has been verified. Redirecting to dashboard...
+                  </p>
+                  <div className="flex justify-center">
+                    <Skeleton variant="circular" width="1.25rem" height="1.25rem" className="mx-auto" />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-start gap-2.5">
+                      {otp.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={(el) => {
+                            inputRefs.current[index] = el;
+                          }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          aria-label={`Digit ${index + 1} of 6`}
+                          onChange={(e) => handleOtpChange(index, e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(index, e)}
+                          onPaste={index === 0 ? handlePaste : undefined}
+                          disabled={loading}
+                          className="w-[52px] h-[64px] text-center text-2xl font-medium rounded-[12px] border border-zinc-200 dark:border-zinc-800 bg-transparent text-foreground transition-all duration-200 focus:outline-none focus:border-black dark:focus:border-white focus:ring-0 shadow-none"
+                        />
+                      ))}
                     </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="form"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-6"
-                  >
-                    {/* OTP Input Fields */}
-                    <div className="space-y-4">
-                      <Label className="text-center block">
-                        Enter verification code
-                      </Label>
+                  </div>
 
-                      <div className="flex justify-center space-x-3">
-                        {otp.map((digit, index) => (
-                          <motion.input
-                            key={index}
-                            ref={(el) => {
-                              inputRefs.current[index] = el;
-                            }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(index, e)}
-                            onPaste={index === 0 ? handlePaste : undefined}
-                            disabled={loading}
-                            className={`
-                              w-12 h-12 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-300
-                              focus:outline-none focus:ring-4 focus:ring-primary/30
-                              ${digit
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'border-border bg-background text-foreground'
-                              }
-                              ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary/60'}
-                            `}
-                            style={{
-                              boxShadow: digit
-                                ? '0 0 20px hsl(var(--primary) / 0.3)'
-                                : 'none'
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Error Message */}
-                    <AnimatePresence>
-                      {error && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="flex items-center space-x-2 text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3"
-                        >
-                          <IconCircleX className="w-5 h-5 flex-shrink-0" />
-                          <span className="text-sm font-medium">{error}</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Action Buttons */}
-                    <div className="space-y-4">
-                      <Button
-                        onClick={() => handleVerifyOTP()}
-                        isLoading={loading}
-                        disabled={otp.some(digit => digit === "")}
-                        className="w-full h-12 bg-primary hover:bg-primary/90 font-semibold"
+                  {/* Error Message */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex items-center space-x-2 text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5"
                       >
-                        {loading ? "Verifying..." : "Verify Code"}
-                      </Button>
+                        <IconCircleX className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">{error}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                      {/* Resend OTP */}
-                      <div className="text-center">
-                        <Button
-                          variant="ghost"
-                          onClick={handleResendOTP}
-                          isLoading={isResending}
-                          disabled={resendCooldown > 0}
-                          className="text-primary"
-                        >
-                          {isResending ? (
-                            "Sending..."
-                          ) : resendCooldown > 0 ? (
-                            <>
-                              <IconClock className="w-4 h-4" />
-                              Resend in {resendCooldown}s
-                            </>
-                          ) : (
-                            <>
-                              <IconRefresh className="w-4 h-4" />
-                              Resend Code
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => handleVerifyOTP()}
+                      disabled={loading || otp.some(digit => digit === "")}
+                      className="btn-auth-submit"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <IconLoader2 className="animate-spin h-4 w-4" />
+                          Verifying...
+                        </span>
+                      ) : (
+                        <>
+                          Verify code
+                          <IconArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </button>
+
+                    {/* Resend OTP */}
+                    <div className="text-center text-sm text-muted-foreground pt-3">
+                      {isResending ? (
+                        "Sending code..."
+                      ) : resendCooldown > 0 ? (
+                        <span>
+                          Didn't get it? <span className="font-semibold text-foreground">Resend in {resendCooldown}s</span>
+                        </span>
+                      ) : (
+                        <span>
+                          Didn't get it?{" "}
+                          <button
+                            type="button"
+                            onClick={handleResendOTP}
+                            className="font-semibold text-foreground hover:underline cursor-pointer"
+                          >
+                            Resend code
+                          </button>
+                        </span>
+                      )}
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
 
-              {/* Navigation */}
-              <div className="mt-8 pt-6">
-                <Separator className="mb-6" />
-                <div className="flex justify-between items-center">
-                  <Button variant="ghost" asChild className="p-0">
-                    <Link href="/auth">
-                      <span className="inline-flex items-center space-x-2">
-                        <IconArrowLeft className="w-4 h-4" />
-                        <span>Back to Sign Up</span>
-                      </span>
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="flex justify-between items-center w-full text-xs text-muted-foreground mt-4">
+          <span>&copy; {new Date().getFullYear()} MATUR.ai</span>
+          <div className="flex gap-3">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+          </div>
+        </div>
+      </div>
 
-        {/* Help Text */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-6 text-center"
-        >
-          <p className="text-sm text-muted-foreground">
-            Didn't receive the code? Check your spam folder or{" "}
-            <Button
-              variant="link"
-              onClick={handleResendOTP}
-              disabled={resendCooldown > 0}
-              className="p-0 h-auto text-primary"
-            >
-              request a new one
-            </Button>
-          </p>
-        </motion.div>
+      {/* Right Pane - Image */}
+      <div className="hidden lg:block lg:w-[55%] relative">
+        <div className="w-full h-full rounded-[12px] overflow-hidden shadow-lg relative">
+          <img
+            src="/auth_bg_light.png"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover dark:hidden"
+          />
+          <img
+            src="/auth_bg_dark.jpg"
+            alt="Auth visual"
+            className="absolute inset-0 w-full h-full object-cover hidden dark:block"
+          />
+        </div>
       </div>
     </div>
   );
