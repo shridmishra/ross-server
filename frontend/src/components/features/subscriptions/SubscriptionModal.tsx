@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TrialConfirmationModal } from "./TrialConfirmationModal";
 import {
   IconCrown,
   IconBuilding,
@@ -59,15 +60,21 @@ export default function SubscriptionModal({
   });
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false);
   const { user, refreshUser } = useAuth();
 
-  const handleStartTrial = async () => {
+  const handleStartTrial = () => {
+    setShowTrialConfirm(true);
+  };
+
+  const handleConfirmTrial = async () => {
     if (upgradingPlan !== null) return;
     try {
       setUpgradingPlan("trial");
       await apiService.startTrial();
       await refreshUser();
       showToast.success("Free trial started successfully!");
+      setShowTrialConfirm(false);
       onClose();
       // Optional: reload the page to refresh all state completely
       window.location.reload();
@@ -213,6 +220,7 @@ export default function SubscriptionModal({
   ];
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl p-0 overflow-y-auto max-h-[90vh] border-0 bg-transparent [&>button]:hidden">
         <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
@@ -487,5 +495,13 @@ export default function SubscriptionModal({
         </div>
       </DialogContent>
     </Dialog>
+
+    <TrialConfirmationModal
+      isOpen={showTrialConfirm}
+      onClose={() => setShowTrialConfirm(false)}
+      onConfirm={handleConfirmTrial}
+      isLoading={upgradingPlan === "trial"}
+    />
+    </>
   );
 }

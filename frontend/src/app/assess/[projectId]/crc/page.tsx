@@ -19,6 +19,8 @@ import {
   IconLock,
   IconDownload,
   IconInfoCircle,
+  IconFileText,
+  IconMessage,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -160,6 +162,7 @@ export default function CRCAssessmentPage() {
 
   const [localNotes, setLocalNotes] = useState<Record<string, string>>({});
   const [showDetails, setShowDetails] = useState(false);
+  const [activeTab, setActiveTab] = useState<"evidence" | "notes" | "comments">("evidence");
 
   // Derive current control from URL or category
   const currentIndex = useMemo(() => {
@@ -356,37 +359,38 @@ export default function CRCAssessmentPage() {
                 )}
               </div>
             </div>
+
+            {/* Progress Bar */}
+            <div className="mt-2 w-full">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Assessment Progress
+                </span>
+                <span className="text-[10px] font-bold text-foreground">
+                  {answeredControls}/{totalControls} Controls ({Math.round(progress)}%)
+                </span>
+              </div>
+              <div className="w-full bg-secondary dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%`, backgroundColor: "var(--section-premium)" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Question Content */}
-        <div className="flex-1 px-8 py-6">
-          <div className="max-w-4xl mx-auto">
-            {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">
-                  Control {currentIndex + 1} of {totalControls}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {Math.round(progress)}% Complete
-                </span>
-              </div>
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-
+        <div className="flex-1 px-8 py-6 w-full">
+          <div className="max-w-4xl mx-auto space-y-6">
+            
             {/* Control Card */}
             <motion.div
               key={currentControl.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-card rounded-2xl shadow-lg border border-border p-8 mb-8"
+              className="bg-card rounded-2xl shadow-lg border border-border p-8"
             >
               {/* Control Header */}
               <div className="mb-6">
@@ -607,7 +611,7 @@ export default function CRCAssessmentPage() {
                 </motion.div>
               )}
 
-              {/* Answer Radio Buttons — Yes / Partially / No */}
+              {/* Answer Radio Buttons — Yes / Partially / No / NA */}
               <div className="space-y-3">
                 {ANSWER_OPTIONS.map((option) => {
                   const isSelected = currentAnswer === option.value;
@@ -653,191 +657,10 @@ export default function CRCAssessmentPage() {
                   );
                 })}
               </div>
-
-              {/* Evidence Tracker Section (Feature I) */}
-              <div className="mt-6 pt-6 border-t border-border space-y-4">
-                <h3 className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                  📋 Evidence Status
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Status Dropdown */}
-                  <div>
-                    <label htmlFor="evidence-status-select" className="block text-xs text-muted-foreground mb-1.5">
-                      Select Status
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="evidence-status-select"
-                        disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null}
-                        value={currentResponse?.evidenceStatus || "No Evidence"}
-                        onChange={async (e) => {
-                          if (currentAnswer === undefined || currentAnswer === null) {
-                            showToast.error("Please answer the control question before managing evidence");
-                            return;
-                          }
-                          const newStatus = e.target.value as any;
-                          try {
-                            await handleEvidenceStatusChange(currentControl.id, newStatus);
-                          } catch (err) {
-                            // Handled in context
-                          }
-                        }}
-                        className="w-full appearance-none px-3 pr-10 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        <option value="No Evidence">No Evidence</option>
-                        <option value="Template Downloaded">Template Downloaded</option>
-                        <option value="Evidence in Progress">Evidence in Progress</option>
-                        <option value="Evidence Complete">Evidence Complete</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
-                        <IconChevronDown className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Badge Display */}
-                  <div className="flex items-end pb-1.5">
-                    <span className="text-xs text-muted-foreground mr-2">Current Status:</span>
-                    {(() => {
-                      const status = currentResponse?.evidenceStatus || "No Evidence";
-                      let colorClass = "bg-secondary text-secondary-foreground";
-                      if (status === "Template Downloaded") colorClass = "bg-blue-500/10 text-blue-500 border border-blue-500/20";
-                      else if (status === "Evidence in Progress") colorClass = "bg-amber-500/10 text-amber-500 border border-amber-500/20";
-                      else if (status === "Evidence Complete") colorClass = "bg-green-500/10 text-green-500 border border-green-500/20";
-                      return (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClass}`}>
-                          {status}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* Evidence URL Input */}
-                {(currentResponse?.evidenceStatus === "Evidence in Progress" || currentResponse?.evidenceStatus === "Evidence Complete") && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
-                  >
-                    <div>
-                      <label htmlFor="evidence-url-input" className="block text-xs text-muted-foreground mb-1.5 flex items-center justify-between">
-                        <span>Evidence URL (HTTPS required)</span>
-                        {currentResponse?.evidenceStatus === "Evidence Complete" && (
-                          <span className="text-red-500 text-[10px]">* Required for Evidence Complete</span>
-                        )}
-                      </label>
-                      <input
-                        id="evidence-url-input"
-                        type="text"
-                        disabled={isReadOnly}
-                        value={urlInput}
-                        placeholder="https://docs.google.com/document/d/... or other documentation link"
-                        onChange={(e) => setUrlInput(e.target.value)}
-                        onBlur={async () => {
-                          if (urlInput === (currentResponse?.evidenceUrl || "")) return;
-                          const finalUrl = urlInput.trim() === "" ? null : urlInput.trim();
-                          try {
-                            await handleEvidenceStatusChange(
-                              currentControl.id, 
-                              currentResponse?.evidenceStatus || "No Evidence", 
-                              finalUrl
-                            );
-                            showToast.success("Evidence URL saved");
-                          } catch (err) {
-                            setUrlInput(currentResponse?.evidenceUrl || "");
-                          }
-                        }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                      />
-                    </div>
-
-                    {/* Audit-ready Checkbox */}
-                    {currentResponse?.evidenceUrl && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-start pt-1"
-                      >
-                        <div className="flex items-center h-5">
-                          <input
-                            id="audit-ready-checkbox"
-                            type="checkbox"
-                            disabled={isReadOnly}
-                            checked={currentResponse?.auditReady || false}
-                            onChange={async (e) => {
-                              try {
-                                await handleEvidenceStatusChange(
-                                  currentControl.id,
-                                  currentResponse?.evidenceStatus || "No Evidence",
-                                  currentResponse?.evidenceUrl,
-                                  e.target.checked
-                                );
-                                showToast.success(e.target.checked ? "Marked as audit ready" : "Removed audit ready status");
-                              } catch (err) {
-                                // Handled in context
-                              }
-                            }}
-                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                          />
-                        </div>
-                        <div className="ml-3 text-xs">
-                          <label htmlFor="audit-ready-checkbox" className="font-medium text-foreground">
-                            🔒 Audit-ready confirmation
-                          </label>
-                          <p className="text-muted-foreground mt-0.5">
-                            I confirm this evidence link is valid, restricted to internal/external compliance reviewers, and currently meets the control requirements.
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                )}
-
-                {/* Gentle nudge message */}
-                {((currentAnswer === 1 || currentAnswer === 0.5) && (!currentResponse?.evidenceStatus || currentResponse?.evidenceStatus === "No Evidence")) && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2 text-xs text-amber-600 dark:text-amber-500"
-                  >
-                    <IconAlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-semibold">Gentle Nudge:</span> You indicated this control is implemented ({currentAnswer === 1 ? "Yes" : "Partially"}), but you haven't uploaded/verified any evidence. Consider downloading the compliance template above to prepare your documentation.
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Notes Section */}
-              <div className="mt-6 pt-6 border-t border-border">
-                <h3 className="text-sm font-medium text-foreground mb-3">
-                  Your Notes
-                </h3>
-                <SecureTextarea
-                  value={currentNote}
-                  onChange={(note) =>
-                    setLocalNotes(prev => ({ ...prev, [currentControl.id]: note }))
-                  }
-                  onBeforeSave={() => {
-                    if (currentAnswer === undefined || currentAnswer === null) {
-                      showToast.error("Please answer the control question before saving notes");
-                      return false;
-                    }
-                    return true;
-                  }}
-                  onSave={(value) => handleCrcNoteSave(currentControl.id, value)}
-                  placeholder="Add your notes about this control — evidence, gaps, action items..."
-                  maxLength={5000}
-                  className="w-full"
-                  readOnly={isReadOnly}
-                />
-              </div>
             </motion.div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between pb-8 border-b border-border mb-8">
+            <div className="flex items-center justify-between pb-4">
               <button
                 onClick={handlePrevious}
                 type="button"
@@ -859,13 +682,250 @@ export default function CRCAssessmentPage() {
               </button>
             </div>
 
-            {/* Project Notes & Collaboration */}
-            <div className="pt-4">
-              <h3 className="text-lg font-semibold mb-4 px-2">Project Notes & Collaboration</h3>
-              <CommentsPanel projectId={projectId} objectType="PROJECT" objectId={projectId} />
+            {/* Supporting Card (Evidence, Notes, Collaboration) */}
+            <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
+              {/* Tab Headers */}
+              <div className="flex border-b border-border bg-muted/30">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("evidence")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
+                    activeTab === "evidence"
+                      ? "border-primary text-primary bg-card"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                  }`}
+                  style={activeTab === "evidence" ? { borderBottomColor: "var(--section-premium)", color: "var(--section-premium)" } : {}}
+                >
+                  <IconShieldCheck className="w-4 h-4" />
+                  Evidence Status
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("notes")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
+                    activeTab === "notes"
+                      ? "border-primary text-primary bg-card"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                  }`}
+                  style={activeTab === "notes" ? { borderBottomColor: "var(--section-premium)", color: "var(--section-premium)" } : {}}
+                >
+                  <IconFileText className="w-4 h-4" />
+                  Notes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("comments")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-semibold border-b-2 transition-all ${
+                    activeTab === "comments"
+                      ? "border-primary text-primary bg-card"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                  }`}
+                  style={activeTab === "comments" ? { borderBottomColor: "var(--section-premium)", color: "var(--section-premium)" } : {}}
+                >
+                  <IconMessage className="w-4 h-4" />
+                  Comments & Collaboration
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-6">
+                {activeTab === "evidence" && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-4"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Status Dropdown */}
+                      <div>
+                        <label htmlFor="evidence-status-select" className="block text-xs text-muted-foreground mb-1.5 font-medium">
+                          Select Status
+                        </label>
+                        <div className="relative">
+                          <select
+                            id="evidence-status-select"
+                            disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null}
+                            value={currentResponse?.evidenceStatus || "No Evidence"}
+                            onChange={async (e) => {
+                              if (currentAnswer === undefined || currentAnswer === null) {
+                                showToast.error("Please answer the control question before managing evidence");
+                                return;
+                              }
+                              const newStatus = e.target.value as any;
+                              try {
+                                await handleEvidenceStatusChange(currentControl.id, newStatus);
+                              } catch (err) {
+                                // Handled in context
+                              }
+                            }}
+                            className="w-full appearance-none px-3 pr-10 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            <option value="No Evidence">No Evidence</option>
+                            <option value="Template Downloaded">Template Downloaded</option>
+                            <option value="Evidence in Progress">Evidence in Progress</option>
+                            <option value="Evidence Complete">Evidence Complete</option>
+                          </select>
+                          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
+                            <IconChevronDown className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Badge Display */}
+                      <div className="flex items-end pb-2">
+                        <span className="text-xs text-muted-foreground mr-2 font-medium">Current Status:</span>
+                        {(() => {
+                          const status = currentResponse?.evidenceStatus || "No Evidence";
+                          let colorClass = "bg-secondary text-secondary-foreground";
+                          if (status === "Template Downloaded") colorClass = "bg-blue-500/10 text-blue-500 border border-blue-500/20";
+                          else if (status === "Evidence in Progress") colorClass = "bg-amber-500/10 text-amber-500 border border-amber-500/20";
+                          else if (status === "Evidence Complete") colorClass = "bg-green-500/10 text-green-500 border border-green-500/20";
+                          return (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClass}`}>
+                              {status}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Evidence URL Input */}
+                    {(currentResponse?.evidenceStatus === "Evidence in Progress" || currentResponse?.evidenceStatus === "Evidence Complete") && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-3 w-full border-t border-border pt-4"
+                      >
+                        <div>
+                          <label htmlFor="evidence-url-input" className="block text-xs text-muted-foreground mb-1.5 flex items-center justify-between font-medium">
+                            <span>Evidence URL (HTTPS required)</span>
+                            {currentResponse?.evidenceStatus === "Evidence Complete" && (
+                              <span className="text-red-500 text-[10px]">* Required</span>
+                            )}
+                          </label>
+                          <input
+                            id="evidence-url-input"
+                            type="text"
+                            disabled={isReadOnly}
+                            value={urlInput}
+                            placeholder="https://docs.google.com/document/d/... or other link"
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            onBlur={async () => {
+                              if (urlInput === (currentResponse?.evidenceUrl || "")) return;
+                              const finalUrl = urlInput.trim() === "" ? null : urlInput.trim();
+                              try {
+                                await handleEvidenceStatusChange(
+                                  currentControl.id, 
+                                  currentResponse?.evidenceStatus || "No Evidence", 
+                                  finalUrl
+                                );
+                                showToast.success("Evidence URL saved");
+                              } catch (err) {
+                                setUrlInput(currentResponse?.evidenceUrl || "");
+                              }
+                            }}
+                            className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+
+                        {/* Audit-ready Checkbox */}
+                        {currentResponse?.evidenceUrl && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-start pt-1"
+                          >
+                            <div className="flex items-center h-5">
+                              <input
+                                id="audit-ready-checkbox"
+                                type="checkbox"
+                                disabled={isReadOnly}
+                                checked={currentResponse?.auditReady || false}
+                                onChange={async (e) => {
+                                  try {
+                                    await handleEvidenceStatusChange(
+                                      currentControl.id,
+                                      currentResponse?.evidenceStatus || "No Evidence",
+                                      currentResponse?.evidenceUrl,
+                                      e.target.checked
+                                    );
+                                    showToast.success(e.target.checked ? "Marked as audit ready" : "Removed audit ready status");
+                                  } catch (err) {
+                                    // Handled in context
+                                  }
+                                }}
+                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              />
+                            </div>
+                            <div className="ml-3 text-xs">
+                              <label htmlFor="audit-ready-checkbox" className="font-medium text-foreground">
+                                🔒 Audit-ready confirmation
+                              </label>
+                              <p className="text-muted-foreground mt-0.5">
+                                I confirm this evidence link is valid and meets requirements.
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Gentle nudge message */}
+                    {((currentAnswer === 1 || currentAnswer === 0.5) && (!currentResponse?.evidenceStatus || currentResponse?.evidenceStatus === "No Evidence")) && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2 text-xs text-amber-600 dark:text-amber-500"
+                      >
+                        <IconAlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-semibold">Gentle Nudge:</span> You indicated this control is implemented, but haven't provided evidence. Consider downloading the template above.
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+
+                {activeTab === "notes" && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-4"
+                  >
+                    <SecureTextarea
+                      value={currentNote}
+                      onChange={(note) =>
+                        setLocalNotes(prev => ({ ...prev, [currentControl.id]: note }))
+                      }
+                      onBeforeSave={() => {
+                        if (currentAnswer === undefined || currentAnswer === null) {
+                          showToast.error("Please answer the control question before saving notes");
+                          return false;
+                        }
+                        return true;
+                      }}
+                      onSave={(value) => handleCrcNoteSave(currentControl.id, value)}
+                      placeholder="Add your notes about this control — evidence, gaps, action items..."
+                      maxLength={5000}
+                      className="w-full min-h-[150px]"
+                      readOnly={isReadOnly}
+                    />
+                  </motion.div>
+                )}
+
+                {activeTab === "comments" && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <CommentsPanel projectId={projectId} objectType="PROJECT" objectId={projectId} />
+                  </motion.div>
+                )}
+              </div>
             </div>
-            </div>
+
           </div>
         </div>
+    </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TrialConfirmationModal } from "./TrialConfirmationModal";
 import {
   IconCrown,
   IconShield,
@@ -89,12 +90,19 @@ export default function PremiumReEngagementPopup() {
     setIsVisible(false);
   };
 
-  const handleStartTrial = async () => {
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false);
+
+  const handleStartTrial = () => {
+    setShowTrialConfirm(true);
+  };
+
+  const handleConfirmTrial = async () => {
     setIsStartingTrial(true);
     try {
       await apiService.startTrial();
       await refreshUser();
       showToast.success("🎉 Your 7-day free trial has started!");
+      setShowTrialConfirm(false);
       setIsVisible(false);
       window.location.reload();
     } catch (error: any) {
@@ -108,6 +116,7 @@ export default function PremiumReEngagementPopup() {
   if (!isVisible) return null;
 
   return (
+    <>
     <Dialog open={isVisible} onOpenChange={(open) => !open && handleDismiss()}>
       <DialogContent className="max-w-lg p-0 overflow-y-auto max-h-[90vh] border-0 bg-transparent [&>button]:hidden">
         <AnimatePresence>
@@ -228,5 +237,13 @@ export default function PremiumReEngagementPopup() {
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+
+    <TrialConfirmationModal
+      isOpen={showTrialConfirm}
+      onClose={() => setShowTrialConfirm(false)}
+      onConfirm={handleConfirmTrial}
+      isLoading={isStartingTrial}
+    />
+    </>
   );
 }

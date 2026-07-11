@@ -51,7 +51,8 @@ import {
     IconSend,
     IconX,
     IconArrowLeft,
-    IconSettings
+    IconSettings,
+    IconRefresh
 } from "@tabler/icons-react";
 import ProjectSettingsTabs from "@/components/features/projects/ProjectSettingsTabs";
 import SubscriptionModal from "@/components/features/subscriptions/SubscriptionModal";
@@ -354,11 +355,21 @@ export default function TeamManagementPage() {
 
             {/* Members List */}
             <Card className="shadow-sm">
-                <CardHeader className="border-b pb-4">
+                <CardHeader className="border-b pb-4 flex flex-row items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <IconMail className="w-5 h-5 text-muted-foreground" />
                         Project Members
                     </CardTitle>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={fetchData} 
+                        disabled={loading}
+                        className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                        <IconRefresh className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">

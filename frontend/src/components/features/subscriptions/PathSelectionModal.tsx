@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { TrialConfirmationModal } from "./TrialConfirmationModal";
 import {
   IconCircleCheck,
   IconCrown,
@@ -83,6 +84,7 @@ export default function PathSelectionModal({
   const { user, refreshUser } = useAuth();
   const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [isSelectingAima, setIsSelectingAima] = useState(false);
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false);
 
   const isPaidUser = user?.subscription_status && user?.subscription_status !== "free";
   const hasUsedTrial = user?.trial_used;
@@ -112,11 +114,16 @@ export default function PathSelectionModal({
       return;
     }
 
+    setShowTrialConfirm(true);
+  };
+
+  const handleConfirmTrial = async () => {
     setIsStartingTrial(true);
     try {
       await apiService.startTrial();
       await refreshUser();
       showToast.success("🎉 Your 7-day free trial has started!");
+      setShowTrialConfirm(false);
       onSelectPremium();
     } catch (error: any) {
       console.error("Failed to start trial:", error);
@@ -127,6 +134,7 @@ export default function PathSelectionModal({
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
         className="max-w-5xl p-0 overflow-y-auto max-h-[95vh] border-0 bg-transparent [&>button]:hidden"
@@ -317,5 +325,13 @@ export default function PathSelectionModal({
         </motion.div>
       </DialogContent>
     </Dialog>
+
+    <TrialConfirmationModal
+      isOpen={showTrialConfirm}
+      onClose={() => setShowTrialConfirm(false)}
+      onConfirm={handleConfirmTrial}
+      isLoading={isStartingTrial}
+    />
+    </>
   );
 }
