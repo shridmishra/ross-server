@@ -458,6 +458,7 @@ export const usePdfExport = ({ reportRef, payload }: UsePdfExportProps) => {
 
             // Clone the report container for PDF-specific rendering
             const clone = reportRef.current.cloneNode(true) as HTMLElement;
+            clone.id = "pdf-export-container";
             clone.style.width = "1200px";
             clone.style.position = "absolute";
             clone.style.top = "0";

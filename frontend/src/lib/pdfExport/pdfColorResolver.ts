@@ -22,11 +22,12 @@ export const convertOklchToRgb = (colorStr: string): string => {
 
 export const resolveColorFunctions = (value: any): any => {
     if (typeof value !== "string") return value;
-    if (!value.includes("oklch") && !value.includes("oklab") && !value.includes("lab") && !value.includes("lch")) {
+    if (!value.includes("oklch") && !value.includes("oklab") && !value.includes("lab") && !value.includes("lch") && !value.includes("color-mix")) {
         return value;
     }
-    // Match any oklch, oklab, lab, or lch function call (including nested inside color-mix)
-    return value.replace(/(oklch|oklab|lab|lch)\([^)]+\)/g, (match) => {
+    // Match color-mix(...) with up to one level of nested parens, or bare oklch/oklab/lab/lch
+    const pattern = /(color-mix\((?:[^()]+|\([^()]*\))*\)|(oklch|oklab|lab|lch)\([^)]+\))/g;
+    return value.replace(pattern, (match) => {
         return convertOklchToRgb(match);
     });
 };
@@ -44,7 +45,7 @@ export const getStyleProxy = (style: any): any => {
                     return resolveColorFunctions(val);
                 };
             }
-            let val = Reflect.get(target, prop, receiver);
+            let val = Reflect.get(target, prop);
             if (typeof val === "function") {
                 return val.bind(target);
             }
@@ -70,7 +71,7 @@ export const getProxyRule = (rule: any): any => {
                     const originalText = target.cssText;
                     return resolveColorFunctions(originalText);
                 } catch (e) {
-                    let val = Reflect.get(target, prop, receiver);
+                    let val = Reflect.get(target, prop);
                     if (typeof val === "function") return val.bind(target);
                     return val;
                 }
@@ -111,7 +112,7 @@ export const getProxyRule = (rule: any): any => {
                     // fallback
                 }
             }
-            let val = Reflect.get(target, prop, receiver);
+            let val = Reflect.get(target, prop);
             if (typeof val === "function") {
                 return val.bind(target);
             }
