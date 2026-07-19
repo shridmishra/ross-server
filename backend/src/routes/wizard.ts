@@ -472,7 +472,8 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
   } catch (error: any) {
     if (client) await client.query("ROLLBACK");
     console.error("Error applying wizard profile:", error);
-    const detail = error?.detail || error?.message || "Unknown error";
+    const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV !== "production";
+    const detail = isDev ? (error?.detail || error?.message || "Unknown error") : "An error occurred while applying the wizard profile.";
     const code = error?.code || "UNKNOWN";
     res.status(500).json({ success: false, error: "Failed to apply wizard profile", detail, code });
   } finally {

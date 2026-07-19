@@ -498,7 +498,7 @@ export const CrcDashboardPdfDocument: React.FC<CrcDashboardPdfDocumentProps> = (
         <Text style={styles.sectionTitle}>Framework Readiness</Text>
         <View style={styles.frameworkRow}>
           {frameworkEntries.map((fw) => {
-            const fwTier = getTierInfo(fw.data.percentage, fw.data.scoredControls);
+            const fwTier = getTierInfo(fw.data.percentage, fw.data.scoredControls + fw.data.naCount);
             return (
               <View key={fw.title} style={styles.frameworkCard} wrap={false}>
                 <Text style={styles.frameworkTitle}>{fw.title}</Text>

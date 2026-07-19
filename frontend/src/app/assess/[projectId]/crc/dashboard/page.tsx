@@ -157,7 +157,7 @@ function FrameworkCard({
   themeClass: string;
   borderClass: string;
 }) {
-  const tier = getReadinessTier(data.percentage, data.scoredControls);
+  const tier = getReadinessTier(data.percentage, data.scoredControls + data.naCount);
   return (
     <Card className={`relative overflow-hidden ${themeClass} ${borderClass} shadow-md`}>
       <CardHeader className="pb-3 pt-5">
