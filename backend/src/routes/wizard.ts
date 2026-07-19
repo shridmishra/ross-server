@@ -349,17 +349,25 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
     };
 
     // 4. Update project table fields
-    // Prefill name and description from wizard profile if available
+    // Prefill name and description from wizard profile if available (only update name if non-empty to respect NOT NULL constraint)
     const profileResult = await client.query(
       "SELECT name, description FROM wizard_profiles WHERE project_id = $1",
       [projectId]
     );
     if (profileResult.rows.length > 0) {
       const profile = profileResult.rows[0];
-      await client.query(
-        "UPDATE projects SET name = $1, description = $2, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
-        [profile.name, profile.description, projectId]
-      );
+      const hasName = profile.name && profile.name.trim() !== "";
+      if (hasName) {
+        await client.query(
+          "UPDATE projects SET name = $1, description = $2, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
+          [profile.name.trim(), profile.description, projectId]
+        );
+      } else {
+        await client.query(
+          "UPDATE projects SET description = $1, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+          [profile.description, projectId]
+        );
+      }
     } else {
       await client.query(
         "UPDATE projects SET wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
@@ -461,10 +469,12 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
 
     await client.query("COMMIT");
     res.json({ success: true, message: "Profile applied to project successfully" });
-  } catch (error) {
+  } catch (error: any) {
     if (client) await client.query("ROLLBACK");
     console.error("Error applying wizard profile:", error);
-    res.status(500).json({ success: false, error: "Failed to apply wizard profile" });
+    const detail = error?.detail || error?.message || "Unknown error";
+    const code = error?.code || "UNKNOWN";
+    res.status(500).json({ success: false, error: "Failed to apply wizard profile", detail, code });
   } finally {
     if (client) client.release();
   }

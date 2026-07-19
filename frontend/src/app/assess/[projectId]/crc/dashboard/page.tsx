@@ -38,14 +38,21 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 const formatPercent = (value: number | null): string =>
   value === null ? "—" : `${value.toFixed(1)}%`;
 
-const getReadinessTier = (percent: number | null): { label: string; color: string; bg: string } => {
+const getReadinessTier = (
+  percent: number | null,
+  answeredCount: number = 1
+): { label: string; color: string; bg: string } => {
+  if (answeredCount === 0) {
+    return { label: "Not Started", color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-500/10" };
+  }
   if (percent === null) return { label: "Insufficient Data", color: "text-muted-foreground", bg: "bg-muted" };
   if (percent >= 60) return { label: "Ready", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10" };
   if (percent >= 30) return { label: "Partially Ready", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10" };
   return { label: "Not Ready", color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10" };
 };
 
-const getCategoryColor = (percent: number | null): string => {
+const getCategoryColor = (percent: number | null, answeredCount: number = 1): string => {
+  if (answeredCount === 0) return "text-blue-500 dark:text-blue-400";
   if (percent === null) return "text-muted-foreground";
   if (percent >= 60) return "text-emerald-600 dark:text-emerald-400";
   if (percent >= 30) return "text-amber-600 dark:text-amber-400";
@@ -79,20 +86,21 @@ function detectIsEU(): boolean {
 
 // --- Sub-Components ---
 
-const getProgressColor = (percent: number | null): string => {
+const getProgressColor = (percent: number | null, answeredCount: number = 1): string => {
+  if (answeredCount === 0) return "#3b82f6"; // blue-500
   if (percent === null) return "#94a3b8"; // slate-400
   if (percent >= 60) return "#059669"; // emerald-600
   if (percent >= 30) return "#d97706"; // amber-600
   return "#dc2626"; // red-600
 };
 
-function CircularProgress({ percentage, size = 160 }: { percentage: number | null; size?: number }) {
+function CircularProgress({ percentage, size = 160, answeredCount = 1 }: { percentage: number | null; size?: number; answeredCount?: number }) {
   const value = percentage ?? 0;
   const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (value / 100) * circumference;
-  const tier = getReadinessTier(percentage);
-  const progressColor = getProgressColor(percentage);
+  const tier = getReadinessTier(percentage, answeredCount);
+  const progressColor = getProgressColor(percentage, answeredCount);
 
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
@@ -149,7 +157,7 @@ function FrameworkCard({
   themeClass: string;
   borderClass: string;
 }) {
-  const tier = getReadinessTier(data.percentage);
+  const tier = getReadinessTier(data.percentage, data.scoredControls);
   return (
     <Card className={`relative overflow-hidden ${themeClass} ${borderClass} shadow-md`}>
       <CardHeader className="pb-3 pt-5">
@@ -605,7 +613,7 @@ export default function CRCDashboardPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center py-4 space-y-3">
-                    <CircularProgress percentage={overall.percentage} />
+                    <CircularProgress percentage={overall.percentage} answeredCount={overall.answeredControls} />
                     <div className="text-center space-y-1">
                       <p className="text-xs text-muted-foreground">
                         {overall.scoredControls} scored · {overall.answeredControls} answered · {overall.totalControls} total
@@ -829,7 +837,7 @@ export default function CRCDashboardPage() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 {categories.map((cat, idx) => {
-                  const catTier = getReadinessTier(cat.percentage);
+                  const catTier = getReadinessTier(cat.percentage, cat.answeredControls);
                   return (
                     <motion.div
                       key={`${cat.categoryId ?? "null"}-${cat.categoryName}`}
@@ -845,7 +853,7 @@ export default function CRCDashboardPage() {
                               <CardTitle className="text-sm truncate">{cat.categoryName}</CardTitle>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className={`text-xl font-bold tabular-nums ${getCategoryColor(cat.percentage)}`}>
+                              <p className={`text-xl font-bold tabular-nums ${getCategoryColor(cat.percentage, cat.answeredControls)}`}>
                                 {formatPercent(cat.percentage)}
                               </p>
                               <p className={`text-[10px] font-medium ${catTier.color}`}>
