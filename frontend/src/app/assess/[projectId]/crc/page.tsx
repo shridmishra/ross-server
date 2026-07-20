@@ -791,8 +791,8 @@ export default function CRCAssessmentPage() {
                         <div className="relative">
                           <select
                             id="evidence-status-select"
-                            disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null}
-                            value={currentResponse?.evidenceStatus || "No Evidence"}
+                            disabled={isReadOnly || currentAnswer === undefined || currentAnswer === null || currentAnswer === 2}
+                            value={currentAnswer === 2 ? "No Evidence" : (currentResponse?.evidenceStatus || "No Evidence")}
                             onChange={async (e) => {
                               if (currentAnswer === undefined || currentAnswer === null) {
                                 showToast.error("Please answer the control question before managing evidence");
@@ -822,6 +822,13 @@ export default function CRCAssessmentPage() {
                       <div className="flex items-end pb-2">
                         <span className="text-xs text-muted-foreground mr-2 font-medium">Current Status:</span>
                         {(() => {
+                          if (currentAnswer === 2) {
+                            return (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border">
+                                Not Required
+                              </span>
+                            );
+                          }
                           const status = currentResponse?.evidenceStatus || "No Evidence";
                           let colorClass = "bg-secondary text-secondary-foreground";
                           if (status === "Template Downloaded") colorClass = "bg-blue-500/10 text-blue-500 border border-blue-500/20";
@@ -837,7 +844,7 @@ export default function CRCAssessmentPage() {
                     </div>
 
                     {/* Evidence URL Input */}
-                    {(currentResponse?.evidenceStatus === "Evidence in Progress" || currentResponse?.evidenceStatus === "Evidence Complete") && (
+                    {currentAnswer !== 2 && (currentResponse?.evidenceStatus === "Evidence in Progress" || currentResponse?.evidenceStatus === "Evidence Complete") && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}

@@ -333,14 +333,16 @@ const styles = StyleSheet.create({
 const formatPercent = (value: number | null): string =>
   value === null ? "—" : `${value.toFixed(1)}%`;
 
-const getTierInfo = (percent: number | null) => {
+const getTierInfo = (percent: number | null, answeredCount: number = 1) => {
+  if (answeredCount === 0) return { label: "Not Started", color: colors.gray, bg: colors.muted };
   if (percent === null) return { label: "Insufficient Data", color: colors.gray, bg: colors.muted };
   if (percent >= 60) return { label: "Ready", color: colors.green, bg: colors.greenBg };
   if (percent >= 30) return { label: "Partially Ready", color: colors.amber, bg: colors.amberBg };
   return { label: "Not Ready", color: colors.red, bg: colors.redBg };
 };
 
-const getCategoryColor = (percent: number | null): string => {
+const getCategoryColor = (percent: number | null, answeredCount: number = 1): string => {
+  if (answeredCount === 0) return colors.gray;
   if (percent === null) return colors.gray;
   if (percent >= 60) return colors.green;
   if (percent >= 30) return colors.amber;
@@ -361,7 +363,7 @@ export const CrcDashboardPdfDocument: React.FC<CrcDashboardPdfDocumentProps> = (
   complete,
 }) => {
   const { overall, categories = [], breakdown, frameworks } = results;
-  const tier = getTierInfo(overall ? overall.percentage : null);
+  const tier = getTierInfo(overall ? overall.percentage : null, overall ? overall.answeredControls : 1);
   const today = new Date();
   const deadline = new Date("2026-08-02T00:00:00Z");
   const daysRemaining = Math.max(0, Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
@@ -496,7 +498,7 @@ export const CrcDashboardPdfDocument: React.FC<CrcDashboardPdfDocumentProps> = (
         <Text style={styles.sectionTitle}>Framework Readiness</Text>
         <View style={styles.frameworkRow}>
           {frameworkEntries.map((fw) => {
-            const fwTier = getTierInfo(fw.data.percentage);
+            const fwTier = getTierInfo(fw.data.percentage, fw.data.scoredControls + fw.data.naCount);
             return (
               <View key={fw.title} style={styles.frameworkCard} wrap={false}>
                 <Text style={styles.frameworkTitle}>{fw.title}</Text>
@@ -552,7 +554,7 @@ export const CrcDashboardPdfDocument: React.FC<CrcDashboardPdfDocumentProps> = (
             wrap={false}
           >
             <Text style={styles.categoryName}>{cat.categoryName}</Text>
-            <Text style={[styles.categoryScore, { color: getCategoryColor(cat.percentage) }]}>
+            <Text style={[styles.categoryScore, { color: getCategoryColor(cat.percentage, cat.answeredControls) }]}>
               {formatPercent(cat.percentage)}
             </Text>
             <Text style={styles.categoryMeta}>

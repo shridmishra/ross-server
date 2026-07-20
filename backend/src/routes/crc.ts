@@ -1189,14 +1189,21 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       );
       const existing = currentResponseQuery.rows[0];
 
-      const currentStatus = data.evidenceStatus !== undefined ? data.evidenceStatus : (existing ? existing.evidence_status : 'No Evidence');
+      let currentStatus = data.evidenceStatus !== undefined ? data.evidenceStatus : (existing ? existing.evidence_status : 'No Evidence');
       
       let inputUrl = data.evidenceUrl;
       if (inputUrl === "") {
         inputUrl = null;
       }
-      const currentUrl = inputUrl !== undefined ? inputUrl : (existing ? existing.evidence_url : null);
-      const currentAuditReady = data.auditReady !== undefined ? data.auditReady : (existing ? existing.audit_ready : false);
+      let currentUrl = inputUrl !== undefined ? inputUrl : (existing ? existing.evidence_url : null);
+      let currentAuditReady = data.auditReady !== undefined ? data.auditReady : (existing ? existing.audit_ready : false);
+
+      // Force reset evidence tracker fields if answer is Not Applicable (NA = 2)
+      if (data.value === 2) {
+        currentStatus = 'No Evidence';
+        currentUrl = null;
+        currentAuditReady = false;
+      }
 
       // Validate evidence fields
       if (currentStatus === 'Evidence Complete') {
@@ -1700,7 +1707,7 @@ router.put("/risks/:projectId/:riskId", authenticateToken, async (req, res) => {
       ? (data.target_date ? (data.target_date === null ? null : new Date(data.target_date)) : null) 
       : currentRisk.target_date;
     const reviewFrequency = data.review_frequency !== undefined ? data.review_frequency : currentRisk.review_frequency;
-    const status = (isManual && data.status !== undefined) ? data.status : currentRisk.status;
+    const status = data.status !== undefined ? data.status : currentRisk.status;
 
     const result = await pool.query(
       `UPDATE crc_risks SET
