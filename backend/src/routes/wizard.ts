@@ -394,14 +394,16 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
     const suggestedRisks = outputs.suggested_risks || [];
     const acceptedRisks = Array.isArray(req.body?.acceptedRisks) ? req.body.acceptedRisks : null;
     
-    // Sync the crc_risks_seq sequence to be above the max existing risk_code number
-    // This prevents "duplicate key value violates unique constraint crc_risks_risk_code_key" errors
     if (suggestedRisks.length > 0) {
+      // Global transaction-level lock to prevent concurrent rewinds of the sequence
+      await client.query("SELECT pg_advisory_xact_lock(hashtext('crc_risks_seq_sync'))");
       await client.query(`
-        SELECT setval('crc_risks_seq', GREATEST(
-          (SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) FROM crc_risks),
-          (SELECT last_value FROM crc_risks_seq)
-        ))
+        SELECT setval('crc_risks_seq', max_val)
+        FROM (
+          SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) AS max_val 
+          FROM crc_risks
+        ) m
+        WHERE max_val > (SELECT last_value FROM crc_risks_seq)
       `);
     }
 
@@ -449,8 +451,12 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
           await client.query("RELEASE SAVEPOINT risk_insert");
         } catch (riskErr: any) {
           await client.query("ROLLBACK TO SAVEPOINT risk_insert");
-          // Log but continue — don't let one risk collision abort the entire profile apply
-          console.warn(`Skipped risk insert (${riskErr?.code}): ${risk.title}`);
+          if (riskErr?.code === '23505') {
+            // Log but continue only for unique constraint violations (e.g., sequence collisions)
+            console.warn(`Skipped risk insert due to collision (${riskErr?.code}): ${risk.title}`);
+          } else {
+            throw riskErr;
+          }
         }
       }
     }
