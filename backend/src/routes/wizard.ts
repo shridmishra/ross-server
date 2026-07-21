@@ -358,14 +358,29 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
       const profile = profileResult.rows[0];
       const hasName = profile.name && profile.name.trim() !== "";
       if (hasName) {
-        await client.query(
-          "UPDATE projects SET name = $1, description = $2, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
-          [profile.name.trim(), profile.description, projectId]
-        );
+        await client.query("SAVEPOINT project_name_update");
+        try {
+          await client.query(
+            "UPDATE projects SET name = $1, description = $2, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
+            [profile.name.trim(), profile.description || "", projectId]
+          );
+          await client.query("RELEASE SAVEPOINT project_name_update");
+        } catch (nameErr: any) {
+          await client.query("ROLLBACK TO SAVEPOINT project_name_update");
+          // If name update fails due to unique name collision (error code 23505), update description & status without overriding name
+          if (nameErr?.code === "23505") {
+            await client.query(
+              "UPDATE projects SET description = $1, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+              [profile.description || "", projectId]
+            );
+          } else {
+            throw nameErr;
+          }
+        }
       } else {
         await client.query(
           "UPDATE projects SET description = $1, wizard_completed = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
-          [profile.description, projectId]
+          [profile.description || "", projectId]
         );
       }
     } else {
@@ -377,9 +392,11 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
 
     // 5. Insert starter risks if they don't conflict (or just append) and are accepted by the user
     const suggestedRisks = outputs.suggested_risks || [];
-    const acceptedRisks = Array.isArray(req.body.acceptedRisks) ? req.body.acceptedRisks : null;
+    const acceptedRisks = Array.isArray(req.body?.acceptedRisks) ? req.body.acceptedRisks : null;
     
     for (const risk of suggestedRisks) {
+      if (!risk || typeof risk !== "object" || !risk.title) continue;
+
       // Skip if user explicitly filtered/deselected this risk
       if (acceptedRisks && !acceptedRisks.includes(risk.title)) {
         continue;
@@ -392,6 +409,15 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
       );
 
       if (dupeCheck.rows.length === 0) {
+        let rating = "Medium";
+        if (risk.rating) {
+          const r = String(risk.rating).toLowerCase();
+          if (r === "critical") rating = "Critical";
+          else if (r === "high") rating = "High";
+          else if (r === "medium") rating = "Medium";
+          else if (r === "low") rating = "Low";
+        }
+
         await client.query(
           `INSERT INTO crc_risks (
             project_id, control_id, title, category, rating, status, description,
@@ -399,21 +425,40 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
           ) VALUES ($1, NULL, $2, $3, $4, 'Open', $5, $6, 'AI Wizard', NULL, 'Quarterly', 'Automated')`,
           [
             projectId,
-            risk.title,
-            risk.category,
-            risk.rating,
-            risk.description,
-            risk.mitigation_plan,
+            String(risk.title).slice(0, 300),
+            String(risk.category || "General").slice(0, 100),
+            rating,
+            risk.description || "",
+            risk.mitigation_plan || "",
           ]
         );
       }
     }
 
     // 6. Insert starter components if they don't conflict and are accepted by the user
+    const ALLOWED_COMPONENT_TYPES = new Set([
+      "Internal Proprietary Model",
+      "Closed Foundation Model",
+      "Open Source Model",
+      "Vector Database",
+      "Embedding Model",
+      "Cloud AI Service",
+      "Agent Framework",
+      "Guardrail Tool",
+      "Inference Infrastructure",
+      "Training Dataset",
+      "Validation Dataset",
+      "API Service",
+      "AI Application UI",
+      "Evaluation / Monitoring Tool"
+    ]);
+
     const suggestedComponents = outputs.suggested_components || [];
-    const acceptedComponents = Array.isArray(req.body.acceptedComponents) ? req.body.acceptedComponents : null;
+    const acceptedComponents = Array.isArray(req.body?.acceptedComponents) ? req.body.acceptedComponents : null;
 
     for (const comp of suggestedComponents) {
+      if (!comp || typeof comp !== "object" || !comp.component_name) continue;
+
       // Skip if user explicitly filtered/deselected this component
       if (acceptedComponents && !acceptedComponents.includes(comp.component_name)) {
         continue;
@@ -430,6 +475,27 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
         const nextSeq = parseInt(seqResult.rows[0].seq, 10);
         const componentId = `CMP-${String(nextSeq).padStart(3, "0")}`;
 
+        const compType = ALLOWED_COMPONENT_TYPES.has(comp.component_type) ? comp.component_type : "API Service";
+
+        let riskTier = "Low";
+        if (comp.risk_tier) {
+          const rt = String(comp.risk_tier).toLowerCase();
+          if (rt === "critical") riskTier = "Critical";
+          else if (rt === "high") riskTier = "High";
+          else if (rt === "medium") riskTier = "Medium";
+          else if (rt === "low") riskTier = "Low";
+        }
+
+        let compStatus = "Active";
+        if (comp.status) {
+          const st = String(comp.status).toLowerCase();
+          if (st === "active") compStatus = "Active";
+          else if (st === "evaluating") compStatus = "Evaluating";
+          else if (st === "deprecated") compStatus = "Deprecated";
+        }
+
+        const dataCategories = Array.isArray(comp.data_categories_sent) ? comp.data_categories_sent : [];
+
         await client.query(
           `INSERT INTO component_inventory (
             project_id, component_id, component_name, component_type, provider, version,
@@ -438,13 +504,13 @@ router.post("/:projectId/apply", authenticateToken, loadProject, requireProjectR
           [
             projectId,
             componentId,
-            comp.component_name,
-            comp.component_type,
-            comp.provider,
-            comp.role_in_system,
-            JSON.stringify(comp.data_categories_sent),
-            comp.risk_tier,
-            comp.status,
+            String(comp.component_name).slice(0, 255),
+            compType,
+            String(comp.provider || "Unknown").slice(0, 255),
+            comp.role_in_system || "Wizard identified component",
+            JSON.stringify(dataCategories),
+            riskTier,
+            compStatus,
           ]
         );
       }
