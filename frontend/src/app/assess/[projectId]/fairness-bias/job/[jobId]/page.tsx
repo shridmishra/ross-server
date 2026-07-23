@@ -285,6 +285,7 @@ export default function ManualPromptJobPage() {
                   className="border border-border rounded-xl p-4 bg-muted/30"
                 >
                   <p className="text-sm font-semibold text-foreground">{result.category}</p>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{result.prompt}</p>
                   {result.evaluation ? (
                     <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                       <span>Overall score:</span>

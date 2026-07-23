@@ -12,7 +12,7 @@ import TrialBanner from "../features/trial/TrialBanner";
 import { useAuth } from "../../contexts/AuthContext";
 import AICopilot from "../shared/AICopilot";
 import { AssessmentProvider } from "../../contexts/AssessmentContext";
-import { useSidebarStore } from "../../store/sidebarStore";
+import { useSidebarStore, getTotalSidebarWidth } from "../../store/sidebarStore";
 
 const getProjectIdFromPath = (pathname: string | null): string | null => {
   const match = pathname?.match(/\/assess\/([a-f0-9-]{36})/i);
@@ -49,7 +49,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   // Show sidebar on all other pages (Dashboard, Assess, etc.)
 
   const projectId = getProjectIdFromPath(pathname);
-  const totalSidebarWidth = 48 + (isSecondaryOpen ? sidebarWidth : 0);
+  const totalSidebarWidth = getTotalSidebarWidth(isSecondaryOpen, sidebarWidth);
 
   const sidebarContent = (
     <SidebarProvider

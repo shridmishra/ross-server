@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 
+const ACTIVITY_BAR_WIDTH = 48;
 const DEFAULT_WIDTH = 256; // 16rem – compact default, questions truncated
 const MIN_WIDTH = 202;
 const MAX_WIDTH_RATIO = 0.5; // 50% of viewport
+
+export function getTotalSidebarWidth(isSecondaryOpen: boolean, sidebarWidth: number): number {
+  return ACTIVITY_BAR_WIDTH + (isSecondaryOpen ? sidebarWidth : 0);
+}
 
 interface SidebarStore {
   sidebarWidth: number;
@@ -56,4 +61,4 @@ export const useSidebarStore = create<SidebarStore>((set) => ({
   },
 }));
 
-export { MIN_WIDTH, MAX_WIDTH_RATIO };
+export { ACTIVITY_BAR_WIDTH, MIN_WIDTH, MAX_WIDTH_RATIO };

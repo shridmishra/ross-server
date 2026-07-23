@@ -62,7 +62,15 @@ function RollbackBanner({ projects }: { projects: Project[] }) {
   const handleRollback = async () => {
     if (!rollbackInfo) return;
     try {
-      localStorage.removeItem(`wizard_rollback_snapshot_${rollbackInfo.projectId}`);
+      const snapshotKey = `wizard_rollback_snapshot_${rollbackInfo.projectId}`;
+      const savedRaw = localStorage.getItem(snapshotKey);
+      if (savedRaw) {
+        const parsed = JSON.parse(savedRaw);
+        if (parsed?.answers) {
+          await apiService.saveWizardAnswers(rollbackInfo.projectId, parsed.answers);
+        }
+      }
+      localStorage.removeItem(snapshotKey);
       setRollbackInfo(null);
       showToast.success("Wizard profile reverted. Reverted project state.");
       window.location.reload();

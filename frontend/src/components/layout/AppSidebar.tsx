@@ -91,7 +91,7 @@ import { apiService, CRCControl, Project } from "../../lib/api";
 import { cn, getDomainIcon } from "@/lib/utils";
 import SubscriptionModal from "../features/subscriptions/SubscriptionModal";
 import { ProjectSelectionModal } from "./ProjectSelectionModal";
-import { useSidebarStore, MIN_WIDTH, MAX_WIDTH_RATIO } from "../../store/sidebarStore";
+import { useSidebarStore, getTotalSidebarWidth, ACTIVITY_BAR_WIDTH, MIN_WIDTH, MAX_WIDTH_RATIO } from "../../store/sidebarStore";
 import { buildAssessmentAnswerKey } from "@/lib/assessmentValidation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -462,7 +462,10 @@ function SidebarContentComponent() {
         if (active) setIsLoadingProjects(false);
       });
 
-  }, [isAuthenticated, pathname]);
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
 
   const [projectSearchQuery, setProjectSearchQuery] = useState("");
 
@@ -477,7 +480,7 @@ function SidebarContentComponent() {
     );
   }, [userProjects, projectSearchQuery]);
 
-  const totalSidebarWidth = 48 + (isSecondaryOpen ? sidebarWidth : 0);
+  const totalSidebarWidth = getTotalSidebarWidth(isSecondaryOpen, sidebarWidth);
 
   // ─── Project Selection Modal State ──────────────────────────────────────────
   const [showProjectModal, setShowProjectModal] = useState(false);

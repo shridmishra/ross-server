@@ -566,9 +566,9 @@ export default function CRCRiskRegisterPage() {
             </table>
           </div>
           {hiddenCount > 0 && (
-            <div className="p-3.5 mt-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-300">
+            <div className="p-3.5 mt-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-300">
               <div className="flex items-center gap-2">
-                <IconAlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                <IconAlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                 <span>
                   <strong>{hiddenCount} additional risks were not displayed</strong> (starter list capped at top 10 sorted Critical &gt; High &gt; Medium &gt; Low).
                 </span>
@@ -577,7 +577,7 @@ export default function CRCRiskRegisterPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowAllRisks(true)}
-                className="h-7 text-xs border-amber-500/40 text-amber-300 hover:bg-amber-500/20 shrink-0 font-semibold"
+                className="h-7 text-xs border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 shrink-0 font-semibold"
               >
                 View All {sortedRisks.length} Risks
               </Button>
