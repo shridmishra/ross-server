@@ -1060,27 +1060,25 @@ function SidebarContentComponent() {
 
                 {/* Details Content Container */}
                 <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
-                  {/* Project selection card for tabs that work with projects */}
-                  {(activeTab === "aima" || activeTab === "premium" || activeTab === "settings" || isInsideProject) && (
-                    <div className="mb-1">
-                      <button
-                        type="button"
-                        onClick={() => setShowProjectModal(true)}
-                        className="flex items-center justify-between w-full p-2 rounded-lg border border-border/40 dark:border-sidebar-border bg-slate-50 dark:bg-sidebar-accent/30 hover:bg-slate-100 dark:hover:bg-sidebar-accent/60 transition-all duration-200 cursor-pointer text-left group"
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <div className="size-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <IconFolder className="size-3.5" />
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] uppercase font-semibold text-muted-foreground leading-none">Project</span>
-                            <span className="text-xs font-semibold text-foreground truncate mt-0.5">{projectName || "Select Project"}</span>
-                          </div>
+                  {/* Always-visible Project Selection Card */}
+                  <div className="mb-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowProjectModal(true)}
+                      className="flex items-center justify-between w-full p-2 rounded-lg border border-border/40 dark:border-sidebar-border bg-slate-50 dark:bg-sidebar-accent/30 hover:bg-slate-100 dark:hover:bg-sidebar-accent/60 transition-all duration-200 cursor-pointer text-left group"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="size-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <IconFolder className="size-3.5" />
                         </div>
-                        <IconSelector className="size-3.5 text-muted-foreground/75 shrink-0 ml-1 group-hover:text-foreground transition-colors" />
-                      </button>
-                    </div>
-                  )}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] uppercase font-semibold text-muted-foreground leading-none">Project</span>
+                          <span className="text-xs font-semibold text-foreground truncate mt-0.5">{projectName || "Select Project"}</span>
+                        </div>
+                      </div>
+                      <IconSelector className="size-3.5 text-muted-foreground/75 shrink-0 ml-1 group-hover:text-foreground transition-colors" />
+                    </button>
+                  </div>
 
                   {/* Tab specific detail menus */}
                   {activeTab === "dashboard" && (
