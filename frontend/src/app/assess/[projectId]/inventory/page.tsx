@@ -366,7 +366,7 @@ export default function ComponentInventoryPage() {
   // Handle Submit Form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !formType || !formProvider || !formRole.trim()) {
+    if (!formName.trim() || !formType || !formProvider || !formRole.trim() || formDataCategories.length === 0) {
       showToast.error( "Please fill in all required fields");
       return;
     }
@@ -667,7 +667,7 @@ export default function ComponentInventoryPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full flex-1">
           {/* Type Filter */}
           <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-auto min-w-[130px] shrink-0 rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[130px] rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -682,7 +682,7 @@ export default function ComponentInventoryPage() {
 
           {/* Provider Filter */}
           <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-            <SelectTrigger className="w-auto min-w-[140px] shrink-0 rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[140px] rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Providers" />
             </SelectTrigger>
             <SelectContent>
@@ -697,7 +697,7 @@ export default function ComponentInventoryPage() {
 
           {/* Risk Filter */}
           <Select value={selectedRisk} onValueChange={setSelectedRisk}>
-            <SelectTrigger className="w-auto min-w-[120px] shrink-0 rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[120px] rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Risks" />
             </SelectTrigger>
             <SelectContent>

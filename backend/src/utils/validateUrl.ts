@@ -1,6 +1,51 @@
 /**
  * Utility for validating public API URLs and preventing SSRF / internal network scans.
  */
+
+function parseIPv4(hostname: string): [number, number, number, number] | null {
+  const parts = hostname.split(".");
+  if (parts.length < 1 || parts.length > 4) return null;
+
+  const parsedParts: number[] = [];
+  for (const part of parts) {
+    if (!part) return null;
+    let num: number;
+    if (/^0x[0-9a-f]+$/i.test(part)) {
+      num = parseInt(part, 16);
+    } else if (/^0[0-7]+$/.test(part) && part.length > 1) {
+      num = parseInt(part, 8);
+    } else if (/^\d+$/.test(part)) {
+      num = parseInt(part, 10);
+    } else {
+      return null;
+    }
+    if (isNaN(num) || num < 0 || num > 0xffffffff) return null;
+    parsedParts.push(num);
+  }
+
+  let ip32: number;
+  if (parsedParts.length === 1) {
+    ip32 = parsedParts[0];
+  } else if (parsedParts.length === 2) {
+    if (parsedParts[0] > 255 || parsedParts[1] > 0xffffff) return null;
+    ip32 = (parsedParts[0] << 24) + parsedParts[1];
+  } else if (parsedParts.length === 3) {
+    if (parsedParts[0] > 255 || parsedParts[1] > 255 || parsedParts[2] > 0xffff) return null;
+    ip32 = (parsedParts[0] << 24) + (parsedParts[1] << 16) + parsedParts[2];
+  } else {
+    if (parsedParts.some((p) => p > 255)) return null;
+    ip32 = (parsedParts[0] << 24) + (parsedParts[1] << 16) + (parsedParts[2] << 8) + parsedParts[3];
+  }
+
+  ip32 = ip32 >>> 0;
+  const a = (ip32 >>> 24) & 255;
+  const b = (ip32 >>> 16) & 255;
+  const c = (ip32 >>> 8) & 255;
+  const d = ip32 & 255;
+
+  return [a, b, c, d];
+}
+
 export function isPublicApiUrl(urlString: string): { isValid: boolean; error?: string } {
   if (!urlString || typeof urlString !== "string") {
     return { isValid: false, error: "API URL is required." };
@@ -35,12 +80,10 @@ export function isPublicApiUrl(urlString: string): { isValid: boolean; error?: s
     return { isValid: false, error: "Localhost and internal addresses are not allowed. Please specify a public API URL." };
   }
 
-  // IPv4 regexes for loopback, private ranges, link-local, carrier-grade NAT
-  const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (ipv4Match) {
-    const [, aStr, bStr, cStr, dStr] = ipv4Match;
-    const a = parseInt(aStr, 10);
-    const b = parseInt(bStr, 10);
+  // IPv4 numeric host normalization and range check
+  const parsedIp = parseIPv4(hostname);
+  if (parsedIp) {
+    const [a, b] = parsedIp;
 
     // 127.0.0.0/8 (Loopback)
     if (a === 127) {
@@ -72,12 +115,13 @@ export function isPublicApiUrl(urlString: string): { isValid: boolean; error?: s
     }
   }
 
-  // IPv6 check
+  // IPv6 check (including fc00::/7 ULA range)
   const cleanHostname = hostname.replace(/^\[|\]$/g, "");
   if (
     cleanHostname === "::1" ||
     cleanHostname === "0:0:0:0:0:0:0:1" ||
     cleanHostname.startsWith("fe80:") ||
+    /^f[cd][0-9a-f]{2}:/i.test(cleanHostname) ||
     cleanHostname.startsWith("fc00:") ||
     cleanHostname.startsWith("fd00:")
   ) {

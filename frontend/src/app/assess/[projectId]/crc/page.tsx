@@ -831,8 +831,9 @@ export default function CRCAssessmentPage() {
                                 return;
                               }
                               const newStatus = e.target.value as any;
+                              const trimmedUrl = (urlInput || "").trim();
 
-                              if (newStatus === "Evidence Complete" && (!urlInput || !urlInput.trim())) {
+                              if (newStatus === "Evidence Complete" && !trimmedUrl) {
                                 showToast.error("Please provide an Evidence URL before setting status to 'Evidence Complete'.");
                                 try {
                                   await handleEvidenceStatusChange(currentControl.id, "Evidence in Progress");
@@ -844,7 +845,7 @@ export default function CRCAssessmentPage() {
                               }
 
                               try {
-                                await handleEvidenceStatusChange(currentControl.id, newStatus);
+                                await handleEvidenceStatusChange(currentControl.id, newStatus, trimmedUrl || currentResponse?.evidenceUrl);
                               } catch (err) {
                                 // Handled in context
                               }
@@ -887,8 +888,8 @@ export default function CRCAssessmentPage() {
                       </div>
                     </div>
 
-                    {/* Evidence URL Input - Always accessible for answered controls */}
-                    {currentAnswer !== 2 && (
+                    {/* Evidence URL Input - Shown for answered non-NA controls */}
+                    {currentAnswer !== null && currentAnswer !== undefined && currentAnswer !== 2 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}

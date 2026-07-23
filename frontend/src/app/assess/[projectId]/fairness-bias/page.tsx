@@ -604,10 +604,16 @@ export default function FairnessBiasTest() {
                     value={responses[currentResKey] || ""}
                     onChange={(e) => {
                       const originalValue = e.target.value;
+                      const currentVal = responses[currentResKey] || "";
+                      const currentWords = currentVal.trim() ? currentVal.trim().split(/\s+/).filter(Boolean) : [];
+                      const isPrevUnderLimit = currentWords.length <= 1000 && currentVal.length <= 5000;
+
                       const words = originalValue.trim() ? originalValue.trim().split(/\s+/).filter(Boolean) : [];
                       
                       if (words.length > 1000 || originalValue.length > 5000) {
-                        showToast.warning("Maximum response limit reached (1,000 words / 5,000 characters).");
+                        if (isPrevUnderLimit) {
+                          showToast.warning("Maximum response limit reached (1,000 words / 5,000 characters).");
+                        }
                         if (originalValue.length > 5000) {
                           setResponses({ ...responses, [currentResKey]: originalValue.slice(0, 5000) });
                         }

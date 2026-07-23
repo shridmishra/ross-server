@@ -565,7 +565,7 @@ export const evaluationAggregator = inngest.createFunction(
             ...result,
             explanation: result.reasoning || (result as any).explanation || "",
           },
-          message: `Overall score ${(result.overallScore * 100).toFixed(1)}%`,
+          message: result.overallScore !== null ? `Overall score ${(result.overallScore * 100).toFixed(1)}%` : "Overall score unavailable",
         }]);
       } else {
         const errMessage = extractErrorMessage(response, error);

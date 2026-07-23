@@ -135,7 +135,7 @@ export const ApiHistory = ({ projectId, routeMode = 'fairness' }: ApiHistoryProp
             return (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
                     <XCircle className="w-3.5 h-3.5" />
-                    Failed ({success}/{total})
+                    Failed ({failure}/{total})
                 </span>
             );
         } else {

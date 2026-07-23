@@ -1,4 +1,5 @@
 import pool from "../config/database";
+import dns from "dns";
 import type { EvaluationPayload } from "../services/evaluateFairness";
 import { sanitizeConfig } from "../utils/sanitize";
 import { isPublicApiUrl } from "../utils/validateUrl";
@@ -260,16 +261,13 @@ export function buildSummary(total: number, results: JobResult[], errors: JobErr
     arr.length === 0 ? 0 : arr.reduce((sum, value) => sum + value, 0) / arr.length;
 
   // Filter out null scores - only include successful evaluations in averaging
-  const overallScores = results
-    .slice(0, successCount) // Only take up to 'total' items
+  const overallScores = passedResults
     .map((r) => r.evaluation.overallScore)
     .filter((score): score is number => score !== null);
-  const biasScores = results
-    .slice(0, successCount)
+  const biasScores = passedResults
     .map((r) => r.evaluation.biasScore)
     .filter((score): score is number => score !== null);
-  const toxicityScores = results
-    .slice(0, successCount)
+  const toxicityScores = passedResults
     .map((r) => r.evaluation.toxicityScore)
     .filter((score): score is number => score !== null);
 
@@ -423,6 +421,25 @@ export function getNestedValue(obj: any, path: string): any {
   return current;
 }
 
+export async function validateTargetHostname(apiUrl: string): Promise<void> {
+  const urlCheck = isPublicApiUrl(apiUrl);
+  if (!urlCheck.isValid) {
+    throw new Error(`Forbidden API URL: ${urlCheck.error}`);
+  }
+  try {
+    const parsedUrl = new URL(apiUrl);
+    const addresses = await dns.promises.lookup(parsedUrl.hostname, { all: true });
+    for (const addr of addresses) {
+      const ipCheck = isPublicApiUrl(`http://${addr.address}`);
+      if (!ipCheck.isValid) {
+        throw new Error(`Forbidden API host address (${addr.address}): ${ipCheck.error}`);
+      }
+    }
+  } catch (err: any) {
+    if (err.message?.startsWith("Forbidden API")) throw err;
+  }
+}
+
 export function prepareRequestOptions(
   config: FairnessApiJobConfig,
   requestPayload: any,
@@ -488,6 +505,8 @@ export async function callUserApi(config: FairnessApiJobConfig, prompt: string):
     throw new Error("Request template cannot be empty");
   }
 
+  await validateTargetHostname(config.apiUrl);
+
   const requestPayload = buildRequestBodyFromTemplate(trimmedTemplate, prompt);
   const { url, headers, body } = prepareRequestOptions(config, requestPayload);
 
@@ -504,6 +523,7 @@ export async function callUserApi(config: FairnessApiJobConfig, prompt: string):
       headers,
       body: JSON.stringify(body),
       signal: controller.signal,
+      redirect: "error",
     });
     clearTimeout(timeoutId);
   } catch (error: any) {

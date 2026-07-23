@@ -212,34 +212,36 @@ export default function ProjectSettingsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Danger Zone */}
-                <Card className="border-destructive/20 shadow-md ring-1 ring-destructive/5 mt-8">
-                    <CardHeader className="bg-destructive/5 border-b border-destructive/10 pb-4">
-                        <CardTitle className="text-lg flex items-center gap-2 text-destructive">
-                            <IconTrash className="w-5 h-5 text-destructive" />
-                            Danger Zone
-                        </CardTitle>
-                        <CardDescription>
-                            Permanently move this project to trash. You can recover it from your Dashboard for up to 30 days.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                            <h4 className="text-sm font-semibold text-foreground">Delete Project</h4>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Moving this project to trash will disable access to all associated assessments and data.
-                            </p>
-                        </div>
-                        <Button
-                            variant="destructive"
-                            onClick={() => setShowDeleteModal(true)}
-                            className="shrink-0 font-medium flex items-center gap-2"
-                        >
-                            <IconTrash className="w-4 h-4" />
-                            Delete Project
-                        </Button>
-                    </CardContent>
-                </Card>
+                {/* Danger Zone - Owner Only */}
+                {user?.id && project?.user_id && user.id === project.user_id && (
+                    <Card className="border-destructive/20 shadow-md ring-1 ring-destructive/5 mt-8">
+                        <CardHeader className="bg-destructive/5 border-b border-destructive/10 pb-4">
+                            <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+                                <IconTrash className="w-5 h-5 text-destructive" />
+                                Danger Zone
+                            </CardTitle>
+                            <CardDescription>
+                                Permanently move this project to trash. You can recover it from your Dashboard for up to 30 days.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <h4 className="text-sm font-semibold text-foreground">Delete Project</h4>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Moving this project to trash will disable access to all associated assessments and data.
+                                </p>
+                            </div>
+                            <Button
+                                variant="destructive"
+                                onClick={() => setShowDeleteModal(true)}
+                                className="shrink-0 font-medium flex items-center gap-2"
+                            >
+                                <IconTrash className="w-4 h-4" />
+                                Delete Project
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             {/* Delete Confirmation Modal */}

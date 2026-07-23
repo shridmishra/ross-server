@@ -362,8 +362,8 @@ router.delete(
       }
 
       const result = await pool.query(
-        "UPDATE projects SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id",
-        [projectId],
+        "UPDATE projects SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 RETURNING id",
+        [projectId, actorId],
       );
 
       if (result.rows.length === 0) {

@@ -93,9 +93,8 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
     (answers.use_case === "employment_hr" || annex_iii_domains.includes("employment_hr") || annex_iii_domains.includes("education_vocational"));
   
   const isPublicBiometricSpace = 
-    answers.biometric_use === "public_spaces_identification" ||
-    answers.biometric_use === "biometric_identification" ||
-    (answers.biometric_use === "biometric_categorization" && isLawEnforcement);
+    answers.biometric_use === "biometric_categorization" ||
+    ((answers.biometric_use === "public_spaces_identification" || answers.biometric_use === "biometric_identification") && isLawEnforcement);
 
   const isSocialScoring = answers.use_case === "social_scoring";
   const isCognitiveManipulation = answers.use_case === "cognitive_behavioral_manipulation";

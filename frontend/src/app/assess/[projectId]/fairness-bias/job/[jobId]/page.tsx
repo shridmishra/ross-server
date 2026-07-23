@@ -289,7 +289,7 @@ export default function ManualPromptJobPage() {
                     <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                       <span>Overall score:</span>
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        {(result.evaluation.overallScore * 100).toFixed(1)}%
+                        {result.evaluation.overallScore != null ? `${(result.evaluation.overallScore * 100).toFixed(1)}%` : "Score unavailable"}
                       </span>
                     </div>
                   ) : result.message && !result.message.toLowerCase().includes("overall score") ? (

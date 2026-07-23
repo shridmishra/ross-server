@@ -185,7 +185,7 @@ interface Question {
 const CompactProgress = ({ current, total, isCompleted, size = "default" }: { current: number; total: number; isCompleted: boolean; size?: "default" | "sm" }) => (
   <span
     className={cn(
-      size === "sm" ? "text-[9px]" : "text-[10px]",
+      size === "sm" ? "text-[10px]" : "text-[11px]",
       "font-mono ml-auto shrink-0",
       isCompleted ? "text-green-500" : current > 0 ? "text-blue-500" : "text-muted-foreground/60"
     )}
@@ -246,7 +246,7 @@ const DomainTreeItem = ({
           return <Icon className="w-3.5 h-3.5 shrink-0 text-[var(--section-free)]" />;
         })()}
         <span className={cn(
-          "font-bold text-xs truncate ml-1.5 flex-1 min-w-0 text-foreground",
+          "font-bold text-sm truncate ml-1.5 flex-1 min-w-0 text-foreground",
           isDomainActive && !currentPracticeId && "text-primary font-extrabold"
         )}>
           {domain.title}
@@ -285,7 +285,7 @@ const DomainTreeItem = ({
                       )}
                     >
                       <span className={cn(
-                        "text-[12px] truncate flex-1 min-w-0 font-medium",
+                        "text-[13px] truncate flex-1 min-w-0 font-medium",
                         isPracticeActive ? "text-foreground font-semibold" : "text-foreground/90 group-hover/practice:text-foreground"
                       )}>
                         {practice.title}
@@ -320,7 +320,7 @@ const DomainTreeItem = ({
                                   <IconCircle className={cn("h-3.5 w-3.5 shrink-0", isQuestionActive ? "text-primary" : "text-zinc-400 dark:text-zinc-500")} />
                                 )}
                                 <span className={cn(
-                                  "text-[11.5px] truncate ml-1.5 flex-1 min-w-0 leading-normal",
+                                  "text-[12.5px] truncate ml-1.5 flex-1 min-w-0 leading-normal",
                                   isQuestionActive
                                     ? "text-white dark:text-white font-semibold"
                                     : "text-zinc-300 dark:text-zinc-200 font-medium group-hover/question:text-white"
@@ -378,7 +378,7 @@ const ActivityBarButton = ({
         )}
       </button>
     </TooltipTrigger>
-    <TooltipContent side="right" sideOffset={8} className="font-medium text-xs">
+    <TooltipContent side="right" sideOffset={8} className="font-medium text-sm">
       {label}
     </TooltipContent>
   </Tooltip>
@@ -1058,7 +1058,7 @@ function SidebarContentComponent() {
               >
                 {/* Header */}
                 <div className="h-12 px-3 flex items-center justify-between border-b border-sidebar-border/30 bg-sidebar/50 shrink-0 select-none">
-                  <span className="text-sm font-bold tracking-tight text-foreground truncate">
+                  <span className="text-base font-bold tracking-tight text-foreground truncate">
                     MATUR<span className="text-primary font-semibold">.ai</span>
                   </span>
                   <Tooltip>
@@ -1093,7 +1093,7 @@ function SidebarContentComponent() {
                             <IconFolder className="size-4" />
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-foreground truncate">{projectName || "Select Project"}</span>
+                            <span className="text-sm font-bold text-foreground truncate">{projectName || "Select Project"}</span>
                           </div>
                         </div>
                         <IconSelector className="size-4 text-muted-foreground/70 shrink-0 ml-1.5 group-hover:text-primary transition-colors" />
@@ -1114,7 +1114,7 @@ function SidebarContentComponent() {
                             (pathname === "/dashboard" || pathname === "/") && "border-l-[3px] border-primary bg-primary/10 text-primary pl-1.5 font-semibold rounded-l-none rounded-r-md"
                           )}
                         >
-                          <Link href="/dashboard" className="flex items-center gap-2 w-full px-2 py-1.5 text-xs font-medium">
+                          <Link href="/dashboard" className="flex items-center gap-2 w-full px-2 py-1.5 text-sm font-medium">
                             <IconDashboard className="size-4 text-primary shrink-0" />
                             <span>Dashboard</span>
                           </Link>
@@ -1124,13 +1124,13 @@ function SidebarContentComponent() {
                       {/* Project Search & List Section */}
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center justify-between px-2 py-0.5">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                             Projects ({userProjects.length})
                           </span>
                           <button
                             type="button"
                             onClick={() => setShowProjectModal(true)}
-                            className="text-[10px] text-primary font-semibold hover:underline cursor-pointer"
+                            className="text-xs text-primary font-semibold hover:underline cursor-pointer"
                           >
                             Modal View
                           </button>
@@ -1145,7 +1145,7 @@ function SidebarContentComponent() {
                                 placeholder="Search projects..."
                                 value={projectSearchQuery}
                                 onChange={(e) => setProjectSearchQuery(e.target.value)}
-                                className="w-full h-7 pl-7 pr-2 text-xs rounded-md border border-border/50 bg-background/80 focus:outline-none focus:ring-1 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground/60"
+                                className="w-full h-7 pl-7 pr-2 text-sm rounded-md border border-border/50 bg-background/80 focus:outline-none focus:ring-1 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground/60"
                               />
                               <IconSearch className="size-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
                             </div>
@@ -1219,7 +1219,7 @@ function SidebarContentComponent() {
 
                   {activeTab === "aima" && (
                     <div className="flex flex-col gap-1">
-                      <div className="px-2 py-1.5 text-[10.5px] font-bold uppercase tracking-wider text-zinc-300 dark:text-zinc-400 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
+                      <div className="px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-300 dark:text-zinc-400 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
                         <span className="size-1.5 rounded-full bg-primary shrink-0" />
                         <span>AIMA Domains</span>
                       </div>
@@ -1248,7 +1248,7 @@ function SidebarContentComponent() {
                     <div className="flex flex-col gap-3">
                       {/* CRC Governance & Controls */}
                       <div className="flex flex-col gap-1">
-                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
+                        <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
                           <span className="size-1.5 rounded-full bg-[var(--section-premium)] shrink-0" />
                           <span>CRC Governance & Controls</span>
                         </div>
@@ -1261,7 +1261,7 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconLayoutDashboard className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">CRC Dashboard</span>
+                          <span className="text-sm font-medium truncate">CRC Dashboard</span>
                         </SidebarMenuButton>
 
                         {/* Categories */}
@@ -1282,13 +1282,13 @@ function SidebarContentComponent() {
                                   }));
                                 }}
                                 className={cn(
-                                  "flex items-center gap-1.5 h-7 px-2 rounded-md text-xs font-medium transition-colors w-full text-left cursor-pointer hover:bg-sidebar-accent/50",
+                                  "flex items-center gap-1.5 h-7 px-2 rounded-md text-sm font-medium transition-colors w-full text-left cursor-pointer hover:bg-sidebar-accent/50",
                                   isCatActive && "text-[var(--section-premium)] font-semibold bg-[var(--section-premium)]/10 border-l-[3px] border-[var(--section-premium)] pl-1.5 rounded-l-none rounded-r-md"
                                 )}
                               >
                                 <IconChevronRight className={cn("size-3.5 text-muted-foreground transition-transform shrink-0", isCatExpanded && "rotate-90")} />
                                 <span className="truncate flex-1">{categoryName}</span>
-                                <span className="text-[10px] text-muted-foreground/70 font-mono">{catControls.length}</span>
+                                <span className="text-xs text-muted-foreground/70 font-mono">{catControls.length}</span>
                               </button>
 
                               <AnimatePresence>
@@ -1307,7 +1307,7 @@ function SidebarContentComponent() {
                                           type="button"
                                           onClick={() => handleProjectNav(`/crc?controlId=${ctrl.id}`)}
                                           className={cn(
-                                            "flex items-center gap-1.5 h-6 px-2 rounded-md text-[11px] transition-colors w-full text-left cursor-pointer",
+                                            "flex items-center gap-1.5 h-6 px-2 rounded-md text-xs transition-colors w-full text-left cursor-pointer",
                                             isCtrlActive ? "text-[var(--section-premium)] font-semibold bg-[var(--section-premium)]/15 border-l-[3px] border-[var(--section-premium)] pl-1 rounded-l-none rounded-r-md" : "text-muted-foreground hover:text-foreground"
                                           )}
                                         >
@@ -1326,7 +1326,7 @@ function SidebarContentComponent() {
 
                       {/* Fairness & Bias */}
                       <div className="flex flex-col gap-1">
-                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
+                        <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
                           <span className="size-1.5 rounded-full bg-[var(--section-premium)] shrink-0" />
                           <span>Fairness & Bias</span>
                         </div>
@@ -1339,7 +1339,7 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconScale className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">Fairness Overview</span>
+                          <span className="text-sm font-medium truncate">Fairness Overview</span>
                         </SidebarMenuButton>
                         <SidebarMenuButton
                           onClick={() => handleProjectNav("/fairness-bias/options")}
@@ -1350,7 +1350,7 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconSettings className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">Options & Metrics</span>
+                          <span className="text-sm font-medium truncate">Options & Metrics</span>
                         </SidebarMenuButton>
                         <SidebarMenuButton
                           onClick={() => handleProjectNav("/fairness-bias/dataset-testing")}
@@ -1361,13 +1361,13 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconTable className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">Dataset Testing</span>
+                          <span className="text-sm font-medium truncate">Dataset Testing</span>
                         </SidebarMenuButton>
                       </div>
 
                       {/* Model Vulnerability & Inventory */}
                       <div className="flex flex-col gap-1">
-                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
+                        <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 border-b border-sidebar-border/30 mb-1">
                           <span className="size-1.5 rounded-full bg-[var(--section-premium)] shrink-0" />
                           <span>Security & Assets</span>
                         </div>
@@ -1380,7 +1380,7 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconShieldLock className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">Model Vulnerability</span>
+                          <span className="text-sm font-medium truncate">Model Vulnerability</span>
                         </SidebarMenuButton>
                         <SidebarMenuButton
                           onClick={() => handleProjectNav("/inventory")}
@@ -1391,7 +1391,7 @@ function SidebarContentComponent() {
                           )}
                         >
                           <IconFolder className="size-4 text-[var(--section-premium)] shrink-0" />
-                          <span className="text-xs font-medium truncate">System Inventory</span>
+                          <span className="text-sm font-medium truncate">System Inventory</span>
                         </SidebarMenuButton>
                       </div>
                     </div>
@@ -1399,7 +1399,7 @@ function SidebarContentComponent() {
 
                   {activeTab === "settings" && (
                     <div className="flex flex-col gap-1">
-                      <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--primary)]">
+                      <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[var(--primary)]">
                         Project Settings
                       </div>
                       <SidebarMenuButton
@@ -1411,7 +1411,7 @@ function SidebarContentComponent() {
                         )}
                       >
                         <IconBriefcase className="size-4 text-[var(--primary)] shrink-0" />
-                        <span className="text-xs font-medium truncate">Project Information</span>
+                        <span className="text-sm font-medium truncate">Project Information</span>
                       </SidebarMenuButton>
                       <SidebarMenuButton
                         onClick={() => handleProjectNav("/team")}
@@ -1422,14 +1422,14 @@ function SidebarContentComponent() {
                         )}
                       >
                         <IconUsers className="size-4 text-[var(--primary)] shrink-0" />
-                        <span className="text-xs font-medium truncate">Team Members</span>
+                        <span className="text-sm font-medium truncate">Team Members</span>
                       </SidebarMenuButton>
                     </div>
                   )}
 
                   {activeTab === "admin" && user?.role === ROLES.ADMIN && (
                     <div className="flex flex-col gap-1">
-                      <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-[var(--section-admin)]">
+                      <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[var(--section-admin)]">
                         Admin Tools
                       </div>
                       {adminNavItems.map((item) => {
@@ -1445,7 +1445,7 @@ function SidebarContentComponent() {
                               active && "border-l-[3px] border-[var(--section-admin)] bg-[var(--section-admin)]/10 text-[var(--section-admin)] pl-1.5 font-semibold rounded-l-none rounded-r-md"
                             )}
                           >
-                            <Link href={item.href} className="flex items-center gap-2 text-xs font-medium">
+                            <Link href={item.href} className="flex items-center gap-2 text-sm font-medium">
                               <Icon className="size-4 text-[var(--section-admin)] shrink-0" />
                               <span className="truncate">{item.label}</span>
                             </Link>

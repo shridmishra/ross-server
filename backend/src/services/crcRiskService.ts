@@ -113,6 +113,7 @@ export async function syncRiskFromResponse(
              VALUES ($1, $2, $3, $4, $5, 'Open', $6, 'Automated')
              ON CONFLICT (project_id, control_id)
              DO UPDATE SET rating = $5,
+                           status = 'Open',
                            title = $3, category = $4, description = $6,
                            updated_at = CURRENT_TIMESTAMP
              RETURNING id`,

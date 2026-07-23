@@ -1146,6 +1146,18 @@ export function validateEvidenceUrl(url: string): { valid: boolean; error?: stri
 
   const hostname = parsed.hostname.toLowerCase();
   const pathname = parsed.pathname.toLowerCase();
+  const hasPath = pathname !== '/' && pathname.trim().length > 1;
+
+  // Evaluate recognized evidence platforms first
+  if (VALID_EVIDENCE_DOMAINS.some(d => hostname === d || hostname.endsWith(`.${d}`))) {
+    if (!hasPath) {
+      return { 
+        valid: false, 
+        error: 'Please provide a direct link to the specific evidence artifact rather than a home page.' 
+      };
+    }
+    return { valid: true };
+  }
 
   // Rejection check for blocked root domains
   if (BLOCKED_DOMAINS.some(d => hostname === d || hostname.endsWith(`.${d}`))) {
@@ -1153,11 +1165,6 @@ export function validateEvidenceUrl(url: string): { valid: boolean; error?: stri
       valid: false, 
       error: 'This URL appears to be a generic domain rather than a specific evidence document. Please provide a link to your compliance artifact (e.g. Google Doc, PDF, Word doc, SharePoint, or Notion page).' 
     };
-  }
-
-  // Accepted if host is a known evidence platform (e.g. docs.google.com, sharepoint.com, notion.site, github.com)
-  if (VALID_EVIDENCE_DOMAINS.some(d => hostname === d || hostname.endsWith(`.${d}`))) {
-    return { valid: true };
   }
 
   // Accepted if pathname ends with a supported document extension
