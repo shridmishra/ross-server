@@ -42,18 +42,16 @@ const getReadinessTier = (
   percent: number | null,
   answeredCount: number = 1
 ): { label: string; color: string; bg: string } => {
-  if (answeredCount === 0) {
+  if (answeredCount === 0 || percent === null) {
     return { label: "Not Started", color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-500/10" };
   }
-  if (percent === null) return { label: "Insufficient Data", color: "text-muted-foreground", bg: "bg-muted" };
   if (percent >= 60) return { label: "Ready", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10" };
   if (percent >= 30) return { label: "Partially Ready", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10" };
   return { label: "Not Ready", color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10" };
 };
 
 const getCategoryColor = (percent: number | null, answeredCount: number = 1): string => {
-  if (answeredCount === 0) return "text-blue-500 dark:text-blue-400";
-  if (percent === null) return "text-muted-foreground";
+  if (answeredCount === 0 || percent === null) return "text-blue-500 dark:text-blue-400";
   if (percent >= 60) return "text-emerald-600 dark:text-emerald-400";
   if (percent >= 30) return "text-amber-600 dark:text-amber-400";
   return "text-red-600 dark:text-red-400";
@@ -136,7 +134,7 @@ function CircularProgress({ percentage, size = 160, answeredCount = 1 }: { perce
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-bold text-foreground tabular-nums">
-          {percentage !== null ? `${Math.round(value)}%` : "—"}
+          {percentage !== null ? formatPercent(percentage) : "—"}
         </span>
         <span className={`text-xs font-semibold mt-0.5 ${tier.color}`}>{tier.label}</span>
       </div>
@@ -556,9 +554,6 @@ export default function CRCDashboardPage() {
           </motion.div>
         )}
 
-        {/* Quick Wins Widget */}
-        <QuickWinsWidget projectId={projectId} />
-
         {/* Empty State */}
         {!hasResponses && (
           <motion.div
@@ -597,6 +592,8 @@ export default function CRCDashboardPage() {
         {/* Dashboard Content - Only show when we have responses */}
         {hasResponses && (
           <>
+            {/* Quick Wins Widget */}
+            <QuickWinsWidget projectId={projectId} />
             {/* Overall Score + Breakdown Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Overall Score Card */}

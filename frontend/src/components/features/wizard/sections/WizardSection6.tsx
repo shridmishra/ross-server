@@ -53,7 +53,7 @@ export function WizardSection6() {
   };
 
   return (
-    <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+    <div className="space-y-6 px-0.5">
       {/* Q12: Annex III Sensitive Domains */}
       <div className="space-y-3">
         <Label className="text-base font-bold text-foreground">

@@ -547,7 +547,7 @@ export default function QuestionView() {
                         <div className="mt-6 pt-6 border-t border-border">
                             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                                 <span>Your Notes</span>
-                                <span className="text-[10px] font-normal text-muted-foreground/80 bg-muted px-1.5 py-0.5 rounded border border-border/50">(Auto-saves)</span>
+                                <span className="text-[10px] font-normal text-muted-foreground/80 bg-muted px-1.5 py-0.5 rounded border border-border/50">Auto-saves</span>
                             </h3>
                             <SecureTextarea
                                 value={currentNote}

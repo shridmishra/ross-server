@@ -526,8 +526,13 @@ export const evaluationAggregator = inngest.createFunction(
         resultEntry = JSON.stringify([{
           category: response?.category || "unknown",
           prompt: response?.prompt || "unknown",
+          response: response?.response || (response as any)?.userResponse || "",
+          userResponse: response?.response || (response as any)?.userResponse || "",
           success: true,
-          evaluation: result,
+          evaluation: {
+            ...result,
+            explanation: result.reasoning || (result as any).explanation || "",
+          },
           message: `Overall score ${(result.overallScore * 100).toFixed(1)}%`,
         }]);
       } else {
@@ -535,6 +540,8 @@ export const evaluationAggregator = inngest.createFunction(
         errorEntry = JSON.stringify([{
           category: response?.category || "unknown",
           prompt: response?.prompt || "unknown",
+          response: response?.response || (response as any)?.userResponse || "",
+          userResponse: response?.response || (response as any)?.userResponse || "",
           success: false,
           error: errMessage,
           message: errMessage,

@@ -608,7 +608,7 @@ export default function FairnessBiasTest() {
                     }}
                     placeholder="Type or paste your response here..."
                   />
-                  <div className="mt-2 text-xs text-warning-foreground bg-warning/10 border border-warning/20 p-3 rounded-xl flex items-start gap-2">
+                  <div className="mt-2 text-xs text-amber-800 dark:text-amber-200 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl flex items-start gap-2">
                     <span className="shrink-0 mt-0.5">⚠️</span>
                     <div>
                       <strong>Security:</strong> Your notes are automatically sanitized to
