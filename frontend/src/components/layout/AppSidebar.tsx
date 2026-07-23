@@ -862,7 +862,7 @@ function SidebarContentComponent() {
       <Sidebar
         collapsible="none"
         variant="sidebar"
-        className="border-r-0 p-0 shadow-none bg-sidebar select-none h-screen min-h-screen"
+        className="sticky top-0 h-screen shrink-0 z-30 border-r-0 p-0 shadow-none bg-sidebar select-none"
         style={{
           "--sidebar-width": `${totalSidebarWidth}px`,
         } as React.CSSProperties}
