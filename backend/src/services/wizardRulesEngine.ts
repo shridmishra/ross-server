@@ -82,10 +82,21 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   const informational_notes: string[] = [];
 
   // 1.1 Prohibited Practices (Article 5) -> UNACCEPTABLE
+  const isLawEnforcement = 
+    answers.use_case === "law_enforcement" || 
+    answers.use_case === "law_enforcement_justice" || 
+    annex_iii_domains.includes("law_enforcement") || 
+    annex_iii_domains.includes("law_enforcement_justice") ||
+    annex_iii_domains.includes("justice_democracy");
+
   const isEmotionInWorkplace = answers.biometric_use === "emotion_recognition" && 
     (answers.use_case === "employment_hr" || annex_iii_domains.includes("employment_hr") || annex_iii_domains.includes("education_vocational"));
   
-  const isPublicBiometricSpace = answers.biometric_use === "public_spaces_identification";
+  const isPublicBiometricSpace = 
+    answers.biometric_use === "public_spaces_identification" ||
+    answers.biometric_use === "biometric_identification" ||
+    (answers.biometric_use === "biometric_categorization" && isLawEnforcement);
+
   const isSocialScoring = answers.use_case === "social_scoring";
   const isCognitiveManipulation = answers.use_case === "cognitive_behavioral_manipulation";
 
@@ -128,6 +139,10 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         eu_risk_tier = "LIMITED";
         article50_note = true;
         eu_risk_reason = "Subject to EU AI Act Article 50 transparency obligations (general purpose AI / generative chatbot interface).";
+      } else if (answers.use_case === "other") {
+        eu_risk_tier = "UNCLASSIFIED";
+        eu_risk_reason = "System use case specified as 'Other'. Automated risk classification cannot default to a lower risk tier — a manual compliance and legal review path is required.";
+        informational_notes.push("Manual Compliance Review Required: Selecting 'Other' for system use case prevents automated risk tiering. System requires manual legal and risk review.");
       } else if (geographic_scope.includes("eu_eea")) {
         eu_risk_tier = "MINIMAL";
         eu_risk_reason = "Classified as Minimal Risk under the EU AI Act (standard application with no high-risk characteristics).";
@@ -153,6 +168,9 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   if (answers.automation_level === "autonomous" && internal_risk_tier === "MEDIUM") {
     internal_risk_tier = "HIGH";
     informational_notes.push("Internal risk tier upgraded to HIGH due to autonomous operating model.");
+  }
+  if (answers.use_case === "other" && internal_risk_tier === "LOW") {
+    internal_risk_tier = "MEDIUM";
   }
   if ((data_categories.includes("sensitive") || data_categories.includes("biometric")) && internal_risk_tier === "LOW") {
     internal_risk_tier = "MEDIUM";

@@ -285,15 +285,16 @@ export default function ManualPromptJobPage() {
                   className="border border-border rounded-xl p-4 bg-muted/30"
                 >
                   <p className="text-sm font-semibold text-foreground">{result.category}</p>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{result.prompt}</p>
-                  {result.evaluation && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      Overall score: {(result.evaluation.overallScore * 100).toFixed(1)}%
+                  {result.evaluation ? (
+                    <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                      <span>Overall score:</span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                        {(result.evaluation.overallScore * 100).toFixed(1)}%
+                      </span>
                     </div>
-                  )}
-                  {result.message && (
+                  ) : result.message && !result.message.toLowerCase().includes("overall score") ? (
                     <p className="text-xs text-success mt-2">{result.message}</p>
-                  )}
+                  ) : null}
                 </div>
               ))}
 

@@ -269,7 +269,13 @@ export default function QuestionView() {
         setDescriptionCache({ key: questionKey, html: container.innerHTML });
     }, [currentQuestion?.description, questionKey]);
 
-
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const mainElement = document.querySelector('main') || document.getElementById('main-content');
+        if (mainElement) {
+            mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [currentQuestionIndex, currentDomainId, currentPracticeId]);
 
     if (loading || !questions) {
         return <AssessmentSkeleton />;

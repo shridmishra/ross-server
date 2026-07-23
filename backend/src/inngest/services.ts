@@ -1,6 +1,7 @@
 import pool from "../config/database";
 import type { EvaluationPayload } from "../services/evaluateFairness";
 import { sanitizeConfig } from "../utils/sanitize";
+import { isPublicApiUrl } from "../utils/validateUrl";
 import {
   getAllSecurityPrompts,
   evaluateSecurityResponse,
@@ -248,16 +249,12 @@ export function delay(ms: number) {
 }
 
 export function buildSummary(total: number, results: JobResult[], errors: JobError[]): JobSummary {
-  // Ensure we don't count the same prompt multiple times if results/errors arrays are somehow messy
-  // Although the aggregator should prevent this, this is a defensive measure.
-  const successCount = Math.min(results.length, total);
-  const failureCount = Math.min(errors.length, Math.max(0, total - successCount));
-
-  if (results.length + errors.length !== total || errors.length > total - successCount) {
-    console.warn(
-      `[buildSummary] Inconsistent state detected: results=${results.length}, errors=${errors.length}, total=${total}`
-    );
-  }
+  // A prompt evaluation is counted as successful/passed if it did not error and achieved overallScore >= 0.6 (60%)
+  const passedResults = results.filter(
+    (r) => (r as any).success !== false && (r.evaluation?.overallScore == null || r.evaluation.overallScore >= 0.6)
+  );
+  const successCount = Math.min(passedResults.length, total);
+  const failureCount = Math.max(0, total - successCount);
 
   const average = (arr: number[]) =>
     arr.length === 0 ? 0 : arr.reduce((sum, value) => sum + value, 0) / arr.length;
@@ -430,6 +427,11 @@ export function prepareRequestOptions(
   config: FairnessApiJobConfig,
   requestPayload: any,
 ): { url: string; headers: Record<string, string>; body: any } {
+  const urlCheck = isPublicApiUrl(config.apiUrl);
+  if (!urlCheck.isValid) {
+    throw new Error(`Forbidden API URL: ${urlCheck.error}`);
+  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };

@@ -401,16 +401,47 @@ export const userApiCallAggregator = inngest.createFunction(
 
     const allComplete = await step.run("process-completion", async () => {
       const statusValue = success ? "success" : "failed";
-      await pool.query(
-        `UPDATE evaluation_status
-         SET payload = jsonb_set(
-           COALESCE(payload, '{}'::jsonb),
-           ARRAY['userApiCallStatuses', $1::text],
-           $2::jsonb
-         )
-         WHERE job_id = $3`,
-        [String(promptIndex), JSON.stringify(statusValue), jobId]
-      );
+
+      if (!success) {
+        const errorMsg = error || "Target API request failed. Verify endpoint URL, auth, and response key path.";
+        const errorObj = {
+          category: event.data?.category || "API Test",
+          prompt: event.data?.prompt || `Prompt #${promptIndex + 1}`,
+          success: false,
+          error: errorMsg,
+          message: errorMsg
+        };
+
+        await pool.query(
+          `UPDATE evaluation_status
+           SET payload = jsonb_set(
+             jsonb_set(
+               jsonb_set(
+                 COALESCE(payload, '{}'::jsonb),
+                 ARRAY['userApiCallStatuses', $1::text],
+                 $2::jsonb
+               ),
+               '{errors}',
+               COALESCE(payload->'errors', '[]'::jsonb) || $3::jsonb
+             ),
+             '{error}',
+             $4::jsonb
+           )
+           WHERE job_id = $5`,
+          [String(promptIndex), JSON.stringify(statusValue), JSON.stringify([errorObj]), JSON.stringify(errorMsg), jobId]
+        );
+      } else {
+        await pool.query(
+          `UPDATE evaluation_status
+           SET payload = jsonb_set(
+             COALESCE(payload, '{}'::jsonb),
+             ARRAY['userApiCallStatuses', $1::text],
+             $2::jsonb
+           )
+           WHERE job_id = $3`,
+          [String(promptIndex), JSON.stringify(statusValue), jobId]
+        );
+      }
 
       const jobResult = await pool.query(
         `SELECT id, payload, total_prompts FROM evaluation_status WHERE job_id = $1`,
@@ -523,12 +554,13 @@ export const evaluationAggregator = inngest.createFunction(
       let errorEntry: string | null = null;
       
       if (result) {
+        const isPassed = result.overallScore !== null ? result.overallScore >= 0.6 : true;
         resultEntry = JSON.stringify([{
           category: response?.category || "unknown",
           prompt: response?.prompt || "unknown",
           response: response?.response || (response as any)?.userResponse || "",
           userResponse: response?.response || (response as any)?.userResponse || "",
-          success: true,
+          success: isPassed,
           evaluation: {
             ...result,
             explanation: result.reasoning || (result as any).explanation || "",

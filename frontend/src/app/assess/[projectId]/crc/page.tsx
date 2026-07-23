@@ -202,6 +202,14 @@ export default function CRCAssessmentPage() {
     return 0; // Default to first
   }, [controlIdParam, categoryParam, controls]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainElement = document.querySelector('main') || document.getElementById('main-content');
+    if (mainElement) {
+      mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentIndex]);
+
   const currentControl = controls[currentIndex];
   const currentResponse = responses[currentControl?.id];
 
@@ -419,13 +427,27 @@ export default function CRCAssessmentPage() {
             >
               {/* Control Header */}
               <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-4 flex-wrap">
                   <Badge variant="outline" className="text-xs font-mono">
                     {currentControl.control_id}
                   </Badge>
                   <Badge className={PRIORITY_COLORS[currentControl.priority] || "bg-muted text-muted-foreground"}>
                     {currentControl.priority} Priority
                   </Badge>
+                  {(currentControl as any).flag && (
+                    <Badge 
+                      variant="secondary" 
+                      className={
+                        (currentControl as any).flag === "MANDATORY" 
+                          ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-semibold"
+                          : (currentControl as any).flag === "RECOMMENDED"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold"
+                          : "bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20 text-xs font-semibold"
+                      }
+                    >
+                      {(currentControl as any).flag === "MANDATORY" ? "Mandatory" : (currentControl as any).flag === "RECOMMENDED" ? "Recommended" : "Optional"}
+                    </Badge>
+                  )}
                   <Badge variant="outline" className="text-xs">
                     {currentControl.category_name}
                   </Badge>
@@ -696,15 +718,25 @@ export default function CRCAssessmentPage() {
                 Previous
               </button>
 
-              <button
-                onClick={handleNext}
-                type="button"
-                disabled={currentIndex === controls.length - 1}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                Next
-                <IconArrowRight className="w-4 h-4" />
-              </button>
+              {currentIndex < controls.length - 1 ? (
+                <button
+                  onClick={handleNext}
+                  type="button"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  Next
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => router.push(`/assess/${projectId}/crc/dashboard`)}
+                  type="button"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  View CRC Dashboard
+                  <IconArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* Supporting Card (Evidence, Notes, Collaboration) */}
@@ -799,6 +831,18 @@ export default function CRCAssessmentPage() {
                                 return;
                               }
                               const newStatus = e.target.value as any;
+
+                              if (newStatus === "Evidence Complete" && (!urlInput || !urlInput.trim())) {
+                                showToast.error("Please provide an Evidence URL before setting status to 'Evidence Complete'.");
+                                try {
+                                  await handleEvidenceStatusChange(currentControl.id, "Evidence in Progress");
+                                } catch (err) {}
+                                setTimeout(() => {
+                                  document.getElementById("evidence-url-input")?.focus();
+                                }, 100);
+                                return;
+                              }
+
                               try {
                                 await handleEvidenceStatusChange(currentControl.id, newStatus);
                               } catch (err) {
@@ -843,8 +887,8 @@ export default function CRCAssessmentPage() {
                       </div>
                     </div>
 
-                    {/* Evidence URL Input */}
-                    {currentAnswer !== 2 && (currentResponse?.evidenceStatus === "Evidence in Progress" || currentResponse?.evidenceStatus === "Evidence Complete") && (
+                    {/* Evidence URL Input - Always accessible for answered controls */}
+                    {currentAnswer !== 2 && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -867,10 +911,16 @@ export default function CRCAssessmentPage() {
                             onBlur={async () => {
                               if (urlInput === (currentResponse?.evidenceUrl || "")) return;
                               const finalUrl = urlInput.trim() === "" ? null : urlInput.trim();
+                              let targetStatus = currentResponse?.evidenceStatus || "No Evidence";
+                              if (finalUrl && targetStatus === "No Evidence") {
+                                targetStatus = "Evidence in Progress";
+                              } else if (!finalUrl && targetStatus === "Evidence Complete") {
+                                targetStatus = "Evidence in Progress";
+                              }
                               try {
                                 await handleEvidenceStatusChange(
                                   currentControl.id, 
-                                  currentResponse?.evidenceStatus || "No Evidence", 
+                                  targetStatus, 
                                   finalUrl
                                 );
                                 showToast.success("Evidence URL saved");

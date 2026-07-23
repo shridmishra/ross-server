@@ -24,6 +24,7 @@ export function WizardSection6() {
   const biometricPurposes = [
     { value: "emotion_recognition", label: "Emotion Recognition (detecting emotional states in workplace/schools)" },
     { value: "biometric_categorization", label: "Biometric Categorization (inferring race, gender, political beliefs)" },
+    { value: "biometric_identification", label: "Remote Biometric Identification (biometric scanning / identification)" },
     { value: "public_spaces_identification", label: "Remote Identification in public spaces (crowd scanning/surveillance)" },
     { value: "verification_authentication", label: "1-to-1 Verification (secure login, authentication, face-unlock)" },
     { value: "none", label: "No biometric data is processed" },

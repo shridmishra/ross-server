@@ -32,7 +32,7 @@ export const getRouteFlags = (pathname: string | null) => {
   const isCrcPage = !!pathname?.match(/\/crc($|\/|\?)/);
   const isFairnessPage = !!pathname?.match(/\/fairness-bias($|\/|\?)/);
   const isFairnessRootPage = !!pathname?.match(/\/fairness-bias($|\?|\/$)/);
-  const isApiEndpointPage = !!pathname?.match(/\/fairness-bias\/api-endpoint($|\/|\?)/);
+  const isApiEndpointPage = !!pathname?.match(/\/fairness-bias\/(api-endpoint|api-history)($|\/|\?)/);
   const isVulnerabilityPage = !!pathname?.match(/\/vulnerability-assessment($|\/|\?)/);
   const isDatasetTestingPage = !!pathname?.match(/\/fairness-bias\/dataset-testing($|\/|\?)/);
   const isFairnessOptionsPage = !!pathname?.match(/\/fairness-bias\/options($|\/|\?)/);

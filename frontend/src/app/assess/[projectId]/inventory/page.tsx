@@ -667,7 +667,7 @@ export default function ComponentInventoryPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full flex-1">
           {/* Type Filter */}
           <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-auto min-w-[130px] shrink-0 rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -682,7 +682,7 @@ export default function ComponentInventoryPage() {
 
           {/* Provider Filter */}
           <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-auto min-w-[140px] shrink-0 rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Providers" />
             </SelectTrigger>
             <SelectContent>
@@ -697,7 +697,7 @@ export default function ComponentInventoryPage() {
 
           {/* Risk Filter */}
           <Select value={selectedRisk} onValueChange={setSelectedRisk}>
-            <SelectTrigger className="rounded-xl border-border/60 bg-transparent">
+            <SelectTrigger className="w-auto min-w-[120px] shrink-0 rounded-xl border-border/60 bg-transparent">
               <SelectValue placeholder="All Risks" />
             </SelectTrigger>
             <SelectContent>
@@ -1114,7 +1114,9 @@ export default function ComponentInventoryPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Type */}
               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                <label className="text-xs font-bold text-foreground">Component Type *</label>
+                <label className="text-xs font-bold text-foreground">
+                  Component Type <span className="text-red-500 font-bold ml-0.5">*</span>
+                </label>
                 <Select value={formType} onValueChange={(val) => {
                   setFormType(val);
                   // Auto override risk suggestions if not locked
@@ -1135,7 +1137,9 @@ export default function ComponentInventoryPage() {
               {/* Provider */}
               <div className="space-y-1.5 col-span-2 md:col-span-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-foreground">Provider / Vendor *</label>
+                  <label className="text-xs font-bold text-foreground">
+                    Provider / Vendor <span className="text-red-500 font-bold ml-0.5">*</span>
+                  </label>
                   {isCustomProvider && (
                     <button
                       type="button"
@@ -1184,7 +1188,9 @@ export default function ComponentInventoryPage() {
               {/* Name */}
               <div className="space-y-1.5 col-span-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-foreground">Component / Model Name *</label>
+                  <label className="text-xs font-bold text-foreground">
+                    Component / Model Name <span className="text-red-500 font-bold ml-0.5">*</span>
+                  </label>
                   {!isCustomProvider && isCustomModel && (
                     <button
                       type="button"
@@ -1251,7 +1257,9 @@ export default function ComponentInventoryPage() {
 
               {/* Status */}
               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                <label className="text-xs font-bold text-foreground">Inventory Status *</label>
+                <label className="text-xs font-bold text-foreground">
+                  Inventory Status <span className="text-red-500 font-bold ml-0.5">*</span>
+                </label>
                 <Select value={formStatus} onValueChange={setFormStatus}>
                   <SelectTrigger className="rounded-xl border-border/65">
                     <SelectValue placeholder="Select status" />
@@ -1268,7 +1276,9 @@ export default function ComponentInventoryPage() {
 
               {/* Role in system */}
               <div className="space-y-1.5 col-span-2">
-                <label className="text-xs font-bold text-foreground">Role in AI System *</label>
+                <label className="text-xs font-bold text-foreground">
+                  Role in AI System <span className="text-red-500 font-bold ml-0.5">*</span>
+                </label>
                 <Textarea
                   placeholder="Explain exactly what this component does in your architecture (e.g., 'Primary closed foundation LLM used for user chat generation and summarization of case studies.')"
                   value={formRole}
@@ -1282,7 +1292,9 @@ export default function ComponentInventoryPage() {
               {/* Data Categories Multi-select */}
               <div className="space-y-1.5 col-span-2">
                 <label className="text-xs font-bold text-foreground flex items-center justify-between">
-                  <span>Data Categories Sent/Processed *</span>
+                  <span>
+                    Data Categories Sent/Processed <span className="text-red-500 font-bold ml-0.5">*</span>
+                  </span>
                   <button
                     type="button"
                     onClick={handleNoDataProcessing}

@@ -121,13 +121,17 @@ export default function FairnessBiasTest() {
   }, [loading, user, projectId]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainElement = document.querySelector('main') || document.getElementById('main-content');
+    if (mainElement) {
+      mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     if (currentQuestionRef.current) {
-      setTimeout(() => {
-        currentQuestionRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }, 300);
+      currentQuestionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
     }
   }, [currentCategoryIndex, currentPromptIndex]);
 
@@ -567,12 +571,32 @@ export default function FairnessBiasTest() {
                 </div>
 
                 <div className="mb-6">
-                  <label
-                    htmlFor="responseTextarea"
-                    className="block text-sm font-medium text-foreground mb-2"
-                  >
-                    Your Response
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label
+                      htmlFor="responseTextarea"
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      Your Response
+                    </label>
+                    {(() => {
+                      const val = responses[currentResKey] || "";
+                      const words = val.trim() ? val.trim().split(/\s+/).filter(Boolean).length : 0;
+                      const chars = val.length;
+                      const isLimitReached = words >= 1000 || chars >= 5000;
+                      const isNearLimit = words >= 800 || chars >= 4000;
+                      return (
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md transition-colors ${
+                          isLimitReached 
+                            ? "text-rose-500 bg-rose-500/10 font-bold" 
+                            : isNearLimit 
+                            ? "text-amber-500 bg-amber-500/10" 
+                            : "text-muted-foreground"
+                        }`}>
+                          {words} / 1,000 words ({chars} / 5,000 chars)
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <textarea
                     id="responseTextarea"
                     rows={8}
@@ -580,6 +604,15 @@ export default function FairnessBiasTest() {
                     value={responses[currentResKey] || ""}
                     onChange={(e) => {
                       const originalValue = e.target.value;
+                      const words = originalValue.trim() ? originalValue.trim().split(/\s+/).filter(Boolean) : [];
+                      
+                      if (words.length > 1000 || originalValue.length > 5000) {
+                        showToast.warning("Maximum response limit reached (1,000 words / 5,000 characters).");
+                        if (originalValue.length > 5000) {
+                          setResponses({ ...responses, [currentResKey]: originalValue.slice(0, 5000) });
+                        }
+                        return;
+                      }
 
                       if (!originalValue.trim()) {
                         setHasShownDangerWarning(prev => {
@@ -631,14 +664,24 @@ export default function FairnessBiasTest() {
                 Previous
               </Button>
 
-              <Button
-                onClick={handleNext}
-                disabled={!hasNext}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-              >
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              {hasNext ? (
+                <Button
+                  onClick={handleNext}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                >
+                  Next
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleEvaluateAssessment}
+                  disabled={isEvaluating}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                >
+                  {isEvaluating ? "Evaluating..." : "Evaluate Assessment"}
+                  <BarChart3 className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
 
