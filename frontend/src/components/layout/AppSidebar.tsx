@@ -859,15 +859,19 @@ function SidebarContentComponent() {
   return (
     <>
       <TooltipProvider delayDuration={0}>
-      <Sidebar
-        collapsible="none"
-        variant="sidebar"
-        className="sticky top-0 h-screen shrink-0 z-30 border-r-0 p-0 shadow-none bg-sidebar select-none"
-        style={{
-          "--sidebar-width": `${totalSidebarWidth}px`,
-        } as React.CSSProperties}
-      >
-        <div className="flex h-screen min-h-screen w-full select-none">
+        {/* Layout width spacer */}
+        <div
+          className="shrink-0 h-screen pointer-events-none"
+          style={{ width: `${totalSidebarWidth}px` }}
+          aria-hidden="true"
+        />
+
+        {/* Fixed position dual sidebar */}
+        <aside
+          className="fixed top-0 left-0 bottom-0 z-30 h-screen flex select-none bg-sidebar border-r-0 p-0 shadow-none"
+          style={{ width: `${totalSidebarWidth}px` }}
+        >
+          <div className="flex h-screen w-full select-none">
           {/* ─── 1. Thin Primary Activity Bar (56px) ─────────────────────────── */}
           <div className="w-[56px] shrink-0 h-screen min-h-screen border-r border-sidebar-border/40 bg-sidebar flex flex-col justify-between items-center py-3 z-10 select-none">
             {/* Top Logo / Brand mark */}
@@ -1479,7 +1483,7 @@ function SidebarContentComponent() {
             )}
           </AnimatePresence>
         </div>
-      </Sidebar>
+      </aside>
 
       <SubscriptionModal
         isOpen={showSubscriptionModal}
