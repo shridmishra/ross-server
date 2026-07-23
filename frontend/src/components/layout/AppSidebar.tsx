@@ -1024,7 +1024,7 @@ function SidebarContentComponent() {
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: sidebarWidth, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
+                transition={isResizing ? { duration: 0 } : { duration: 0.2, ease: "easeInOut" }}
                 style={{ width: sidebarWidth }}
                 className="relative h-screen min-h-screen border-r border-sidebar-border/40 bg-sidebar flex flex-col shrink-0 overflow-hidden"
               >
