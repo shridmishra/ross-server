@@ -44,7 +44,7 @@ export default function CRCWelcomePage() {
 
   return (
     <div className="flex-1 bg-background">
-      <div className="max-w-3xl mx-auto py-6 space-y-8">
+      <div className="w-full px-6 py-6 space-y-8">
         <div className="flex items-center gap-4">
           <button
             type="button"

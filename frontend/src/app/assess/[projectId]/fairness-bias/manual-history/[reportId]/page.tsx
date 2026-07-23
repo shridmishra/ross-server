@@ -158,7 +158,7 @@ export default function ManualReportDetailPage() {
     return (
         <div ref={reportRef} className="min-h-screen bg-background">
             <div className="bg-card border-b border-border pdf-section">
-                <div className="max-w-7xl mx-auto px-6 py-4">
+                <div className="w-full px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <button
@@ -200,7 +200,7 @@ export default function ManualReportDetailPage() {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+            <div className="w-full px-6 py-8 space-y-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 break-inside-avoid pdf-section">
                     <div className="bg-card border border-border rounded-xl p-6">

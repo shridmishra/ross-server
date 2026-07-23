@@ -297,7 +297,7 @@ export default function CRCAssessmentPage() {
     <div className="flex-1 flex flex-col w-full">
         {/* Header */}
         <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
-          <div className="max-w-7xl mx-auto flex flex-col gap-2">
+          <div className="w-full flex flex-col gap-2">
             {/* Top: Breadcrumb */}
             <div className="flex items-center justify-between text-xs">
               <Breadcrumb
@@ -415,7 +415,7 @@ export default function CRCAssessmentPage() {
 
         {/* Question Content */}
         <div className="flex-1 px-8 py-6 w-full">
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="w-full space-y-6">
             
             {/* Control Card */}
             <motion.div

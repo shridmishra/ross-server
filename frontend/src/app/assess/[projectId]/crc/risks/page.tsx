@@ -366,7 +366,7 @@ export default function CRCRiskRegisterPage() {
 
   return (
     <div className="flex-1 bg-background overflow-y-auto h-screen pb-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+      <div className="w-full px-4 sm:px-6 py-6 space-y-8">
         
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

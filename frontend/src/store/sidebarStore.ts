@@ -6,8 +6,11 @@ const MAX_WIDTH_RATIO = 0.5; // 50% of viewport
 
 interface SidebarStore {
   sidebarWidth: number;
+  isSecondaryOpen: boolean;
   isResizing: boolean;
   setSidebarWidth: (width: number) => void;
+  setIsSecondaryOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  toggleSecondaryOpen: () => void;
   setIsResizing: (resizing: boolean) => void;
   initializeWidth: () => void;
 }
@@ -16,6 +19,7 @@ let saveTimeout: NodeJS.Timeout | null = null;
 
 export const useSidebarStore = create<SidebarStore>((set) => ({
   sidebarWidth: DEFAULT_WIDTH,
+  isSecondaryOpen: true,
   isResizing: false,
   setSidebarWidth: (width: number) => {
     const clamped = Math.max(MIN_WIDTH, Math.min(width, window.innerWidth * MAX_WIDTH_RATIO));
@@ -27,6 +31,14 @@ export const useSidebarStore = create<SidebarStore>((set) => ({
         localStorage.setItem('sidebar-width', clamped.toString());
       }, 500);
     }
+  },
+  setIsSecondaryOpen: (open) => {
+    set((state) => ({
+      isSecondaryOpen: typeof open === 'function' ? open(state.isSecondaryOpen) : open,
+    }));
+  },
+  toggleSecondaryOpen: () => {
+    set((state) => ({ isSecondaryOpen: !state.isSecondaryOpen }));
   },
   setIsResizing: (resizing: boolean) => {
     set({ isResizing: resizing });

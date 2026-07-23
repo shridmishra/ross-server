@@ -174,7 +174,7 @@ export default function ManualPromptJobPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-card border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-4">
+        <div className="w-full px-6 py-4 flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => router.push(`/assess/${projectId}/fairness-bias`)}
@@ -191,7 +191,7 @@ export default function ManualPromptJobPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <div className="w-full px-6 py-10 space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

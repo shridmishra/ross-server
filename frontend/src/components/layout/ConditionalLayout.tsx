@@ -25,7 +25,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const isHomePage = isLandingRoute(pathname);
   const { isAuthenticated } = useAuth();
 
-  const { sidebarWidth, isResizing, initializeWidth } = useSidebarStore();
+  const { sidebarWidth, isSecondaryOpen, isResizing, initializeWidth } = useSidebarStore();
 
   // Run initialization after client-side mount to avoid hydration mismatch
   useEffect(() => {
@@ -49,13 +49,14 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   // Show sidebar on all other pages (Dashboard, Assess, etc.)
 
   const projectId = getProjectIdFromPath(pathname);
+  const totalSidebarWidth = 48 + (isSecondaryOpen ? sidebarWidth : 0);
 
   const sidebarContent = (
     <SidebarProvider
       defaultOpen={true}
       className={isResizing ? "sidebar-resizing" : ""}
       style={{
-        "--sidebar-width": `${sidebarWidth}px`,
+        "--sidebar-width": `${totalSidebarWidth}px`,
       } as React.CSSProperties}
     >
       <AppSidebar />
