@@ -49,7 +49,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   // Show sidebar on all other pages (Dashboard, Assess, etc.)
 
   const projectId = getProjectIdFromPath(pathname);
-  const totalSidebarWidth = 56 + (isSecondaryOpen ? sidebarWidth : 0);
+  const totalSidebarWidth = 48 + (isSecondaryOpen ? sidebarWidth : 0);
 
   const sidebarContent = (
     <SidebarProvider

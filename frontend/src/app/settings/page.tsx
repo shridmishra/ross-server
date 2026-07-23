@@ -650,7 +650,7 @@ export default function SettingsPage() {
 
   return (
     <div className="bg-background min-h-screen relative">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

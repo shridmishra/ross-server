@@ -418,7 +418,7 @@ export default function DashboardPage() {
     <div className="min-h-full flex flex-col bg-background">
       {/* Page Header inside a sticky header bar */}
       <header className="sticky top-0 z-30 w-full bg-white dark:bg-card border-b border-border shadow-xs backdrop-blur-md">
-        <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
+        <div className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center gap-2">
             <IconLayoutDashboard className="w-6 h-6 text-primary shrink-0" />
             <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
@@ -434,7 +434,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6">
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 w-full py-6">
         <div className="py-2">
           {/* Welcome User Section */}
           <motion.div

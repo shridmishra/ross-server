@@ -343,7 +343,7 @@ export default function QuestionView() {
         <div className="flex-1 flex flex-col w-full">
             {/* HEADER */}
             <div className="bg-sidebar border-b border-sidebar-border px-8 py-3 flex-none sticky top-0 z-20 shadow-xs w-full">
-                <div className="max-w-7xl mx-auto flex flex-col gap-2">
+                <div className="w-full flex flex-col gap-2">
                     {/* Top: Breadcrumb */}
                     <div className="flex items-center justify-between text-xs">
                         <Breadcrumb projectName={projectName || "Loading..."} projectHref={projectBreadcrumbHref} items={[{ label: "AI Maturity Assessment (AIMA)" }]} />
@@ -357,7 +357,7 @@ export default function QuestionView() {
                     </div>
 
                     {/* Bottom: Main row */}
-                    <div className="flex items-center justify-between gap-4 mt-1">
+                    <div className="flex items-center justify-between gap-4 mt-1 ">
                         <div className="flex items-center gap-3 min-w-0">
                             <button
                                 onClick={() => router.back()}
@@ -421,8 +421,8 @@ export default function QuestionView() {
             </div>
 
             {/* Question Content */}
-            <div className="flex-1 px-8 py-6">
-                <div className="max-w-4xl mx-auto">
+            <div className="flex-1 px-8 pt-6 pb-2">
+                <div className="w-full">
                     <div ref={topAnchorRef} aria-hidden />
                     {/* Progress Bar */}
                     <div className="mb-8">
@@ -564,7 +564,7 @@ export default function QuestionView() {
                     </motion.div>
 
                     {/* Navigation Buttons */}
-                    <div className="flex items-center justify-between pb-8">
+                    <div className="flex items-center justify-between pb-2">
                         <button
                             onClick={handlePreviousQuestion}
                             type="button"
