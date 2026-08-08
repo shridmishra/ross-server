@@ -2054,14 +2054,12 @@ router.post("/risks/:projectId", authenticateToken, async (req, res) => {
 
     const targetDate = data.target_date ? new Date(data.target_date) : null;
 
-    // Use a transaction to sync the sequence and insert with collision retry
+    // Sync sequence under lock, then insert (risk_code comes from column default)
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
 
-      // Sync crc_risks_seq to avoid risk_code collisions (same pattern as wizard)
       await client.query("SELECT pg_advisory_xact_lock(hashtext('crc_risks_seq_sync'))");
-      
       const maxValRes = await client.query(`
         SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) AS max_val
         FROM crc_risks
