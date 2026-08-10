@@ -682,9 +682,9 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         const finalUrl = url !== undefined ? url : currentResponse.evidenceUrl;
         const finalAuditReady = auditReady !== undefined ? auditReady : currentResponse.auditReady;
 
-        const hasEvidenceAttached = !!finalUrl || !!currentResponse.evidenceAnalysis;
-        if (status === "Evidence Complete" && !hasEvidenceAttached) {
-            showToast.error("An evidence document file or valid HTTPS Evidence URL is required to set status to 'Evidence Complete'");
+        const hasValidEvidenceAnalysis = currentResponse.evidenceAnalysis?.success && currentResponse.evidenceAnalysis?.isValidTemplate;
+        if (status === "Evidence Complete" && !hasValidEvidenceAnalysis) {
+            showToast.error("A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'");
             return;
         }
 

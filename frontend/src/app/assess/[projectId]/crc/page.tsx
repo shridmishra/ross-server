@@ -1083,9 +1083,7 @@ export default function CRCAssessmentPage() {
                               if (urlInput === (currentResponse?.evidenceUrl || "")) return;
                               const finalUrl = urlInput.trim() === "" ? null : urlInput.trim();
                               let targetStatus = currentResponse?.evidenceStatus || "No Evidence";
-                              if (finalUrl) {
-                                targetStatus = "Evidence Complete";
-                              } else if (!finalUrl && targetStatus === "Evidence Complete") {
+                              if (!finalUrl && targetStatus === "Evidence Complete") {
                                 targetStatus = "No Evidence";
                               }
                               try {

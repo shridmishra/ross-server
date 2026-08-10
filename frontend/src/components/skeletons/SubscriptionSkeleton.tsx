@@ -17,7 +17,7 @@ export function ManageSubscriptionSkeleton() {
 
                 {/* Current Plan Section */}
                 <div className="bg-muted/50 rounded-2xl p-6 mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                         <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex items-center gap-3 flex-wrap">
                                 <Skeleton height="1rem" width="120px" className="max-w-full" />

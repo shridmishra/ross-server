@@ -1310,7 +1310,10 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
     // Verify control exists and is published (outside transaction to avoid holding DB lock during HTTP fetch)
     const controlCheck = await pool.query(
-      "SELECT id, control_id, title, control_statement, category_name, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+      `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+       FROM crc_controls c
+       LEFT JOIN crc_categories cat ON c.category_id = cat.id
+       WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
       [data.controlId]
     );
     if (controlCheck.rows.length === 0) {
@@ -1388,12 +1391,14 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         currentStatus = "Evidence Complete";
       }
 
-      const hasEvidenceAttached = !!currentUrl || !!evidenceAnalysis;
-      if (currentStatus === "Evidence Complete" && !hasEvidenceAttached) {
+      const hasValidAnalysis = (preParsedAnalysis && preParsedAnalysis.success && preParsedAnalysis.isValidTemplate) || (existing && existing.evidence_analysis?.success && existing.evidence_analysis?.isValidTemplate);
+      const hasValidEvidenceAttached = (!!currentUrl && hasValidAnalysis) || hasValidAnalysis;
+
+      if (currentStatus === "Evidence Complete" && !hasValidEvidenceAttached) {
         await client.query("ROLLBACK");
         return res.status(400).json({
           success: false,
-          error: "An evidence document file or valid HTTPS Evidence URL is required to set status to 'Evidence Complete'."
+          error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
         });
       }
 
@@ -1482,7 +1487,10 @@ router.post(
       }
 
       const controlRes = await pool.query(
-        "SELECT id, control_id, title, control_statement, category_name, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+        `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+         FROM crc_controls c
+         LEFT JOIN crc_categories cat ON c.category_id = cat.id
+         WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
         [controlId]
       );
       if (controlRes.rows.length === 0) {
@@ -1526,7 +1534,7 @@ router.post(
       }
 
       const evidenceUrl = uploadedUrl;
-      const status = "Evidence Complete";
+      const status = (analysis && analysis.success && analysis.isValidTemplate) ? "Evidence Complete" : "Evidence in Progress";
 
       const client = await pool.connect();
       let saved: any;

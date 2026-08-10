@@ -682,9 +682,9 @@ export default function ManageSubscriptionPage() {
                 {getPlanDisplayName()}
               </h2>
               {isPremium && planDetails && (
-                <div className="flex items-center gap-2 text-muted-foreground truncate">
+                <div className="flex items-center gap-2 text-muted-foreground flex-wrap text-sm">
                   <IconCalendar className="w-4 h-4 shrink-0" />
-                  <span className="truncate">
+                  <span className="break-words font-medium" title={getRenewalText()}>
                     {getRenewalText()}
                   </span>
                 </div>
@@ -948,15 +948,15 @@ export default function ManageSubscriptionPage() {
                     {invoices.slice(0, MAX_DISPLAYED_INVOICES).map((invoice) => (
                       <div
                         key={invoice.id}
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg gap-2 overflow-hidden min-w-0"
                       >
-                        <div className="flex items-center gap-3">
-                          <IconCircleCheck className="w-5 h-5 text-success" />
-                          <div>
-                            <p className="text-sm font-semibold text-foreground">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <IconCircleCheck className="w-5 h-5 text-success shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground truncate" title={formatCurrency(invoice.amount_paid, invoice.currency)}>
                               {formatCurrency(invoice.amount_paid, invoice.currency)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               {formatDate(invoice.created)}
                             </p>
                           </div>
@@ -966,7 +966,7 @@ export default function ManageSubscriptionPage() {
                             href={invoice.hosted_invoice_url}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="text-muted-foreground hover:text-primary"
+                            className="text-muted-foreground hover:text-primary shrink-0"
                           >
                             <IconDownload className="w-5 h-5" />
                           </a>
