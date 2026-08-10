@@ -1384,8 +1384,17 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         evidenceAnalysis = existing ? existing.evidence_analysis : null;
       }
 
-      if (urlPromoteStatus && (currentStatus === "No Evidence" || currentStatus === "Template Downloaded")) {
+      if (urlPromoteStatus) {
         currentStatus = "Evidence Complete";
+      }
+
+      const hasEvidenceAttached = !!currentUrl || !!evidenceAnalysis;
+      if (currentStatus === "Evidence Complete" && !hasEvidenceAttached) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          success: false,
+          error: "An evidence document file or valid HTTPS Evidence URL is required to set status to 'Evidence Complete'."
+        });
       }
 
       // Upsert response using canonical UUID
