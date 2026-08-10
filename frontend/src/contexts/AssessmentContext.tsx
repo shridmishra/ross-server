@@ -682,6 +682,12 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         const finalUrl = url !== undefined ? url : currentResponse.evidenceUrl;
         const finalAuditReady = auditReady !== undefined ? auditReady : currentResponse.auditReady;
 
+        const hasValidEvidenceAnalysis = currentResponse.evidenceAnalysis?.success && currentResponse.evidenceAnalysis?.isValidTemplate;
+        if (status === "Evidence Complete" && !hasValidEvidenceAnalysis) {
+            showToast.error("A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'");
+            return;
+        }
+
         // Optimistic update
         setCrcResponses(prev => ({
             ...prev,

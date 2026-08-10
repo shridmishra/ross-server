@@ -216,11 +216,46 @@ export function extractTextFromHtml(html: string): string {
 /**
  * Parses evidence document buffer or string and validates template placeholders & evidence requirements.
  */
+const COMMON_STOPWORDS = new Set([
+  "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at",
+  "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can", "cannot", "could",
+  "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for",
+  "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "her", "here", "hers",
+  "herself", "him", "himself", "his", "how", "i", "if", "in", "into", "is", "isn't", "it", "its", "itself", "just",
+  "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or",
+  "other", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "should", "shouldn't", "so",
+  "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves", "then", "there", "these", "they",
+  "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "were", "weren't",
+  "what", "when", "where", "which", "while", "who", "whom", "why", "with", "would", "wouldn't", "you", "your",
+  "yours", "yourself", "yourselves", "brief", "first", "read", "built", "directly", "every", "module", "already",
+  "added", "plus", "covers", "full", "application", "testing", "assessment", "feature", "specification",
+  "brief", "for", "from", "v1", "round", "team", "this", "covers"
+]);
+
+export function extractMeaningfulKeywords(text: string): string[] {
+  if (!text) return [];
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, " ")
+    .split(/\s+/)
+    .filter((k) => k.length >= 3 && !COMMON_STOPWORDS.has(k));
+}
+
+export interface ControlContext {
+  title?: string;
+  statement?: string;
+  category?: string;
+}
+
+/**
+ * Parses evidence document buffer or string and validates template placeholders & evidence requirements.
+ */
 export function parseAndValidateEvidence(
   fileBuffer: Buffer | null,
   rawTextInput: string | null,
   filename: string | null,
-  evidenceRequirements: string[] = []
+  evidenceRequirements: string[] = [],
+  controlContext?: ControlContext
 ): EvidenceParsingResult {
   let extractedText = "";
 
@@ -319,34 +354,71 @@ export function parseAndValidateEvidence(
   // Check 3: Evidence Requirements Keyword & Semantic Matching
   const matchedRequirements: string[] = [];
   const missingRequirements: string[] = [];
+  const lowerText = cleanText.toLowerCase();
 
   for (const req of evidenceRequirements) {
     if (!req || req.trim().length === 0) continue;
     const cleanReq = req.trim();
-    // Split requirement into core keywords (length > 3)
-    const keywords = cleanReq
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/gi, "")
-      .split(/\s+/)
-      .filter((k) => k.length > 3);
+    const cleanReqLower = cleanReq.toLowerCase();
+    const reqKeywords = extractMeaningfulKeywords(cleanReq);
+
+    if (reqKeywords.length === 0) {
+      if (lowerText.includes(cleanReqLower)) {
+        matchedRequirements.push(cleanReq);
+      } else {
+        missingRequirements.push(cleanReq);
+      }
+      continue;
+    }
 
     let matchCount = 0;
-    const lowerText = cleanText.toLowerCase();
-    for (const kw of keywords) {
+    for (const kw of reqKeywords) {
       if (lowerText.includes(kw)) {
         matchCount++;
       }
     }
 
-    // Direct string match or keyword match >= 50%
-    const isDirectMatch = lowerText.includes(cleanReq.toLowerCase());
-    const isKeywordMatch = keywords.length > 0 && matchCount / keywords.length >= 0.4;
+    const isDirectMatch = lowerText.includes(cleanReqLower);
+    const matchRatio = matchCount / reqKeywords.length;
+    const isKeywordMatch = matchRatio >= 0.5 && matchCount >= Math.min(2, reqKeywords.length);
 
     if (isDirectMatch || isKeywordMatch) {
       matchedRequirements.push(cleanReq);
     } else {
       missingRequirements.push(cleanReq);
     }
+  }
+
+  // Check 4: Control Topic Context Relevance Check
+  const controlContextText = [
+    controlContext?.title || "",
+    controlContext?.statement || "",
+    controlContext?.category || ""
+  ].filter(Boolean).join(" ");
+
+  const controlTopicKeywords = Array.from(new Set([
+    ...extractMeaningfulKeywords(controlContextText),
+    ...evidenceRequirements.flatMap(req => extractMeaningfulKeywords(req))
+  ]));
+
+  let controlRelevanceMatched = 0;
+  if (controlTopicKeywords.length > 0) {
+    for (const kw of controlTopicKeywords) {
+      if (lowerText.includes(kw)) {
+        controlRelevanceMatched++;
+      }
+    }
+  }
+
+  const topicRelevanceRatio = controlTopicKeywords.length > 0
+    ? controlRelevanceMatched / controlTopicKeywords.length
+    : 1;
+  const isTopicRelevant = controlTopicKeywords.length === 0 || controlRelevanceMatched >= 2 || topicRelevanceRatio >= 0.2;
+
+  if (!isTopicRelevant) {
+    validationErrors.push(
+      "Document content has low relevance to this control topic or compliance requirements."
+    );
   }
 
   // Score calculation
@@ -360,7 +432,11 @@ export function parseAndValidateEvidence(
     score = Math.round(score * reqCoverage);
   }
 
-  const isValidTemplate = unfilledPlaceholders.length === 0 && (evidenceRequirements.length === 0 || matchedRequirements.length > 0);
+  if (!isTopicRelevant) {
+    score = Math.min(score, Math.round(20 * topicRelevanceRatio));
+  }
+
+  const isValidTemplate = isTopicRelevant && unfilledPlaceholders.length === 0 && (evidenceRequirements.length === 0 || matchedRequirements.length > 0);
 
   if (!isValidTemplate && missingRequirements.length > 0) {
     validationWarnings.push(
@@ -392,7 +468,8 @@ const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB limit
  */
 export async function fetchAndParseEvidenceFromUrl(
   url: string,
-  evidenceRequirements: string[] = []
+  evidenceRequirements: string[] = [],
+  controlContext?: ControlContext
 ): Promise<EvidenceParsingResult> {
   if (!url || typeof url !== "string" || !/^https:\/\//i.test(url.trim())) {
     return {
@@ -520,7 +597,7 @@ export async function fetchAndParseEvidenceFromUrl(
       }
       const buffer = Buffer.from(arrayBuffer);
       const filename = isDocx ? "evidence.docx" : "evidence.pdf";
-      return parseAndValidateEvidence(buffer, null, filename, evidenceRequirements);
+      return parseAndValidateEvidence(buffer, null, filename, evidenceRequirements, controlContext);
     } else {
       const textContent = await response.text();
       if (textContent.length > MAX_RESPONSE_SIZE) {
@@ -539,7 +616,7 @@ export async function fetchAndParseEvidenceFromUrl(
       }
       const isHtml = /<html|<body|<div|<p/i.test(textContent);
       const parsedText = isHtml ? extractTextFromHtml(textContent) : textContent;
-      return parseAndValidateEvidence(null, parsedText, "evidence.txt", evidenceRequirements);
+      return parseAndValidateEvidence(null, parsedText, "evidence.txt", evidenceRequirements, controlContext);
     }
   } catch (err: any) {
     console.error("[evidenceParser] Failed to fetch and parse URL:", err);

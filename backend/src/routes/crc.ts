@@ -1310,7 +1310,10 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
     // Verify control exists and is published (outside transaction to avoid holding DB lock during HTTP fetch)
     const controlCheck = await pool.query(
-      "SELECT id, control_id, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+      `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+       FROM crc_controls c
+       LEFT JOIN crc_categories cat ON c.category_id = cat.id
+       WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
       [data.controlId]
     );
     if (controlCheck.rows.length === 0) {
@@ -1320,6 +1323,11 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
     const targetControlCode = controlCheck.rows[0].control_id;
     const targetUuid = String(controlCheck.rows[0].id);
     const controlReqs: string[] = controlCheck.rows[0].evidence_requirements || [];
+    const controlContext = {
+      title: controlCheck.rows[0].title,
+      statement: controlCheck.rows[0].control_statement,
+      category: controlCheck.rows[0].category_name,
+    };
 
     let inputUrl = data.evidenceUrl;
     if (inputUrl === "") {
@@ -1335,10 +1343,12 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         return res.status(400).json({ success: false, error: validation.error });
       }
       try {
-        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs);
-        if (parsedFromUrl && parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
+        if (parsedFromUrl) {
           preParsedAnalysis = parsedFromUrl;
-          urlPromoteStatus = true;
+          if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+            urlPromoteStatus = true;
+          }
         }
       } catch (urlErr) {
         console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
@@ -1370,9 +1380,26 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         });
       }
 
-      let evidenceAnalysis: any = preParsedAnalysis || (existing ? existing.evidence_analysis : null);
-      if (urlPromoteStatus && (currentStatus === "No Evidence" || currentStatus === "Template Downloaded")) {
+      let evidenceAnalysis: any = null;
+      if (inputUrl !== undefined) {
+        evidenceAnalysis = inputUrl ? preParsedAnalysis : null;
+      } else {
+        evidenceAnalysis = existing ? existing.evidence_analysis : null;
+      }
+
+      if (urlPromoteStatus) {
         currentStatus = "Evidence Complete";
+      }
+
+      const hasValidAnalysis = (preParsedAnalysis && preParsedAnalysis.success && preParsedAnalysis.isValidTemplate) || (existing && existing.evidence_analysis?.success && existing.evidence_analysis?.isValidTemplate);
+      const hasValidEvidenceAttached = (!!currentUrl && hasValidAnalysis) || hasValidAnalysis;
+
+      if (currentStatus === "Evidence Complete" && !hasValidEvidenceAttached) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          success: false,
+          error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
+        });
       }
 
       // Upsert response using canonical UUID
@@ -1460,7 +1487,10 @@ router.post(
       }
 
       const controlRes = await pool.query(
-        "SELECT id, control_id, evidence_requirements, control_statement FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+        `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+         FROM crc_controls c
+         LEFT JOIN crc_categories cat ON c.category_id = cat.id
+         WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
         [controlId]
       );
       if (controlRes.rows.length === 0) {
@@ -1470,12 +1500,18 @@ router.post(
       const control = controlRes.rows[0];
       const actualControlUuid = control.id;
       const evidenceReqs: string[] = control.evidence_requirements || [];
+      const controlContext = {
+        title: control.title,
+        statement: control.control_statement,
+        category: control.category_name,
+      };
 
       const analysis = parseAndValidateEvidence(
         file.buffer,
         null,
         file.originalname,
-        evidenceReqs
+        evidenceReqs,
+        controlContext
       );
 
       let uploadedUrl: string | null = null;
@@ -1498,7 +1534,7 @@ router.post(
       }
 
       const evidenceUrl = uploadedUrl;
-      const status = "Evidence Complete";
+      const status = (analysis && analysis.success && analysis.isValidTemplate) ? "Evidence Complete" : "Evidence in Progress";
 
       const client = await pool.connect();
       let saved: any;
@@ -2032,37 +2068,71 @@ router.post("/risks/:projectId", authenticateToken, async (req, res) => {
       await client.query("BEGIN");
 
       await client.query("SELECT pg_advisory_xact_lock(hashtext('crc_risks_seq_sync'))");
-      await client.query(`
-        SELECT setval('crc_risks_seq', max_val)
-        FROM (
-          SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) AS max_val
-          FROM crc_risks
-        ) m
-        WHERE max_val > (SELECT last_value FROM crc_risks_seq)
+      const maxValRes = await client.query(`
+        SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) AS max_val
+        FROM crc_risks
       `);
+      const maxVal = Number(maxValRes.rows[0]?.max_val || 0);
+      if (maxVal === 0) {
+        await client.query(`SELECT setval('crc_risks_seq', 1, false)`);
+      } else {
+        await client.query(`
+          SELECT setval('crc_risks_seq', $1, true)
+          FROM crc_risks_seq s
+          WHERE $1 > s.last_value OR ($1 = s.last_value AND NOT s.is_called)
+        `, [maxVal]);
+      }
 
-      const result = await client.query(
-        `INSERT INTO crc_risks (
-          project_id, control_id, title, category, rating, status, description,
-          mitigation_plan, owner, target_date, review_frequency, source
-        )
-        VALUES ($1, NULL, $2, $3, $4, 'Open', $5, $6, $7, $8, $9, 'Manual')
-        RETURNING *`,
-        [
-          projectId,
-          data.title,
-          data.category,
-          data.rating,
-          data.description,
-          data.mitigation_plan,
-          data.owner,
-          targetDate,
-          data.review_frequency
-        ]
-      );
+      let insertedRow = null;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (!insertedRow && attempts < maxAttempts) {
+        attempts++;
+        await client.query("SAVEPOINT manual_risk_insert");
+        try {
+          const result = await client.query(
+            `INSERT INTO crc_risks (
+              project_id, control_id, title, category, rating, status, description,
+              mitigation_plan, owner, target_date, review_frequency, source
+            )
+            VALUES ($1, NULL, $2, $3, $4, 'Open', $5, $6, $7, $8, $9, 'Manual')
+            RETURNING *`,
+            [
+              projectId,
+              data.title,
+              data.category,
+              data.rating,
+              data.description,
+              data.mitigation_plan,
+              data.owner,
+              targetDate,
+              data.review_frequency
+            ]
+          );
+          await client.query("RELEASE SAVEPOINT manual_risk_insert");
+          insertedRow = result.rows[0];
+        } catch (insertErr: any) {
+          await client.query("ROLLBACK TO SAVEPOINT manual_risk_insert");
+          const isRiskCodeConflict =
+            insertErr?.constraint === "crc_risks_risk_code_key" ||
+            Boolean(insertErr?.detail?.includes("risk_code"));
+
+          if (insertErr?.code === "23505" && isRiskCodeConflict && attempts < maxAttempts) {
+            await client.query(`
+              SELECT setval('crc_risks_seq', GREATEST(
+                (SELECT COALESCE(MAX(NULLIF(regexp_replace(risk_code, '[^0-9]', '', 'g'), '')::bigint), 0) FROM crc_risks),
+                (SELECT last_value FROM crc_risks_seq)
+              ), true)
+            `);
+          } else {
+            throw insertErr;
+          }
+        }
+      }
 
       await client.query("COMMIT");
-      res.status(201).json({ success: true, data: result.rows[0] });
+      res.status(201).json({ success: true, data: insertedRow });
     } catch (txError: any) {
       await client.query("ROLLBACK");
       throw txError;
