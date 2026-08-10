@@ -27,13 +27,14 @@ export function Skeleton({
 
     const combinedStyle: React.CSSProperties = {
         width: width || "100%",
+        maxWidth: "100%",
         height: height || "1rem",
         ...style,
     };
 
     return (
         <ShadcnSkeleton
-            className={cn(variantClasses[variant], className)}
+            className={cn(variantClasses[variant], "max-w-full", className)}
             style={combinedStyle}
             {...props}
         />

@@ -664,11 +664,11 @@ export default function ManageSubscriptionPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-primary/10 rounded-2xl p-6 mb-6"
+          className="bg-primary/10 rounded-2xl p-6 mb-6 min-w-0 overflow-hidden"
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 min-w-0">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   CURRENT PLAN
                 </span>
@@ -678,20 +678,20 @@ export default function ManageSubscriptionPage() {
                   </Badge>
                 )}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mb-3">
+              <h2 className="text-3xl font-bold text-foreground mb-3 truncate">
                 {getPlanDisplayName()}
               </h2>
               {isPremium && planDetails && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <IconCalendar className="w-4 h-4" />
-                  <span>
+                <div className="flex items-center gap-2 text-muted-foreground truncate">
+                  <IconCalendar className="w-4 h-4 shrink-0" />
+                  <span className="truncate">
                     {getRenewalText()}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
               {/* Free Plan Options */}
               {!isPremium && (
                 <>
@@ -779,38 +779,38 @@ export default function ManageSubscriptionPage() {
         {/* Main Content Grid: Left side (Cards + FAQ), Right side (Billing History) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Left Column: Two Cards + FAQ */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             {/* Four Cards Row */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3 sm:gap-4"
             >
               {/* Billing Cycle Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <IconCalendar className="w-6 h-6 text-muted-foreground mb-3" />
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <Card className="min-w-0 overflow-hidden">
+                <CardContent className="p-4 sm:p-5">
+                  <IconCalendar className="w-6 h-6 text-muted-foreground mb-3 shrink-0" />
+                  <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-normal sm:tracking-wider mb-2 truncate" title="BILLING CYCLE">
                     BILLING CYCLE
                   </p>
-                  <p className="text-lg font-bold text-foreground mb-1">
+                  <p className="text-lg font-bold text-foreground mb-1 truncate">
                     {isPremium ? billingCycle.cycle : "—"}
                   </p>
                   {isPremium && billingCycle.savings && (
-                    <p className="text-sm text-muted-foreground">{billingCycle.savings}</p>
+                    <p className="text-sm text-muted-foreground truncate">{billingCycle.savings}</p>
                   )}
                 </CardContent>
               </Card>
 
               {/* Next Payment Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <IconCoins className="w-6 h-6 text-muted-foreground mb-3" />
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <Card className="min-w-0 overflow-hidden">
+                <CardContent className="p-4 sm:p-5">
+                  <IconCoins className="w-6 h-6 text-muted-foreground mb-3 shrink-0" />
+                  <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-normal sm:tracking-wider mb-2 truncate" title="NEXT PAYMENT">
                     NEXT PAYMENT
                   </p>
-                  <p className="text-lg font-bold text-foreground mb-1">
+                  <p className="text-lg font-bold text-foreground mb-1 truncate">
                     {nextPaymentInfo.isLoading ? (
                       <IconLoader2 className="w-4 h-4 animate-spin inline" />
                     ) : isPremium && nextPaymentInfo.amount !== null && nextPaymentInfo.amount !== undefined ? (
@@ -819,43 +819,43 @@ export default function ManageSubscriptionPage() {
                       "—"
                     )}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground truncate">
                     {isPremium ? `On ${getNextPaymentDateText(planDetails)}` : "No upcoming payments"}
                   </p>
                 </CardContent>
               </Card>
 
               {/* Days Remaining Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <IconClock className="w-6 h-6 text-muted-foreground mb-3" />
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <Card className="min-w-0 overflow-hidden">
+                <CardContent className="p-4 sm:p-5">
+                  <IconClock className="w-6 h-6 text-muted-foreground mb-3 shrink-0" />
+                  <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-normal sm:tracking-wider mb-2 truncate" title="DAYS REMAINING">
                     DAYS REMAINING
                   </p>
-                  <p className="text-lg font-bold text-foreground mb-1">
+                  <p className="text-lg font-bold text-foreground mb-1 truncate">
                     {isPremium && typeof planDetails?.days_remaining === "number"
                       ? `${planDetails.days_remaining} day${planDetails.days_remaining === 1 ? "" : "s"}`
                       : "—"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground truncate">
                     {isPremium ? (isCanceling ? "Until cancellation" : "Until renewal") : "No active subscription"}
                   </p>
                 </CardContent>
               </Card>
 
               {/* Cancellation Date Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <IconAlertTriangle className="w-6 h-6 text-muted-foreground mb-3" />
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <Card className="min-w-0 overflow-hidden">
+                <CardContent className="p-4 sm:p-5">
+                  <IconAlertTriangle className="w-6 h-6 text-muted-foreground mb-3 shrink-0" />
+                  <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-normal sm:tracking-wider mb-2 truncate" title="CANCELLATION DATE">
                     CANCELLATION DATE
                   </p>
-                  <p className="text-lg font-bold text-foreground mb-1">
+                  <p className="text-lg font-bold text-foreground mb-1 truncate">
                     {isPremium && planDetails?.cancel_effective_date
                       ? formatDate(planDetails.cancel_effective_date)
                       : "—"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground truncate">
                     {isPremium && isCanceling ? "Subscription ends" : "Not scheduled"}
                   </p>
                 </CardContent>

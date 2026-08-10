@@ -1310,7 +1310,7 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
     // Verify control exists and is published (outside transaction to avoid holding DB lock during HTTP fetch)
     const controlCheck = await pool.query(
-      "SELECT id, control_id, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+      "SELECT id, control_id, title, control_statement, category_name, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
       [data.controlId]
     );
     if (controlCheck.rows.length === 0) {
@@ -1320,6 +1320,11 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
     const targetControlCode = controlCheck.rows[0].control_id;
     const targetUuid = String(controlCheck.rows[0].id);
     const controlReqs: string[] = controlCheck.rows[0].evidence_requirements || [];
+    const controlContext = {
+      title: controlCheck.rows[0].title,
+      statement: controlCheck.rows[0].control_statement,
+      category: controlCheck.rows[0].category_name,
+    };
 
     let inputUrl = data.evidenceUrl;
     if (inputUrl === "") {
@@ -1335,10 +1340,12 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         return res.status(400).json({ success: false, error: validation.error });
       }
       try {
-        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs);
-        if (parsedFromUrl && parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
+        if (parsedFromUrl) {
           preParsedAnalysis = parsedFromUrl;
-          urlPromoteStatus = true;
+          if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+            urlPromoteStatus = true;
+          }
         }
       } catch (urlErr) {
         console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
@@ -1370,7 +1377,13 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         });
       }
 
-      let evidenceAnalysis: any = preParsedAnalysis || (existing ? existing.evidence_analysis : null);
+      let evidenceAnalysis: any = null;
+      if (inputUrl !== undefined) {
+        evidenceAnalysis = inputUrl ? preParsedAnalysis : null;
+      } else {
+        evidenceAnalysis = existing ? existing.evidence_analysis : null;
+      }
+
       if (urlPromoteStatus && (currentStatus === "No Evidence" || currentStatus === "Template Downloaded")) {
         currentStatus = "Evidence Complete";
       }
@@ -1460,7 +1473,7 @@ router.post(
       }
 
       const controlRes = await pool.query(
-        "SELECT id, control_id, evidence_requirements, control_statement FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
+        "SELECT id, control_id, title, control_statement, category_name, evidence_requirements FROM crc_controls WHERE (id::text = $1 OR control_id = $1) AND status = 'Published'",
         [controlId]
       );
       if (controlRes.rows.length === 0) {
@@ -1470,12 +1483,18 @@ router.post(
       const control = controlRes.rows[0];
       const actualControlUuid = control.id;
       const evidenceReqs: string[] = control.evidence_requirements || [];
+      const controlContext = {
+        title: control.title,
+        statement: control.control_statement,
+        category: control.category_name,
+      };
 
       const analysis = parseAndValidateEvidence(
         file.buffer,
         null,
         file.originalname,
-        evidenceReqs
+        evidenceReqs,
+        controlContext
       );
 
       let uploadedUrl: string | null = null;
