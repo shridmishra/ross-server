@@ -1338,14 +1338,16 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
     // Perform URL evidence fetching/parsing BEFORE opening DB transaction
     let preParsedAnalysis: any = null;
     let urlPromoteStatus = false;
+    let urlChanged = true;
     if (inputUrl) {
       // Check if URL has changed from what's already stored — skip validation & re-parse if unchanged
       const existingUrlCheck = await pool.query(
-        `SELECT evidence_url FROM crc_assessment_responses WHERE project_id = $1 AND control_id = $2`,
+        `SELECT evidence_url, evidence_analysis FROM crc_assessment_responses WHERE project_id = $1 AND control_id = $2`,
         [projectId, targetUuid]
       );
-      const storedUrl = existingUrlCheck.rows[0]?.evidence_url || null;
-      const urlChanged = storedUrl !== inputUrl;
+      const storedRow = existingUrlCheck.rows[0];
+      const storedUrl = storedRow?.evidence_url || null;
+      urlChanged = storedUrl !== inputUrl;
 
       if (urlChanged) {
         const validation = validateEvidenceUrl(inputUrl);
@@ -1363,8 +1365,9 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         } catch (urlErr) {
           console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
         }
+      } else {
+        preParsedAnalysis = storedRow?.evidence_analysis || null;
       }
-      // If URL hasn't changed, keep existing analysis (will be loaded from DB in transaction)
     }
 
     const client = await pool.connect();
@@ -1394,7 +1397,7 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
       let evidenceAnalysis: any = null;
       if (inputUrl !== undefined) {
-        evidenceAnalysis = inputUrl ? preParsedAnalysis : null;
+        evidenceAnalysis = inputUrl ? (urlChanged ? preParsedAnalysis : (existing?.evidence_analysis ?? preParsedAnalysis)) : null;
       } else {
         evidenceAnalysis = existing ? existing.evidence_analysis : null;
       }
