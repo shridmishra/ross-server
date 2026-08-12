@@ -101,7 +101,7 @@ interface AssessmentContextType {
     handleAnswerChange: (questionIndex: number, value: number) => Promise<void>;
     handleNoteChange: (questionIndex: number, note: string) => void;
     handleNoteSave: (questionIndex: number, note: string) => Promise<void>;
-    handleCrcAnswerChange: (controlId: string, value: number) => Promise<void>;
+    handleCrcAnswerChange: (controlId: string, value: number, overrideEvidenceUrl?: string | null) => Promise<void>;
     handleCrcNoteSave: (controlId: string, notes: string) => Promise<void>;
     handleEvidenceStatusChange: (
         controlId: string, 
@@ -570,13 +570,20 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         }
     };
 
-    const handleCrcAnswerChange = async (controlId: string, value: number) => {
+    const handleCrcAnswerChange = async (controlId: string, value: number, overrideEvidenceUrl?: string | null) => {
         if (isReadOnly) return;
         const previousResponse = crcResponses[controlId];
         const notes = crcResponses[controlId]?.notes || "";
         const evidenceStatus = crcResponses[controlId]?.evidenceStatus || "No Evidence";
-        const evidenceUrl = crcResponses[controlId]?.evidenceUrl || null;
-        const auditReady = crcResponses[controlId]?.auditReady || false;
+        const evidenceUrl = overrideEvidenceUrl !== undefined 
+            ? overrideEvidenceUrl 
+            : (crcResponses[controlId]?.evidenceUrl || null);
+        
+        let finalStatus = evidenceStatus;
+        if (overrideEvidenceUrl !== undefined && overrideEvidenceUrl !== (crcResponses[controlId]?.evidenceUrl || null) && evidenceStatus === "Evidence Complete") {
+            finalStatus = overrideEvidenceUrl ? "Evidence in Progress" : "No Evidence";
+        }
+        const auditReady = finalStatus === "Evidence Complete" ? (crcResponses[controlId]?.auditReady || false) : false;
 
         // Optimistic update
         setCrcResponses(prev => ({
@@ -584,7 +591,7 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
             [controlId]: { 
                 value, 
                 notes, 
-                evidenceStatus, 
+                evidenceStatus: finalStatus, 
                 evidenceUrl, 
                 auditReady, 
                 updatedAt: new Date().toISOString() 
@@ -597,7 +604,7 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
                 controlId, 
                 value, 
                 notes, 
-                evidenceStatus, 
+                evidenceStatus: finalStatus, 
                 evidenceUrl, 
                 auditReady 
             });

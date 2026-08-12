@@ -1267,6 +1267,11 @@ export function validateEvidenceUrl(url: string): { valid: boolean; error?: stri
     return { valid: true };
   }
 
+  // Fallback: Accept any non-blocked HTTPS URL with a non-root path
+  if (hasPath) {
+    return { valid: true };
+  }
+
   return { 
     valid: false, 
     error: 'Evidence URL must point to a recognized document source (e.g., Google Doc, PDF, Word doc, SharePoint, Notion, GitHub, or direct file download).' 
@@ -1311,7 +1316,7 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
     // Verify control exists and is published (outside transaction to avoid holding DB lock during HTTP fetch)
     const controlCheck = await pool.query(
-      `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+      `SELECT c.id, c.control_id, c.control_title AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
        FROM crc_controls c
        LEFT JOIN crc_categories cat ON c.category_id = cat.id
        WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
@@ -1410,11 +1415,16 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       const hasValidEvidenceAttached = (!!currentUrl && hasValidAnalysis) || hasValidAnalysis;
 
       if (currentStatus === "Evidence Complete" && !hasValidEvidenceAttached) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({
-          success: false,
-          error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
-        });
+        if (data.evidenceStatus === "Evidence Complete") {
+          await client.query("ROLLBACK");
+          return res.status(400).json({
+            success: false,
+            error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
+          });
+        } else {
+          currentStatus = currentUrl ? "Evidence in Progress" : "No Evidence";
+          currentAuditReady = false;
+        }
       }
 
       // Upsert response using canonical UUID
@@ -1502,7 +1512,7 @@ router.post(
       }
 
       const controlRes = await pool.query(
-        `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+        `SELECT c.id, c.control_id, c.control_title AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
          FROM crc_controls c
          LEFT JOIN crc_categories cat ON c.category_id = cat.id
          WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,

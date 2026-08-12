@@ -424,7 +424,10 @@ export function parseAndValidateEvidence(
   // Score calculation
   let score = 100;
   if (unfilledPlaceholders.length > 0) {
-    score -= Math.min(30, unfilledPlaceholders.length * 10);
+    score = Math.max(0, score - unfilledPlaceholders.length * 25);
+    if (unfilledPlaceholders.length >= 3) {
+      score = 0;
+    }
   }
 
   if (evidenceRequirements.length > 0) {
@@ -491,7 +494,7 @@ export async function fetchAndParseEvidenceFromUrl(
   let redirectsRemaining = 3;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
   try {
     while (true) {

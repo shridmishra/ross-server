@@ -815,7 +815,10 @@ export default function CRCAssessmentPage() {
                           value={option.value}
                           checked={isSelected}
                           disabled={isReadOnly}
-                          onChange={() => handleCrcAnswerChange(currentControl.id, option.value)}
+                          onChange={() => {
+                            const activeUrl = (urlInput || "").trim() || null;
+                            handleCrcAnswerChange(currentControl.id, option.value, activeUrl);
+                          }}
                           className="sr-only peer"
                         />
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-1 ${colors.radioClass}`}>
@@ -1079,12 +1082,18 @@ export default function CRCAssessmentPage() {
                             value={urlInput}
                             placeholder="https://docs.google.com/document/d/... or other link"
                             onChange={(e) => setUrlInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
                             onBlur={async () => {
                               if (urlInput === (currentResponse?.evidenceUrl || "")) return;
                               const finalUrl = urlInput.trim() === "" ? null : urlInput.trim();
                               let targetStatus = currentResponse?.evidenceStatus || "No Evidence";
-                              if (!finalUrl && targetStatus === "Evidence Complete") {
-                                targetStatus = "No Evidence";
+                              if (urlInput !== (currentResponse?.evidenceUrl || "") && targetStatus === "Evidence Complete") {
+                                targetStatus = finalUrl ? "Evidence in Progress" : "No Evidence";
                               }
                               try {
                                 const saved = await handleEvidenceStatusChange(
