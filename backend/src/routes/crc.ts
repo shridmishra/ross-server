@@ -1210,7 +1210,8 @@ const VALID_EVIDENCE_DOMAINS = [
   'notion.so', 'notion.site',
   'atlassian.net', 'confluence.atlassian.net',
   'github.com', 'gitlab.com',
-  'dropbox.com', 'box.com'
+  'dropbox.com', 'box.com',
+  'utfs.io', 'uploadthing.com',
 ];
 
 const VALID_DOCUMENT_EXTENSIONS = [
@@ -1262,7 +1263,7 @@ export function validateEvidenceUrl(url: string): { valid: boolean; error?: stri
   }
 
   // If path contains document-like subpaths (e.g. /documents/, /files/, /pdf/, /evidence/)
-  if (/\/(document|documents|file|files|evidence|report|reports|pdf|view|share|d|s)\//i.test(pathname)) {
+  if (/\/(document|documents|file|files|evidence|report|reports|pdf|view|share|d|f|s)\//i.test(pathname)) {
     return { valid: true };
   }
 
@@ -1338,21 +1339,32 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
     let preParsedAnalysis: any = null;
     let urlPromoteStatus = false;
     if (inputUrl) {
-      const validation = validateEvidenceUrl(inputUrl);
-      if (!validation.valid) {
-        return res.status(400).json({ success: false, error: validation.error });
-      }
-      try {
-        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
-        if (parsedFromUrl) {
-          preParsedAnalysis = parsedFromUrl;
-          if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
-            urlPromoteStatus = true;
-          }
+      // Check if URL has changed from what's already stored — skip validation & re-parse if unchanged
+      const existingUrlCheck = await pool.query(
+        `SELECT evidence_url FROM crc_assessment_responses WHERE project_id = $1 AND control_id = $2`,
+        [projectId, targetUuid]
+      );
+      const storedUrl = existingUrlCheck.rows[0]?.evidence_url || null;
+      const urlChanged = storedUrl !== inputUrl;
+
+      if (urlChanged) {
+        const validation = validateEvidenceUrl(inputUrl);
+        if (!validation.valid) {
+          return res.status(400).json({ success: false, error: validation.error });
         }
-      } catch (urlErr) {
-        console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
+        try {
+          const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
+          if (parsedFromUrl) {
+            preParsedAnalysis = parsedFromUrl;
+            if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+              urlPromoteStatus = true;
+            }
+          }
+        } catch (urlErr) {
+          console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
+        }
       }
+      // If URL hasn't changed, keep existing analysis (will be loaded from DB in transaction)
     }
 
     const client = await pool.connect();

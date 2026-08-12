@@ -238,7 +238,7 @@ export function extractMeaningfulKeywords(text: string): string[] {
     .toLowerCase()
     .replace(/[^a-z0-9\s]/gi, " ")
     .split(/\s+/)
-    .filter((k) => k.length >= 3 && !COMMON_STOPWORDS.has(k));
+    .filter((k) => k.length >= 4 && !COMMON_STOPWORDS.has(k));
 }
 
 export interface ControlContext {
@@ -413,7 +413,7 @@ export function parseAndValidateEvidence(
   const topicRelevanceRatio = controlTopicKeywords.length > 0
     ? controlRelevanceMatched / controlTopicKeywords.length
     : 1;
-  const isTopicRelevant = controlTopicKeywords.length === 0 || controlRelevanceMatched >= 2 || topicRelevanceRatio >= 0.2;
+  const isTopicRelevant = controlTopicKeywords.length === 0 || controlRelevanceMatched >= 3 || topicRelevanceRatio >= 0.3;
 
   if (!isTopicRelevant) {
     validationErrors.push(
@@ -576,10 +576,13 @@ export async function fetchAndParseEvidenceFromUrl(
     }
 
     const contentType = response.headers.get("content-type") || "";
-    const isDocx = /\.docx/i.test(currentUrl) || /officedocument\.wordprocessingml/i.test(contentType);
-    const isPdf = /\.pdf/i.test(currentUrl) || /application\/pdf/i.test(contentType);
+    let isDocx = /\.docx/i.test(currentUrl) || /officedocument\.wordprocessingml/i.test(contentType);
+    let isPdf = /\.pdf/i.test(currentUrl) || /application\/pdf/i.test(contentType);
 
-    if (isDocx || isPdf) {
+    // For ambiguous content types (e.g. octet-stream from UploadThing), detect via magic bytes
+    const isAmbiguousType = !isDocx && !isPdf && (/octet-stream/i.test(contentType) || !contentType || contentType === "application/octet-stream");
+
+    if (isDocx || isPdf || isAmbiguousType) {
       const arrayBuffer = await response.arrayBuffer();
       if (arrayBuffer.byteLength > MAX_RESPONSE_SIZE) {
         return {
@@ -596,8 +599,29 @@ export async function fetchAndParseEvidenceFromUrl(
         };
       }
       const buffer = Buffer.from(arrayBuffer);
-      const filename = isDocx ? "evidence.docx" : "evidence.pdf";
-      return parseAndValidateEvidence(buffer, null, filename, evidenceRequirements, controlContext);
+
+      // Magic bytes detection for ambiguous content types
+      if (isAmbiguousType && !isDocx && !isPdf) {
+        // ZIP/DOCX magic bytes: PK\x03\x04
+        if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4B && buffer[2] === 0x03 && buffer[3] === 0x04) {
+          isDocx = true;
+        }
+        // PDF magic bytes: %PDF
+        else if (buffer.length >= 4 && buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {
+          isPdf = true;
+        }
+      }
+
+      if (isDocx || isPdf) {
+        const filename = isDocx ? "evidence.docx" : "evidence.pdf";
+        return parseAndValidateEvidence(buffer, null, filename, evidenceRequirements, controlContext);
+      }
+
+      // If magic bytes didn't match docx/pdf, try as text
+      const textContent = buffer.toString("utf-8");
+      const isHtml = /<html|<body|<div|<p/i.test(textContent);
+      const parsedText = isHtml ? extractTextFromHtml(textContent) : textContent;
+      return parseAndValidateEvidence(null, parsedText, "evidence.txt", evidenceRequirements, controlContext);
     } else {
       const textContent = await response.text();
       if (textContent.length > MAX_RESPONSE_SIZE) {
