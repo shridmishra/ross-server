@@ -1411,8 +1411,8 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         currentStatus = "Evidence Complete";
       }
 
-      const hasValidAnalysis = (preParsedAnalysis && preParsedAnalysis.success && preParsedAnalysis.isValidTemplate) || (existing && existing.evidence_analysis?.success && existing.evidence_analysis?.isValidTemplate);
-      const hasValidEvidenceAttached = (!!currentUrl && hasValidAnalysis) || hasValidAnalysis;
+      const hasValidAnalysis = !!(evidenceAnalysis && evidenceAnalysis.success && evidenceAnalysis.isValidTemplate);
+      const hasValidEvidenceAttached = !!currentUrl && hasValidAnalysis;
 
       if (currentStatus === "Evidence Complete" && !hasValidEvidenceAttached) {
         if (data.evidenceStatus === "Evidence Complete") {

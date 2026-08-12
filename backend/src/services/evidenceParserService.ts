@@ -463,6 +463,26 @@ export function parseAndValidateEvidence(
   };
 }
 
+export function isValidDocxBuffer(buffer: Buffer): boolean {
+  try {
+    const zip = new AdmZip(buffer);
+    const zipEntries = zip.getEntries();
+    const hasDocXml = zipEntries.some((entry) => entry.entryName === "word/document.xml");
+    if (hasDocXml) return true;
+
+    const contentTypesEntry = zipEntries.find((entry) => entry.entryName === "[Content_Types].xml");
+    if (contentTypesEntry) {
+      const contentTypesXml = contentTypesEntry.getData().toString("utf-8");
+      if (/wordprocessingml/i.test(contentTypesXml) || /vnd\.openxmlformats-officedocument\.wordprocessingml/i.test(contentTypesXml)) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB limit
 
 /**
@@ -605,9 +625,11 @@ export async function fetchAndParseEvidenceFromUrl(
 
       // Magic bytes detection for ambiguous content types
       if (isAmbiguousType && !isDocx && !isPdf) {
-        // ZIP/DOCX magic bytes: PK\x03\x04
+        // ZIP magic bytes: PK\x03\x04
         if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4B && buffer[2] === 0x03 && buffer[3] === 0x04) {
-          isDocx = true;
+          if (isValidDocxBuffer(buffer)) {
+            isDocx = true;
+          }
         }
         // PDF magic bytes: %PDF
         else if (buffer.length >= 4 && buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {

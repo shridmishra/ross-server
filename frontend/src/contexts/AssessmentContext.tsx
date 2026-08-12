@@ -585,6 +585,9 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         }
         const auditReady = finalStatus === "Evidence Complete" ? (crcResponses[controlId]?.auditReady || false) : false;
 
+        const urlUnchanged = overrideEvidenceUrl === undefined || overrideEvidenceUrl === (crcResponses[controlId]?.evidenceUrl || null);
+        const existingAnalysis = urlUnchanged ? crcResponses[controlId]?.evidenceAnalysis : undefined;
+
         // Optimistic update
         setCrcResponses(prev => ({
             ...prev,
@@ -594,13 +597,14 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
                 evidenceStatus: finalStatus, 
                 evidenceUrl, 
                 auditReady, 
+                evidenceAnalysis: existingAnalysis,
                 updatedAt: new Date().toISOString() 
             },
         }));
 
         setSaving(true);
         try {
-            await apiService.saveCRCResponse(projectId, { 
+            const res = await apiService.saveCRCResponse(projectId, { 
                 controlId, 
                 value, 
                 notes, 
@@ -608,6 +612,21 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
                 evidenceUrl, 
                 auditReady 
             });
+            if (res && res.data) {
+                const savedData = res.data;
+                setCrcResponses(prev => ({
+                    ...prev,
+                    [controlId]: {
+                        value: savedData.value,
+                        notes: savedData.notes || "",
+                        evidenceStatus: savedData.evidenceStatus,
+                        evidenceUrl: savedData.evidenceUrl,
+                        auditReady: savedData.auditReady,
+                        evidenceAnalysis: savedData.evidenceAnalysis,
+                        updatedAt: savedData.updatedAt || new Date().toISOString(),
+                    }
+                }));
+            }
         } catch (error) {
             console.error("Failed to save CRC answer:", error);
             // Rollback on error
