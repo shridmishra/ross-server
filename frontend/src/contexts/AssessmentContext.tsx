@@ -101,7 +101,7 @@ interface AssessmentContextType {
     handleAnswerChange: (questionIndex: number, value: number) => Promise<void>;
     handleNoteChange: (questionIndex: number, note: string) => void;
     handleNoteSave: (questionIndex: number, note: string) => Promise<void>;
-    handleCrcAnswerChange: (controlId: string, value: number) => Promise<void>;
+    handleCrcAnswerChange: (controlId: string, value: number, overrideEvidenceUrl?: string | null) => Promise<void>;
     handleCrcNoteSave: (controlId: string, notes: string) => Promise<void>;
     handleEvidenceStatusChange: (
         controlId: string, 
@@ -570,13 +570,23 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         }
     };
 
-    const handleCrcAnswerChange = async (controlId: string, value: number) => {
+    const handleCrcAnswerChange = async (controlId: string, value: number, overrideEvidenceUrl?: string | null) => {
         if (isReadOnly) return;
         const previousResponse = crcResponses[controlId];
         const notes = crcResponses[controlId]?.notes || "";
         const evidenceStatus = crcResponses[controlId]?.evidenceStatus || "No Evidence";
-        const evidenceUrl = crcResponses[controlId]?.evidenceUrl || null;
-        const auditReady = crcResponses[controlId]?.auditReady || false;
+        const evidenceUrl = overrideEvidenceUrl !== undefined 
+            ? overrideEvidenceUrl 
+            : (crcResponses[controlId]?.evidenceUrl || null);
+        
+        let finalStatus = evidenceStatus;
+        if (overrideEvidenceUrl !== undefined && overrideEvidenceUrl !== (crcResponses[controlId]?.evidenceUrl || null) && evidenceStatus === "Evidence Complete") {
+            finalStatus = overrideEvidenceUrl ? "Evidence in Progress" : "No Evidence";
+        }
+        const auditReady = finalStatus === "Evidence Complete" ? (crcResponses[controlId]?.auditReady || false) : false;
+
+        const urlUnchanged = overrideEvidenceUrl === undefined || overrideEvidenceUrl === (crcResponses[controlId]?.evidenceUrl || null);
+        const existingAnalysis = urlUnchanged ? crcResponses[controlId]?.evidenceAnalysis : undefined;
 
         // Optimistic update
         setCrcResponses(prev => ({
@@ -584,23 +594,39 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
             [controlId]: { 
                 value, 
                 notes, 
-                evidenceStatus, 
+                evidenceStatus: finalStatus, 
                 evidenceUrl, 
                 auditReady, 
+                evidenceAnalysis: existingAnalysis,
                 updatedAt: new Date().toISOString() 
             },
         }));
 
         setSaving(true);
         try {
-            await apiService.saveCRCResponse(projectId, { 
+            const res = await apiService.saveCRCResponse(projectId, { 
                 controlId, 
                 value, 
                 notes, 
-                evidenceStatus, 
+                evidenceStatus: finalStatus, 
                 evidenceUrl, 
                 auditReady 
             });
+            if (res && res.data) {
+                const savedData = res.data;
+                setCrcResponses(prev => ({
+                    ...prev,
+                    [controlId]: {
+                        value: savedData.value,
+                        notes: savedData.notes || "",
+                        evidenceStatus: savedData.evidenceStatus,
+                        evidenceUrl: savedData.evidenceUrl,
+                        auditReady: savedData.auditReady,
+                        evidenceAnalysis: savedData.evidenceAnalysis,
+                        updatedAt: savedData.updatedAt || new Date().toISOString(),
+                    }
+                }));
+            }
         } catch (error) {
             console.error("Failed to save CRC answer:", error);
             // Rollback on error

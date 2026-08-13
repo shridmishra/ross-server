@@ -1210,7 +1210,8 @@ const VALID_EVIDENCE_DOMAINS = [
   'notion.so', 'notion.site',
   'atlassian.net', 'confluence.atlassian.net',
   'github.com', 'gitlab.com',
-  'dropbox.com', 'box.com'
+  'dropbox.com', 'box.com',
+  'utfs.io', 'uploadthing.com',
 ];
 
 const VALID_DOCUMENT_EXTENSIONS = [
@@ -1262,7 +1263,12 @@ export function validateEvidenceUrl(url: string): { valid: boolean; error?: stri
   }
 
   // If path contains document-like subpaths (e.g. /documents/, /files/, /pdf/, /evidence/)
-  if (/\/(document|documents|file|files|evidence|report|reports|pdf|view|share|d|s)\//i.test(pathname)) {
+  if (/\/(document|documents|file|files|evidence|report|reports|pdf|view|share|d|f|s)\//i.test(pathname)) {
+    return { valid: true };
+  }
+
+  // Fallback: Accept any non-blocked HTTPS URL with a non-root path
+  if (hasPath) {
     return { valid: true };
   }
 
@@ -1310,7 +1316,7 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
     // Verify control exists and is published (outside transaction to avoid holding DB lock during HTTP fetch)
     const controlCheck = await pool.query(
-      `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+      `SELECT c.id, c.control_id, c.control_title AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
        FROM crc_controls c
        LEFT JOIN crc_categories cat ON c.category_id = cat.id
        WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
@@ -1337,21 +1343,35 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
     // Perform URL evidence fetching/parsing BEFORE opening DB transaction
     let preParsedAnalysis: any = null;
     let urlPromoteStatus = false;
+    let urlChanged = true;
     if (inputUrl) {
-      const validation = validateEvidenceUrl(inputUrl);
-      if (!validation.valid) {
-        return res.status(400).json({ success: false, error: validation.error });
-      }
-      try {
-        const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
-        if (parsedFromUrl) {
-          preParsedAnalysis = parsedFromUrl;
-          if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
-            urlPromoteStatus = true;
-          }
+      // Check if URL has changed from what's already stored — skip validation & re-parse if unchanged
+      const existingUrlCheck = await pool.query(
+        `SELECT evidence_url, evidence_analysis FROM crc_assessment_responses WHERE project_id = $1 AND control_id = $2`,
+        [projectId, targetUuid]
+      );
+      const storedRow = existingUrlCheck.rows[0];
+      const storedUrl = storedRow?.evidence_url || null;
+      urlChanged = storedUrl !== inputUrl;
+
+      if (urlChanged) {
+        const validation = validateEvidenceUrl(inputUrl);
+        if (!validation.valid) {
+          return res.status(400).json({ success: false, error: validation.error });
         }
-      } catch (urlErr) {
-        console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
+        try {
+          const parsedFromUrl = await fetchAndParseEvidenceFromUrl(inputUrl, controlReqs, controlContext);
+          if (parsedFromUrl) {
+            preParsedAnalysis = parsedFromUrl;
+            if (parsedFromUrl.success && parsedFromUrl.isValidTemplate) {
+              urlPromoteStatus = true;
+            }
+          }
+        } catch (urlErr) {
+          console.error("[crc-assess] Error auto-parsing evidence URL:", urlErr);
+        }
+      } else {
+        preParsedAnalysis = storedRow?.evidence_analysis || null;
       }
     }
 
@@ -1382,7 +1402,7 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
 
       let evidenceAnalysis: any = null;
       if (inputUrl !== undefined) {
-        evidenceAnalysis = inputUrl ? preParsedAnalysis : null;
+        evidenceAnalysis = inputUrl ? (urlChanged ? preParsedAnalysis : (existing?.evidence_analysis ?? preParsedAnalysis)) : null;
       } else {
         evidenceAnalysis = existing ? existing.evidence_analysis : null;
       }
@@ -1391,15 +1411,20 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
         currentStatus = "Evidence Complete";
       }
 
-      const hasValidAnalysis = (preParsedAnalysis && preParsedAnalysis.success && preParsedAnalysis.isValidTemplate) || (existing && existing.evidence_analysis?.success && existing.evidence_analysis?.isValidTemplate);
-      const hasValidEvidenceAttached = (!!currentUrl && hasValidAnalysis) || hasValidAnalysis;
+      const hasValidAnalysis = !!(evidenceAnalysis && evidenceAnalysis.success && evidenceAnalysis.isValidTemplate);
+      const hasValidEvidenceAttached = !!currentUrl && hasValidAnalysis;
 
       if (currentStatus === "Evidence Complete" && !hasValidEvidenceAttached) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({
-          success: false,
-          error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
-        });
+        if (data.evidenceStatus === "Evidence Complete") {
+          await client.query("ROLLBACK");
+          return res.status(400).json({
+            success: false,
+            error: "A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'."
+          });
+        } else {
+          currentStatus = currentUrl ? "Evidence in Progress" : "No Evidence";
+          currentAuditReady = false;
+        }
       }
 
       // Upsert response using canonical UUID
@@ -1487,7 +1512,7 @@ router.post(
       }
 
       const controlRes = await pool.query(
-        `SELECT c.id, c.control_id, COALESCE(c.control_title, c.title) AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
+        `SELECT c.id, c.control_id, c.control_title AS title, c.control_statement, cat.name AS category_name, c.evidence_requirements 
          FROM crc_controls c
          LEFT JOIN crc_categories cat ON c.category_id = cat.id
          WHERE (c.id::text = $1 OR c.control_id = $1) AND c.status = 'Published'`,
