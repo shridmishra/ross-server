@@ -1104,6 +1104,8 @@ export default function CRCAssessmentPage() {
                               }
                               if (!finalUrl && targetStatus !== "Template Downloaded") {
                                 targetStatus = "No Evidence";
+                              } else if (finalUrl && targetStatus === "No Evidence") {
+                                targetStatus = "Evidence in Progress";
                               }
                               try {
                                 const saved = await handleEvidenceStatusChange(

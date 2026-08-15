@@ -587,6 +587,9 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
         } else if (overrideEvidenceUrl !== undefined && overrideEvidenceUrl !== (crcResponses[controlId]?.evidenceUrl || null) && evidenceStatus === "Evidence Complete") {
             finalStatus = overrideEvidenceUrl ? "Evidence in Progress" : "No Evidence";
         }
+        if (!evidenceUrl && finalStatus !== "Template Downloaded") {
+            finalStatus = "No Evidence";
+        }
         const auditReady = (finalStatus === "Evidence Complete" && value !== 2) ? (crcResponses[controlId]?.auditReady || false) : false;
 
         const urlUnchanged = overrideEvidenceUrl === undefined || overrideEvidenceUrl === (crcResponses[controlId]?.evidenceUrl || null);
@@ -711,12 +714,18 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
 
         const value = currentResponse.value;
         const notes = currentResponse.notes;
-        const finalUrl = status === "No Evidence" ? null : (url !== undefined ? url : currentResponse.evidenceUrl);
-        const finalAuditReady = (status === "No Evidence" || status !== "Evidence Complete") ? false : (auditReady !== undefined ? auditReady : currentResponse.auditReady);
-        const finalAnalysis = (status === "No Evidence" || !finalUrl) ? undefined : (finalUrl === currentResponse.evidenceUrl ? currentResponse.evidenceAnalysis : undefined);
+        const inputUrl = url !== undefined ? url : currentResponse.evidenceUrl;
+        const normalizedUrl = inputUrl ? (typeof inputUrl === "string" && inputUrl.trim() !== "" ? inputUrl.trim() : inputUrl) : null;
+        let normalizedStatus: CRCEvidenceStatus = status;
+        if (!normalizedUrl && normalizedStatus !== "Template Downloaded") {
+            normalizedStatus = "No Evidence";
+        }
+        const finalUrl = normalizedStatus === "No Evidence" ? null : normalizedUrl;
+        const finalAuditReady = (normalizedStatus !== "Evidence Complete") ? false : (auditReady !== undefined ? auditReady : currentResponse.auditReady);
+        const finalAnalysis = (normalizedStatus === "No Evidence" || !finalUrl) ? undefined : (finalUrl === currentResponse.evidenceUrl ? currentResponse.evidenceAnalysis : undefined);
 
         const hasValidEvidenceAnalysis = currentResponse.evidenceAnalysis?.success && currentResponse.evidenceAnalysis?.isValidTemplate;
-        if (status === "Evidence Complete" && !hasValidEvidenceAnalysis) {
+        if (normalizedStatus === "Evidence Complete" && !hasValidEvidenceAnalysis) {
             showToast.error("A valid, verified evidence document or URL with passing requirements is required to set status to 'Evidence Complete'");
             return;
         }
@@ -727,7 +736,7 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
             [controlId]: {
                 value,
                 notes,
-                evidenceStatus: status,
+                evidenceStatus: normalizedStatus,
                 evidenceUrl: finalUrl,
                 auditReady: finalAuditReady,
                 evidenceAnalysis: finalAnalysis,
@@ -741,7 +750,7 @@ export const AssessmentProvider = ({ children }: { children: React.ReactNode }) 
                 controlId,
                 value,
                 notes,
-                evidenceStatus: status,
+                evidenceStatus: normalizedStatus,
                 evidenceUrl: finalUrl,
                 auditReady: finalAuditReady
             });
