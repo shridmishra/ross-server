@@ -96,6 +96,29 @@ export default function CRCRiskRegisterPage() {
   const [riskToDeleteId, setRiskToDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Today's date in YYYY-MM-DD for min date picker constraint (refreshed at local midnight)
+  const [todayStr, setTodayStr] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const scheduleMidnightRefresh = () => {
+      const now = new Date();
+      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+      const delay = Math.max(nextMidnight.getTime() - now.getTime(), 1000);
+      timer = setTimeout(() => {
+        const d = new Date();
+        setTodayStr(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+        scheduleMidnightRefresh();
+      }, delay);
+    };
+
+    scheduleMidnightRefresh();
+    return () => clearTimeout(timer);
+  }, []);
+
   // Fetch Risks
   const fetchRisks = useCallback(async () => {
     try {
@@ -131,6 +154,16 @@ export default function CRCRiskRegisterPage() {
   const handleUpdateRisk = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRisk) return;
+
+    const now = new Date();
+    const currentToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    if (targetDate && targetDate < currentToday) {
+      const isUnchanged = selectedRisk.target_date && selectedRisk.target_date.substring(0, 10) === targetDate;
+      if (!isUnchanged) {
+        showToast.error("Target date cannot be in the past");
+        return;
+      }
+    }
 
     setIsUpdating(true);
     try {
@@ -743,6 +776,7 @@ export default function CRCRiskRegisterPage() {
                     <label className="text-xs font-semibold text-foreground">Target Date</label>
                     <input
                       type="date"
+                      min={todayStr}
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
                       className="w-full mt-1.5 px-3 py-2 text-sm rounded-lg border border-border bg-background font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"

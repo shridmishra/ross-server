@@ -1385,10 +1385,16 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       let currentUrl = inputUrl !== undefined ? inputUrl : (existing ? existing.evidence_url : null);
       let currentAuditReady = data.auditReady !== undefined ? data.auditReady : (existing ? existing.audit_ready : false);
 
-      // Force reset evidence tracker fields if answer is Not Applicable (NA = 2)
-      if (data.value === 2) {
+      // Force reset evidence tracker fields if answer is Not Applicable (NA = 2) or status is No Evidence
+      if (data.value === 2 || currentStatus === 'No Evidence') {
         currentStatus = 'No Evidence';
         currentUrl = null;
+        currentAuditReady = false;
+      }
+
+      // Normalize URL-less status: if currentUrl is absent, status must be 'No Evidence' unless it is 'Template Downloaded'
+      if (!currentUrl && currentStatus !== 'Template Downloaded') {
+        currentStatus = 'No Evidence';
         currentAuditReady = false;
       }
 
@@ -1401,13 +1407,15 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       }
 
       let evidenceAnalysis: any = null;
-      if (inputUrl !== undefined) {
+      if (currentStatus === 'No Evidence' || !currentUrl) {
+        evidenceAnalysis = null;
+      } else if (inputUrl !== undefined) {
         evidenceAnalysis = inputUrl ? (urlChanged ? preParsedAnalysis : (existing?.evidence_analysis ?? preParsedAnalysis)) : null;
       } else {
         evidenceAnalysis = existing ? existing.evidence_analysis : null;
       }
 
-      if (urlPromoteStatus) {
+      if (urlPromoteStatus && currentStatus !== 'No Evidence') {
         currentStatus = "Evidence Complete";
       }
 
@@ -1425,6 +1433,12 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
           currentStatus = currentUrl ? "Evidence in Progress" : "No Evidence";
           currentAuditReady = false;
         }
+      }
+
+      if (currentStatus === 'No Evidence') {
+        currentUrl = null;
+        currentAuditReady = false;
+        evidenceAnalysis = null;
       }
 
       // Upsert response using canonical UUID
@@ -2002,6 +2016,13 @@ router.get("/risks/:projectId/summary", authenticateToken, async (req, res) => {
 
 // --- Feature 3: Risk Register CRUD Endpoints ---
 
+const isDateBeforeTodayUTC = (val: string | Date) => {
+  const d = new Date(val);
+  const now = new Date();
+  const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return d.getTime() < todayUtc.getTime();
+};
+
 const targetDateSchema = z.preprocess((val) => {
   if (typeof val === "string") {
     const trimmed = val.trim();
@@ -2025,7 +2046,12 @@ const manualRiskSchema = z.object({
   description: z.string().optional().default(""),
   mitigation_plan: z.string().optional().default(""),
   owner: z.string().max(200).optional().default(""),
-  target_date: targetDateSchema,
+  target_date: targetDateSchema.refine((val) => {
+    if (!val) return true;
+    return !isDateBeforeTodayUTC(val);
+  }, {
+    message: "Target date cannot be in the past"
+  }),
   review_frequency: z.string().max(50).optional().default("Quarterly"),
 });
 
@@ -2207,6 +2233,18 @@ router.put("/risks/:projectId/:riskId", authenticateToken, async (req, res) => {
         success: false,
         error: "System-generated risks cannot have their title, category, rating, or description updated manually. These are controlled by the corresponding assessment answers."
       });
+    }
+
+    // Validate target_date is not in the past if set or changed
+    if (data.target_date) {
+      const isUnchanged = currentRisk.target_date && 
+        new Date(currentRisk.target_date).toISOString().substring(0, 10) === new Date(data.target_date).toISOString().substring(0, 10);
+      if (!isUnchanged && isDateBeforeTodayUTC(data.target_date)) {
+        return res.status(400).json({
+          success: false,
+          error: "Target date cannot be in the past"
+        });
+      }
     }
 
     const title = data.title !== undefined ? data.title : currentRisk.title;
