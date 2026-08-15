@@ -1385,8 +1385,8 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       let currentUrl = inputUrl !== undefined ? inputUrl : (existing ? existing.evidence_url : null);
       let currentAuditReady = data.auditReady !== undefined ? data.auditReady : (existing ? existing.audit_ready : false);
 
-      // Force reset evidence tracker fields if answer is Not Applicable (NA = 2)
-      if (data.value === 2) {
+      // Force reset evidence tracker fields if answer is Not Applicable (NA = 2) or status is No Evidence
+      if (data.value === 2 || currentStatus === 'No Evidence') {
         currentStatus = 'No Evidence';
         currentUrl = null;
         currentAuditReady = false;
@@ -1401,13 +1401,15 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
       }
 
       let evidenceAnalysis: any = null;
-      if (inputUrl !== undefined) {
+      if (currentStatus === 'No Evidence' || !currentUrl) {
+        evidenceAnalysis = null;
+      } else if (inputUrl !== undefined) {
         evidenceAnalysis = inputUrl ? (urlChanged ? preParsedAnalysis : (existing?.evidence_analysis ?? preParsedAnalysis)) : null;
       } else {
         evidenceAnalysis = existing ? existing.evidence_analysis : null;
       }
 
-      if (urlPromoteStatus) {
+      if (urlPromoteStatus && currentStatus !== 'No Evidence') {
         currentStatus = "Evidence Complete";
       }
 
@@ -1425,6 +1427,12 @@ router.post("/assess/:projectId", authenticateToken, async (req, res) => {
           currentStatus = currentUrl ? "Evidence in Progress" : "No Evidence";
           currentAuditReady = false;
         }
+      }
+
+      if (currentStatus === 'No Evidence') {
+        currentUrl = null;
+        currentAuditReady = false;
+        evidenceAnalysis = null;
       }
 
       // Upsert response using canonical UUID

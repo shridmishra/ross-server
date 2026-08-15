@@ -96,6 +96,15 @@ export default function CRCRiskRegisterPage() {
   const [riskToDeleteId, setRiskToDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Today's date in YYYY-MM-DD for min date picker constraint
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
+
   // Fetch Risks
   const fetchRisks = useCallback(async () => {
     try {
@@ -131,6 +140,11 @@ export default function CRCRiskRegisterPage() {
   const handleUpdateRisk = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRisk) return;
+
+    if (targetDate && targetDate < todayStr) {
+      showToast.error("Target date cannot be in the past");
+      return;
+    }
 
     setIsUpdating(true);
     try {
@@ -743,6 +757,7 @@ export default function CRCRiskRegisterPage() {
                     <label className="text-xs font-semibold text-foreground">Target Date</label>
                     <input
                       type="date"
+                      min={todayStr}
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
                       className="w-full mt-1.5 px-3 py-2 text-sm rounded-lg border border-border bg-background font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"

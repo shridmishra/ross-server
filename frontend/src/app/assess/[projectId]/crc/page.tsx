@@ -971,10 +971,17 @@ export default function CRCAssessmentPage() {
                               }
                               const newStatus = e.target.value as any;
                               const trimmedUrl = (urlInput || "").trim();
+                              const targetUrl = newStatus === "No Evidence" ? null : (trimmedUrl || currentResponse?.evidenceUrl || null);
+                              if (newStatus === "No Evidence") {
+                                setUrlInput("");
+                              }
 
                               try {
-                                const saved = await handleEvidenceStatusChange(currentControl.id, newStatus, trimmedUrl || currentResponse?.evidenceUrl);
+                                const saved = await handleEvidenceStatusChange(currentControl.id, newStatus, targetUrl, false);
                                 const savedStatus = saved?.evidenceStatus || newStatus;
+                                if (saved && !saved.evidenceUrl) {
+                                  setUrlInput("");
+                                }
                                 showToast.success(`Evidence status set to '${savedStatus}'`);
                               } catch (err) {
                                 // Handled in context
@@ -1095,6 +1102,9 @@ export default function CRCAssessmentPage() {
                               if (urlInput !== (currentResponse?.evidenceUrl || "") && targetStatus === "Evidence Complete") {
                                 targetStatus = finalUrl ? "Evidence in Progress" : "No Evidence";
                               }
+                              if (!finalUrl && targetStatus !== "Template Downloaded") {
+                                targetStatus = "No Evidence";
+                              }
                               try {
                                 const saved = await handleEvidenceStatusChange(
                                   currentControl.id, 
@@ -1118,7 +1128,7 @@ export default function CRCAssessmentPage() {
                         </div>
 
                         {/* Parsed Evidence Analysis & Template Content Validation Card */}
-                        {currentResponse?.evidenceAnalysis && (
+                        {currentResponse?.evidenceAnalysis && currentResponse?.evidenceStatus !== "No Evidence" && currentResponse?.evidenceUrl && (
                           <div className={`p-4 rounded-xl border text-xs space-y-2.5 transition-all ${
                             currentResponse.evidenceAnalysis.isValidTemplate
                               ? "bg-green-500/10 border-green-500/20 text-foreground"
@@ -1183,7 +1193,7 @@ export default function CRCAssessmentPage() {
                         )}
 
                         {/* Audit-ready Checkbox */}
-                        {currentResponse?.evidenceUrl && (
+                        {currentResponse?.evidenceUrl && currentResponse?.evidenceStatus !== "No Evidence" && (
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
