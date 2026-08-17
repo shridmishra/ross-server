@@ -1566,9 +1566,9 @@ router.post(
       }
 
       if (!uploadedUrl) {
-        return res.status(400).json({
+        return res.status(500).json({
           success: false,
-          error: "Failed to upload file to storage. A valid HTTPS upload URL is required.",
+          error: "Storage service error: Failed to upload file to cloud storage. Please check your network connection and try again.",
         });
       }
 
@@ -1609,6 +1609,16 @@ router.post(
       syncRiskFromResponse(projectId, actualControlUuid).catch((err) =>
         console.error("Risk sync failed after evidence upload:", err)
       );
+
+      let validationErrorMsg: string | undefined = undefined;
+      if (!analysis.isValidTemplate) {
+        if (analysis.validationErrors && analysis.validationErrors.length > 0) {
+          validationErrorMsg = analysis.validationErrors[0];
+        } else if (analysis.validationWarnings && analysis.validationWarnings.length > 0) {
+          validationErrorMsg = analysis.validationWarnings[0];
+        }
+      }
+
       return res.json({
         success: true,
         data: {
@@ -1623,13 +1633,11 @@ router.post(
           evidenceAnalysis: saved.evidence_analysis,
           analysis,
         },
-        error: !analysis.isValidTemplate && analysis.validationErrors.length > 0
-          ? analysis.validationErrors[0]
-          : undefined,
+        error: validationErrorMsg,
       });
     } catch (err: any) {
       console.error("Error processing evidence file upload:", err);
-      return res.status(500).json({ success: false, error: "Failed to process evidence file" });
+      return res.status(500).json({ success: false, error: err?.message || "Internal server error while processing evidence file" });
     }
   }
 );

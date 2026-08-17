@@ -54,6 +54,15 @@ async function validateUrlForSsrf(targetUrl: string): Promise<{ safe: boolean; e
 
 export const MAX_ZIP_UNCOMPRESSED_SIZE = 100 * 1024 * 1024; // 100MB
 
+export interface EvidenceScoreBreakdown {
+  requirementCoverageScore: number; // 0 - 50 pts
+  contentDepthScore: number;        // 0 - 30 pts
+  placeholderScore: number;         // 0 - 20 pts
+  totalScore: number;               // 0 - 100 pts
+  wordCount: number;
+  summary: string;
+}
+
 export interface EvidenceParsingResult {
   success: boolean;
   extractedTextLength: number;
@@ -65,6 +74,7 @@ export interface EvidenceParsingResult {
   validationErrors: string[];
   validationWarnings: string[];
   score: number; // 0 - 100
+  scoreBreakdown?: EvidenceScoreBreakdown;
 }
 
 /**
@@ -72,14 +82,68 @@ export interface EvidenceParsingResult {
  * Preserves spaces and line breaks so words/table cells do not get squished together.
  */
 export function extractTextFromDocx(buffer: Buffer): { text: string; error?: string } {
+  if (!buffer || buffer.length === 0) {
+    return { text: "", error: "The uploaded Word file is empty (0 bytes)." };
+  }
+
+  // Check minimum size for valid zip archive
+  if (buffer.length < 22) {
+    return { text: "", error: "Invalid DOCX file: File size is too small to be a valid Microsoft Word (.docx) document." };
+  }
+
+  // Check for legacy binary .doc format (Compound File Binary Format: 0xD0CF11E0)
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0xd0 &&
+    buffer[1] === 0xcf &&
+    buffer[2] === 0x11 &&
+    buffer[3] === 0xe0
+  ) {
+    return {
+      text: "",
+      error: "Legacy binary Word format (.doc) is not supported. Please open the file and re-save/export it as a modern Word (.docx) or PDF document."
+    };
+  }
+
+  // Check ZIP archive magic bytes (PK\x03\x04 or PK\x05\x06 or PK\x07\x08)
+  const isZipMagic =
+    buffer[0] === 0x50 &&
+    buffer[1] === 0x4b &&
+    (buffer[2] === 0x03 || buffer[2] === 0x05 || buffer[2] === 0x07);
+
+  if (!isZipMagic) {
+    return {
+      text: "",
+      error: "Invalid document format: The uploaded file is not a valid Microsoft Word (.docx) package. Please ensure the file was not corrupted or renamed from another extension."
+    };
+  }
+
   try {
     const zip = new AdmZip(buffer);
     const zipEntries = zip.getEntries();
+
+    // Check for password-protected / encrypted Office document
+    const isEncrypted = zipEntries.some(
+      (entry) =>
+        entry.entryName.includes("EncryptedPackage") ||
+        entry.entryName.includes("DataSpaces") ||
+        entry.entryName.includes("EncryptionInfo")
+    );
+    if (isEncrypted) {
+      return {
+        text: "",
+        error: "Password-protected document: This Word (.docx) file is encrypted. Please remove password protection and re-upload."
+      };
+    }
+
     const docEntry = zipEntries.find(
-      (entry) => entry.entryName === "word/document.xml"
+      (entry) => entry.entryName === "word/document.xml" || entry.entryName === "word/document2.xml"
     );
     if (!docEntry) {
-      return { text: "" };
+      return {
+        text: "",
+        error: "Invalid DOCX document: Missing main document body (word/document.xml not found). Please ensure this is a valid Word document."
+      };
     }
     if (docEntry.header.size > MAX_ZIP_UNCOMPRESSED_SIZE) {
       return { text: "", error: "The uncompressed DOCX document size exceeds the limit (100MB)." };
@@ -110,10 +174,18 @@ export function extractTextFromDocx(buffer: Buffer): { text: string; error?: str
       .map((line) => line.replace(/[ \t]+/g, " ").trim())
       .filter((line) => line.length > 0);
 
-    return { text: cleanLines.join("\n") };
-  } catch (err) {
+    const extractedText = cleanLines.join("\n");
+    if (extractedText.trim().length === 0) {
+      return { text: "", error: "The Word (.docx) document does not contain any readable text." };
+    }
+
+    return { text: extractedText };
+  } catch (err: any) {
     console.error("[evidenceParser] Failed to extract text from docx:", err);
-    return { text: "", error: "Failed to parse DOCX document structure." };
+    return {
+      text: "",
+      error: `Corrupted DOCX file: Unable to unzip and parse document structure (${err?.message || "archive error"}). Please check the file and try again.`
+    };
   }
 }
 
@@ -121,8 +193,30 @@ export function extractTextFromDocx(buffer: Buffer): { text: string; error?: str
  * Extracts text streams from a PDF file buffer natively.
  */
 export function extractTextFromPdf(buffer: Buffer): { text: string; error?: string } {
+  if (!buffer || buffer.length === 0) {
+    return { text: "", error: "The uploaded PDF file is empty (0 bytes)." };
+  }
+
+  // Check PDF magic header %PDF within first 1024 bytes
+  const headerSlice = buffer.slice(0, Math.min(1024, buffer.length)).toString("latin1");
+  if (!headerSlice.includes("%PDF-") && !headerSlice.includes("%PDF")) {
+    return {
+      text: "",
+      error: "Invalid document format: The uploaded file is not a valid PDF document."
+    };
+  }
+
   try {
     const pdfStr = buffer.toString("binary");
+
+    // Check for password protection in PDF
+    if (pdfStr.includes("/Encrypt ") || pdfStr.includes("/Standard ") && pdfStr.includes("/Filter /Standard")) {
+      return {
+        text: "",
+        error: "Password-protected PDF: This PDF document is encrypted. Please remove password protection and re-upload."
+      };
+    }
+
     const textMatches: string[] = [];
 
     // Match text inside parenthesis (text) Tj / TJ or stream text blocks
@@ -171,10 +265,22 @@ export function extractTextFromPdf(buffer: Buffer): { text: string; error?: stri
       .map((l) => l.trim())
       .filter((l) => l.length > 0);
 
-    return { text: cleanLines.join("\n") };
-  } catch (err) {
+    const extractedText = cleanLines.join("\n");
+
+    if (extractedText.trim().length < 15) {
+      return {
+        text: "",
+        error: "Unable to extract readable text from PDF: The document appears to be scanned or contains only images without an OCR text layer. Please upload a searchable PDF or Word (.docx) document."
+      };
+    }
+
+    return { text: extractedText };
+  } catch (err: any) {
     console.error("[evidenceParser] Failed to extract text from PDF:", err);
-    return { text: "", error: "Failed to parse PDF content stream." };
+    return {
+      text: "",
+      error: `Failed to parse PDF content stream (${err?.message || "corrupted stream"}). Please check the file and try again.`
+    };
   }
 }
 
@@ -285,6 +391,20 @@ export function parseAndValidateEvidence(
       extractedText = docxResult.text;
     } else if (isPdf) {
       const pdfResult = extractTextFromPdf(fileBuffer);
+      if (pdfResult.error) {
+        return {
+          success: false,
+          extractedTextLength: 0,
+          extractedSnippet: "",
+          unfilledPlaceholders: [],
+          isValidTemplate: false,
+          missingRequirements: evidenceRequirements,
+          matchedRequirements: [],
+          validationErrors: [pdfResult.error],
+          validationWarnings: [],
+          score: 0,
+        };
+      }
       extractedText = pdfResult.text;
     } else if (isTextFile) {
       extractedText = fileBuffer.toString("utf-8").replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ");
@@ -302,9 +422,11 @@ export function parseAndValidateEvidence(
   const cleanText = extractedText.trim();
   const validationErrors: string[] = [];
   const validationWarnings: string[] = [];
+  const words = cleanText.split(/\s+/).filter((w) => w.length > 0);
+  const wordCount = words.length;
 
   // Check 1: Minimum content length
-  if (cleanText.length < 20) {
+  if (cleanText.length < 30 || wordCount < 6) {
     return {
       success: false,
       extractedTextLength: cleanText.length,
@@ -313,42 +435,96 @@ export function parseAndValidateEvidence(
       isValidTemplate: false,
       missingRequirements: evidenceRequirements,
       matchedRequirements: [],
-      validationErrors: ["Evidence document content is too short or empty (minimum 20 characters required)."],
+      validationErrors: [
+        `Document contains insufficient content (${cleanText.length} characters, ${wordCount} words; minimum 30 characters required). Please upload substantive documentation.`
+      ],
       validationWarnings: [],
       score: 0,
+      scoreBreakdown: {
+        requirementCoverageScore: 0,
+        contentDepthScore: 0,
+        placeholderScore: 0,
+        totalScore: 0,
+        wordCount,
+        summary: "Document is empty or contains insufficient text."
+      }
     };
   }
 
-  // Check 2: Unfilled Template Placeholders
-  const placeholderRegexes = [
+  // Check 2: Unfilled Template Placeholders (comprehensive matching)
+  const placeholderPatterns = [
+    // Standard template placeholders
     /\[Company Name\]/gi,
-    /\[Insert Date\]/gi,
+    /\[Insert [^\]]+\]/gi,
     /\[Date\]/gi,
     /\[Author\/Owner\]/gi,
+    /\[Author\]/gi,
+    /\[Owner\]/gi,
     /\[System Name\]/gi,
+    /\[System\]/gi,
     /\[Version\]/gi,
     /\[Your Name\]/gi,
     /\[Organization\]/gi,
     /\[Specify [^\]]+\]/gi,
     /\[Fill in [^\]]+\]/gi,
+    /\[Define [^\]]+\]/gi,
+    /\[Enter [^\]]+\]/gi,
+    /\[Provide [^\]]+\]/gi,
+    /\[Describe [^\]]+\]/gi,
+    /\[Select [^\]]+\]/gi,
+    /\[List [^\]]+\]/gi,
+    /\[e\.g\.[^\]]*\]/gi,
+    /\[eg\.[^\]]*\]/gi,
+    /\[Auto-generated[^\]]*\]/gi,
+    /\[DD\/MM\/YYYY[^\]]*\]/gi,
+    /\[YYYY-MM-DD[^\]]*\]/gi,
+    /\[Name and role[^\]]*\]/gi,
+    /\[Critical \/ High \/ Medium \/ Low\]/gi,
+    /\[Model failure[^\]]*\]/gi,
+    /\[Detailed narrative[^\]]*\]/gi,
+    /\[What happened\??\]/gi,
+    /\[Why did this happen\??\]/gi,
+    /\[Why did that happen\??\]/gi,
+    /\[The underlying root cause\]/gi,
+    /\[What will be done[^\]]*\]/gi,
+    /\[TODO[^\]]*\]/gi,
+    /\[TBD[^\]]*\]/gi,
+    /\[N\/A\]/gi,
+    /\[Placeholder\]/gi,
+    /\[Attach [^\]]+\]/gi,
+    /\[Add [^\]]+\]/gi,
+    // Catch-all bracketed action instructions e.g. [Define ...], [Enter ...], [Insert ...]
+    /\[(?:Insert|Fill|Define|Specify|Enter|Provide|Describe|Select|List|Your|Company|Author|Owner|System|Version|Date|e\.g\.|TODO|TBD|What|Why|How|Name|Role|Attach|Add|Auto)\b[^\]]{1,80}\]/gi,
+    // Angle bracket placeholders
+    /<(?:Insert|Fill|Define|Specify|Enter|Your|Company|Date|TODO|TBD|System|Version)\b[^>]{1,60}>/gi,
+    // Standalone markers
+    /\b(?:TODO|TBD|FIXME|LOREM IPSUM)\b/gi,
   ];
 
   const unfilledPlaceholders: string[] = [];
-  for (const regex of placeholderRegexes) {
+  for (const regex of placeholderPatterns) {
     const matches = cleanText.match(regex);
     if (matches) {
       for (const m of matches) {
-        if (!unfilledPlaceholders.includes(m)) {
-          unfilledPlaceholders.push(m);
+        const trimmed = m.trim();
+        if (!unfilledPlaceholders.includes(trimmed)) {
+          unfilledPlaceholders.push(trimmed);
         }
       }
     }
   }
 
   if (unfilledPlaceholders.length > 0) {
-    validationWarnings.push(
-      `Found ${unfilledPlaceholders.length} unfilled template placeholder(s): ${unfilledPlaceholders.slice(0, 5).join(", ")}${unfilledPlaceholders.length > 5 ? "..." : ""}`
-    );
+    const sampleList = unfilledPlaceholders.slice(0, 4).join(", ") + (unfilledPlaceholders.length > 4 ? "..." : "");
+    if (unfilledPlaceholders.length >= 3) {
+      validationErrors.push(
+        `Document is an uncompleted template containing ${unfilledPlaceholders.length} unfilled placeholders (e.g. ${sampleList}). Please complete all template fields before submitting as evidence.`
+      );
+    } else {
+      validationWarnings.push(
+        `Found ${unfilledPlaceholders.length} unfilled template placeholder(s): ${sampleList}`
+      );
+    }
   }
 
   // Check 3: Evidence Requirements Keyword & Semantic Matching
@@ -398,7 +574,7 @@ export function parseAndValidateEvidence(
 
   const controlTopicKeywords = Array.from(new Set([
     ...extractMeaningfulKeywords(controlContextText),
-    ...evidenceRequirements.flatMap(req => extractMeaningfulKeywords(req))
+    ...evidenceRequirements.flatMap((req) => extractMeaningfulKeywords(req))
   ]));
 
   let controlRelevanceMatched = 0;
@@ -413,39 +589,100 @@ export function parseAndValidateEvidence(
   const topicRelevanceRatio = controlTopicKeywords.length > 0
     ? controlRelevanceMatched / controlTopicKeywords.length
     : 1;
-  const isTopicRelevant = controlTopicKeywords.length === 0 || controlRelevanceMatched >= 3 || topicRelevanceRatio >= 0.3;
+  const isTopicRelevant =
+    controlTopicKeywords.length === 0 ||
+    controlRelevanceMatched >= 3 ||
+    topicRelevanceRatio >= 0.25;
 
   if (!isTopicRelevant) {
     validationErrors.push(
-      "Document content has low relevance to this control topic or compliance requirements."
+      `Document content has low relevance to this control domain (${controlContext?.title || "compliance control"}). The extracted text appears unrelated to the control requirement.`
     );
   }
 
-  // Score calculation
-  let score = 100;
-  if (unfilledPlaceholders.length > 0) {
-    score = Math.max(0, score - unfilledPlaceholders.length * 25);
-    if (unfilledPlaceholders.length >= 3) {
-      score = 0;
-    }
+  // Multi-Factor Transparent Quality Scoring Rubric (100 Points Total)
+  // 1. Requirement Coverage (0 - 50 points)
+  let coverageScore = 50;
+  if (evidenceRequirements.length > 0) {
+    coverageScore = Math.round((matchedRequirements.length / evidenceRequirements.length) * 50);
   }
 
-  if (evidenceRequirements.length > 0) {
-    const reqCoverage = matchedRequirements.length / evidenceRequirements.length;
-    score = Math.round(score * reqCoverage);
+  // 2. Content Depth & Documentation Volume (0 - 30 points)
+  let depthScore = 0;
+  if (wordCount >= 300) {
+    depthScore = 30;
+  } else if (wordCount >= 150) {
+    depthScore = 20;
+  } else if (wordCount >= 50) {
+    depthScore = 10;
+  } else {
+    depthScore = 0;
+  }
+
+  // 3. Template Integrity / Placeholder Completion (0 - 20 points)
+  let placeholderScore = 20;
+  if (unfilledPlaceholders.length === 1) {
+    placeholderScore = 5;
+  } else if (unfilledPlaceholders.length >= 2) {
+    placeholderScore = 0;
+  }
+
+  // Calculate combined score
+  let calculatedScore = coverageScore + depthScore + placeholderScore;
+
+  // Apply strict caps for empty templates, unrelated documents, or zero-matches
+  if (unfilledPlaceholders.length >= 3) {
+    // Unfilled / blank template -> strictly 0 points
+    calculatedScore = 0;
+  } else if (unfilledPlaceholders.length > 0) {
+    // Partially unfilled template -> hard cap at 20
+    calculatedScore = Math.min(calculatedScore, 20);
   }
 
   if (!isTopicRelevant) {
-    score = Math.min(score, Math.round(20 * topicRelevanceRatio));
+    calculatedScore = Math.min(calculatedScore, 10);
   }
 
-  const isValidTemplate = isTopicRelevant && unfilledPlaceholders.length === 0 && (evidenceRequirements.length === 0 || matchedRequirements.length > 0);
+  if (evidenceRequirements.length > 0 && matchedRequirements.length === 0) {
+    calculatedScore = Math.min(calculatedScore, 15);
+  }
 
-  if (!isValidTemplate && missingRequirements.length > 0) {
+  if (wordCount < 50) {
+    calculatedScore = Math.min(calculatedScore, 15);
+  }
+
+  const finalScore = Math.max(0, Math.min(100, Math.round(calculatedScore)));
+
+  // Strict valid template requirement:
+  // - Must be topic relevant
+  // - 0 unfilled placeholders
+  // - Substantive depth (>= 50 words)
+  // - 100% of required evidence items matched (no missing items)
+  // - Score >= 80
+  const isFullyCovered = evidenceRequirements.length === 0 || (missingRequirements.length === 0 && matchedRequirements.length > 0);
+  const isValidTemplate =
+    isTopicRelevant &&
+    unfilledPlaceholders.length === 0 &&
+    wordCount >= 50 &&
+    isFullyCovered &&
+    finalScore >= 80;
+
+  if (!isFullyCovered && missingRequirements.length > 0) {
     validationWarnings.push(
-      `Missing ${missingRequirements.length} required evidence topic(s): ${missingRequirements.slice(0, 3).join("; ")}`
+      `Missing ${missingRequirements.length} required evidence item(s): ${missingRequirements.slice(0, 3).join("; ")}`
     );
   }
+
+  const summary = `Coverage: ${matchedRequirements.length}/${evidenceRequirements.length || 1} (${coverageScore}/50 pts) • Depth: ${wordCount} words (${depthScore}/30 pts) • Placeholders: ${unfilledPlaceholders.length === 0 ? "Clean (20/20 pts)" : `${unfilledPlaceholders.length} unfilled (${placeholderScore}/20 pts)`}`;
+
+  const scoreBreakdown: EvidenceScoreBreakdown = {
+    requirementCoverageScore: coverageScore,
+    contentDepthScore: depthScore,
+    placeholderScore,
+    totalScore: finalScore,
+    wordCount,
+    summary,
+  };
 
   const snippet = cleanText.slice(0, 300) + (cleanText.length > 300 ? "..." : "");
 
@@ -459,7 +696,8 @@ export function parseAndValidateEvidence(
     matchedRequirements,
     validationErrors,
     validationWarnings,
-    score,
+    score: finalScore,
+    scoreBreakdown,
   };
 }
 
@@ -503,7 +741,7 @@ export async function fetchAndParseEvidenceFromUrl(
       isValidTemplate: false,
       missingRequirements: evidenceRequirements,
       matchedRequirements: [],
-      validationErrors: ["Invalid HTTPS Evidence URL format."],
+      validationErrors: ["Invalid HTTPS Evidence URL format. Please provide a full https:// address."],
       validationWarnings: [],
       score: 0,
     };
@@ -528,7 +766,7 @@ export async function fetchAndParseEvidenceFromUrl(
           isValidTemplate: false,
           missingRequirements: evidenceRequirements,
           matchedRequirements: [],
-          validationErrors: [ssrfCheck.error || "Forbidden Evidence URL host."],
+          validationErrors: [ssrfCheck.error || "Forbidden URL: Access to private or restricted network addresses is blocked for security."],
           validationWarnings: [],
           score: 0,
         };
@@ -568,6 +806,15 @@ export async function fetchAndParseEvidenceFromUrl(
     }
 
     if (!response.ok) {
+      let errorMsg = `Unable to access Evidence URL (HTTP ${response.status}).`;
+      if (response.status === 401 || response.status === 403) {
+        errorMsg = `Access denied (HTTP ${response.status}): The Evidence URL is private or requires authorization. Please ensure the link is publicly accessible or shared with view permissions.`;
+      } else if (response.status === 404) {
+        errorMsg = "Evidence document not found (HTTP 404): The specified link does not exist. Please check the URL.";
+      } else if (response.status >= 500) {
+        errorMsg = `Remote server error (HTTP ${response.status}): The server hosting the evidence document encountered an internal error.`;
+      }
+
       return {
         success: false,
         extractedTextLength: 0,
@@ -576,7 +823,7 @@ export async function fetchAndParseEvidenceFromUrl(
         isValidTemplate: false,
         missingRequirements: evidenceRequirements,
         matchedRequirements: [],
-        validationErrors: [`Unable to access Evidence URL (HTTP ${response.status}). Please verify link access permissions.`],
+        validationErrors: [errorMsg],
         validationWarnings: [],
         score: 0,
       };
@@ -669,6 +916,10 @@ export async function fetchAndParseEvidenceFromUrl(
     }
   } catch (err: any) {
     console.error("[evidenceParser] Failed to fetch and parse URL:", err);
+    let errorMessage = "Failed to load or parse URL content. Please verify link access permissions.";
+    if (err?.name === "AbortError" || err?.message?.includes("aborted")) {
+      errorMessage = "Network timeout: Could not connect to Evidence URL within 20 seconds. Please check link availability.";
+    }
     return {
       success: false,
       extractedTextLength: 0,
@@ -677,7 +928,7 @@ export async function fetchAndParseEvidenceFromUrl(
       isValidTemplate: false,
       missingRequirements: evidenceRequirements,
       matchedRequirements: [],
-      validationErrors: ["Failed to load or parse URL content. Please verify link access permissions."],
+      validationErrors: [errorMessage],
       validationWarnings: [],
       score: 0,
     };
@@ -685,3 +936,4 @@ export async function fetchAndParseEvidenceFromUrl(
     clearTimeout(timeoutId);
   }
 }
+
