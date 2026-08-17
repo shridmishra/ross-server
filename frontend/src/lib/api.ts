@@ -202,6 +202,15 @@ export interface ControlFlagInfo {
   reason?: string;
 }
 
+export interface EvidenceScoreBreakdown {
+  requirementCoverageScore: number;
+  contentDepthScore: number;
+  placeholderScore: number;
+  totalScore: number;
+  wordCount?: number;
+  summary?: string;
+}
+
 export interface EvidenceAnalysis {
   success: boolean;
   extractedTextLength: number;
@@ -213,6 +222,7 @@ export interface EvidenceAnalysis {
   validationErrors: string[];
   validationWarnings: string[];
   score: number;
+  scoreBreakdown?: EvidenceScoreBreakdown;
 }
 
 export interface CRCCategory {

@@ -1130,69 +1130,119 @@ export default function CRCAssessmentPage() {
                         </div>
 
                         {/* Parsed Evidence Analysis & Template Content Validation Card */}
-                        {currentResponse?.evidenceAnalysis && currentResponse?.evidenceStatus !== "No Evidence" && currentResponse?.evidenceUrl && (
-                          <div className={`p-4 rounded-xl border text-xs space-y-2.5 transition-all ${
-                            currentResponse.evidenceAnalysis.isValidTemplate
-                              ? "bg-green-500/10 border-green-500/20 text-foreground"
-                              : "bg-red-500/10 border-red-500/20 text-foreground"
-                          }`}>
-                            <div className="flex items-center justify-between font-semibold">
-                              <div className="flex items-center gap-1.5">
-                                {currentResponse.evidenceAnalysis.isValidTemplate ? (
-                                  <span className="text-green-500 font-bold">✅ Evidence Verified & Validated</span>
-                                ) : (
-                                  <span className="text-red-500 font-bold">⚠️ Unfilled Template / Parsing Issues</span>
-                                )}
-                              </div>
-                              <span className="px-2 py-0.5 rounded bg-background border border-border font-mono">
-                                Quality Score: {currentResponse.evidenceAnalysis.score}/100
-                              </span>
-                            </div>
+                        {currentResponse?.evidenceAnalysis && currentResponse?.evidenceStatus !== "No Evidence" && currentResponse?.evidenceUrl && (() => {
+                          const analysis = currentResponse.evidenceAnalysis;
+                          const score = analysis.score ?? 0;
+                          const isComplete = analysis.isValidTemplate && score >= 80;
+                          const isPartial = !isComplete && score >= 40 && (!analysis.unfilledPlaceholders || analysis.unfilledPlaceholders.length === 0);
 
-                            {/* Validation Errors & Unfilled Placeholders */}
-                            {currentResponse.evidenceAnalysis.validationErrors && currentResponse.evidenceAnalysis.validationErrors.length > 0 && (
-                              <div className="p-2.5 rounded-lg bg-red-500/15 text-red-600 border border-red-500/30 space-y-1">
-                                <p className="font-semibold">Template Validation Errors:</p>
-                                <ul className="list-disc pl-4 space-y-1 text-xs">
-                                  {currentResponse.evidenceAnalysis.validationErrors.map((err: string, i: number) => (
-                                    <li key={i}>{err}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                          let cardBg = "bg-red-500/10 border-red-500/30";
+                          let headerColor = "text-red-500";
+                          let badgeBorder = "border-red-500/30 text-red-500";
+                          let statusTitle = "⚠️ Incomplete Template / Action Required";
 
-                            {/* Unfilled Placeholders Badge List */}
-                            {currentResponse.evidenceAnalysis.unfilledPlaceholders && currentResponse.evidenceAnalysis.unfilledPlaceholders.length > 0 && (
-                              <div>
-                                <p className="font-semibold text-muted-foreground mb-1">Unfilled Bracketed Placeholders:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {currentResponse.evidenceAnalysis.unfilledPlaceholders.map((ph: string, i: number) => (
-                                    <span key={i} className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 border border-red-500/30 font-mono text-[11px]">
-                                      {ph}
-                                    </span>
-                                  ))}
+                          if (isComplete) {
+                            cardBg = "bg-green-500/10 border-green-500/30";
+                            headerColor = "text-green-500";
+                            badgeBorder = "border-green-500/30 text-green-500";
+                            statusTitle = "✅ Evidence Verified & Complete";
+                          } else if (isPartial) {
+                            cardBg = "bg-amber-500/10 border-amber-500/30";
+                            headerColor = "text-amber-500";
+                            badgeBorder = "border-amber-500/30 text-amber-500";
+                            statusTitle = "⚡ Partial Evidence - Missing Requirements";
+                          }
+
+                          return (
+                            <div className={`p-4 rounded-xl border text-xs space-y-3 transition-all ${cardBg} text-foreground`}>
+                              <div className="flex items-center justify-between font-semibold">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`font-bold ${headerColor}`}>{statusTitle}</span>
                                 </div>
+                                <span className={`px-2.5 py-0.5 rounded bg-background/80 border font-mono font-bold ${badgeBorder}`}>
+                                  Quality Score: {score}/100
+                                </span>
                               </div>
-                            )}
 
-                            {/* Matched vs Missing Requirements */}
-                            {currentResponse.evidenceAnalysis.missingRequirements && currentResponse.evidenceAnalysis.missingRequirements.length > 0 && (
-                              <div className="text-amber-500 font-medium">
-                                ⚡ Missing Evidence Items: {currentResponse.evidenceAnalysis.missingRequirements.join(", ")}
-                              </div>
-                            )}
+                              {/* Quality Score Metric Breakdown */}
+                              {analysis.scoreBreakdown && (
+                                <div className="p-2.5 rounded-lg bg-background/50 border border-border/50 space-y-1.5">
+                                  <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                                    <span>Scoring Metric Breakdown:</span>
+                                    <span className="font-mono text-[10px]">Total: {score}/100</span>
+                                  </div>
+                                  <div className="grid grid-cols-3 gap-2 text-[10px]">
+                                    <div className="p-1.5 rounded bg-muted/40 border border-border/40 text-center">
+                                      <p className="text-muted-foreground font-medium">Req Coverage</p>
+                                      <p className="font-bold text-foreground mt-0.5">{analysis.scoreBreakdown.requirementCoverageScore}/50 pts</p>
+                                    </div>
+                                    <div className="p-1.5 rounded bg-muted/40 border border-border/40 text-center">
+                                      <p className="text-muted-foreground font-medium">Content Depth</p>
+                                      <p className="font-bold text-foreground mt-0.5">{analysis.scoreBreakdown.contentDepthScore}/30 pts</p>
+                                    </div>
+                                    <div className="p-1.5 rounded bg-muted/40 border border-border/40 text-center">
+                                      <p className="text-muted-foreground font-medium">Template Fields</p>
+                                      <p className="font-bold text-foreground mt-0.5">{analysis.scoreBreakdown.placeholderScore}/20 pts</p>
+                                    </div>
+                                  </div>
+                                  {analysis.scoreBreakdown.summary && (
+                                    <p className="text-[10px] text-muted-foreground font-mono pt-0.5">{analysis.scoreBreakdown.summary}</p>
+                                  )}
+                                </div>
+                              )}
 
-                            {/* Extracted Text Snippet Preview */}
-                            {currentResponse.evidenceAnalysis.extractedSnippet && (
-                              <div className="pt-1 border-t border-border/40">
-                                <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">Parsed Evidence Snippet:</p>
-                                <p className="font-mono text-[11px] text-muted-foreground bg-muted/30 p-2 rounded max-h-24 overflow-y-auto whitespace-pre-wrap">
-                                  {currentResponse.evidenceAnalysis.extractedSnippet}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                              {/* Validation Errors & Specific File/Content Issues */}
+                              {analysis.validationErrors && analysis.validationErrors.length > 0 && (
+                                <div className="p-2.5 rounded-lg bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 space-y-1">
+                                  <p className="font-semibold">Document Validation Issues:</p>
+                                  <ul className="list-disc pl-4 space-y-1 text-xs">
+                                    {analysis.validationErrors.map((err: string, i: number) => (
+                                      <li key={i}>{err}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* Unfilled Placeholders Badge List */}
+                              {analysis.unfilledPlaceholders && analysis.unfilledPlaceholders.length > 0 && (
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-muted-foreground text-[11px]">
+                                    Unfilled Template Placeholders ({analysis.unfilledPlaceholders.length}):
+                                  </p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {analysis.unfilledPlaceholders.map((ph: string, i: number) => (
+                                      <span key={i} className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 border border-red-500/30 font-mono text-[10px]">
+                                        {ph}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Missing Requirements List */}
+                              {analysis.missingRequirements && analysis.missingRequirements.length > 0 && (
+                                <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs">
+                                  <p className="font-semibold mb-0.5">⚡ Missing Required Evidence Items:</p>
+                                  <ul className="list-disc pl-4 space-y-0.5">
+                                    {analysis.missingRequirements.map((item: string, i: number) => (
+                                      <li key={i}>{item}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* Extracted Text Snippet Preview */}
+                              {analysis.extractedSnippet && (
+                                <div className="pt-1 border-t border-border/40">
+                                  <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">Parsed Evidence Snippet:</p>
+                                  <p className="font-mono text-[11px] text-muted-foreground bg-muted/30 p-2 rounded max-h-24 overflow-y-auto whitespace-pre-wrap">
+                                    {analysis.extractedSnippet}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {/* Audit-ready Checkbox */}
                         {currentResponse?.evidenceUrl && currentResponse?.evidenceStatus !== "No Evidence" && (
