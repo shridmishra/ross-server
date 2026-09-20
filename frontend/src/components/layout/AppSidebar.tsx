@@ -311,20 +311,20 @@ const DomainTreeItem = ({
                                 className={cn(
                                   "h-7 px-2 group/question transition-all rounded-md w-full",
                                   isQuestionActive
-                                    ? "border-l-[3px] border-primary bg-primary/20 text-white font-semibold pl-1.5 rounded-l-none"
+                                    ? "border-l-[3px] border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-white font-semibold pl-1.5 rounded-l-none"
                                     : "hover:bg-sidebar-accent/60"
                                 )}
                               >
                                 {q.isAnswered ? (
-                                  <IconCircleCheck className={cn("h-3.5 w-3.5 shrink-0", isQuestionActive ? "text-emerald-400" : "text-emerald-500/90")} />
+                                  <IconCircleCheck className={cn("h-3.5 w-3.5 shrink-0", isQuestionActive ? "text-emerald-600 dark:text-emerald-400" : "text-emerald-600/90 dark:text-emerald-500/90")} />
                                 ) : (
-                                  <IconCircle className={cn("h-3.5 w-3.5 shrink-0", isQuestionActive ? "text-primary" : "text-zinc-400 dark:text-zinc-500")} />
+                                  <IconCircle className={cn("h-3.5 w-3.5 shrink-0", isQuestionActive ? "text-primary" : "text-zinc-500 dark:text-zinc-500")} />
                                 )}
                                 <span className={cn(
                                   "text-[12.5px] truncate ml-1.5 flex-1 min-w-0 leading-normal",
                                   isQuestionActive
-                                    ? "text-white dark:text-white font-semibold"
-                                    : "text-zinc-300 dark:text-zinc-200 font-medium group-hover/question:text-white"
+                                    ? "text-primary dark:text-white font-semibold"
+                                    : "text-zinc-700 dark:text-zinc-300 font-medium group-hover/question:text-foreground dark:group-hover/question:text-white"
                                 )}>
                                   Q{qIdx + 1}: {q.question}
                                 </span>

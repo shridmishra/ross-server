@@ -25,7 +25,7 @@ const saveAnswersSchema = z.object({
   annex_iii_domains: z.array(z.string()).optional(),
   biometric_use: z.string().optional(),
   affects_children: z.enum(["yes", "no", "not_sure"]).optional(),
-  public_url: z.string().optional(),
+  public_url: z.string().url().nullish().or(z.literal("")),
   wizard_step: z.number().int().min(1).max(6).optional(),
 });
 

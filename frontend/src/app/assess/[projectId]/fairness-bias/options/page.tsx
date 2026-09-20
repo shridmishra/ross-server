@@ -253,7 +253,7 @@ export default function FairnessBiasOptions() {
           <div className="mb-12 w-full">
             <InfoSection
               title="About Automated Bias and Fairness Testing"
-              description={`This premium hub connects three fairness paths: manual prompt testing, API automated testing, and dataset testing. Each path is designed to produce evidence you can archive for governance. Premium lists Basic at ${FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.`}
+              description="This premium hub connects three fairness paths: manual prompt testing, API automated testing, and dataset testing. Each path is designed to produce evidence you can archive for governance."
               limitations="Automated metrics cannot cover every intersectional nuance or every jurisdiction. High scores reduce risk but are not a legal guarantee of nondiscrimination for regulated decisions."
               defaultExpanded
             >

@@ -462,12 +462,20 @@ router.get("/controls", authenticateToken, requireRole(["ADMIN"]), async (req, r
 router.get("/controls/:id", authenticateToken, requireRole(["ADMIN"]), async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(`
-      SELECT c.*, cat.name as category_name 
-      FROM crc_controls c
-      LEFT JOIN crc_categories cat ON c.category_id = cat.id
-      WHERE c.id = $1
-    `, [id]);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const result = isUuid
+      ? await pool.query(`
+          SELECT c.*, cat.name as category_name 
+          FROM crc_controls c
+          LEFT JOIN crc_categories cat ON c.category_id = cat.id
+          WHERE c.id = $1
+        `, [id])
+      : await pool.query(`
+          SELECT c.*, cat.name as category_name 
+          FROM crc_controls c
+          LEFT JOIN crc_categories cat ON c.category_id = cat.id
+          WHERE c.control_id = $1
+        `, [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: "Control not found" });

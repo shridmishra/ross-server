@@ -533,7 +533,7 @@ export default function FairnessBiasTest() {
             <div className="mb-8 space-y-4">
               <InfoSection
                 title="About Manual Prompt Testing"
-                description={`You answer MATUR fairness prompts yourself, then MATUR scores each answer automatically. Premium lists Basic at ${FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.`}
+                description="You answer MATUR fairness prompts yourself, then MATUR scores each answer automatically, providing structured evaluation metrics and audit-ready reports."
                 limitations="Human judgment still matters for tone and context. Automated scores can miss subtle harms or over flag benign language. This path is not a statistical sample of all user traffic."
                 defaultExpanded
               >

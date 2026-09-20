@@ -64,8 +64,7 @@ export default function CRCWelcomePage() {
           <span className="text-xs font-semibold text-primary uppercase tracking-wider">Premium</span>
         </div>
         <p className="text-muted-foreground -mt-2">
-          Read how CRC works in MATUR, then open the guided controls when you are ready. Basic premium lists at{" "}
-          {FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown for procurement.
+          Read how CRC works in MATUR, then open the guided controls when you are ready.
         </p>
 
         <article className="prose prose-neutral dark:prose-invert max-w-none text-foreground space-y-8 [&_p]:leading-relaxed [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-0">

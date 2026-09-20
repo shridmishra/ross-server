@@ -722,6 +722,10 @@ router.get("/jobs/:jobId", authenticateToken, async (req, res) => {
             results,
             errors,
             errorMessage,
+            created_at: job.created_at,
+            updated_at: job.updated_at,
+            createdAt: job.created_at,
+            updatedAt: job.updated_at,
         });
     } catch (error: any) {
         console.error("Error fetching job status:", error);
@@ -987,24 +991,33 @@ router.get("/api-reports/:projectId", authenticateToken, async (req, res) => {
             console.error("Backfill completed jobs error (non-fatal):", backfillErr);
         }
 
+        const testType = req.query.testType as string | undefined;
+        let whereClause = `project_id = $1 AND user_id = $2 AND (config->>'testType' IS NULL OR config->>'testType' != 'MANUAL_PROMPT_TEST')`;
+        const countParams: any[] = [projectId, userId];
+        if (testType) {
+            countParams.push(testType);
+            whereClause += ` AND config->>'testType' = $${countParams.length}`;
+        }
+
         // Fetch reports for this project with pagination
         const countResult = await pool.query(
              `SELECT COUNT(*) as total
               FROM api_test_reports
-              WHERE project_id = $1 AND user_id = $2 AND (config->>'testType' IS NULL OR config->>'testType' != 'MANUAL_PROMPT_TEST')`,
-             [projectId, userId]
+              WHERE ${whereClause}`,
+             countParams
         );
         const total = parseInt(countResult.rows[0].total || '0');
 
+        const queryParams = [...countParams, limit, offset];
         const result = await pool.query(
-            `SELECT 
-                id, job_id, total_prompts, success_count, failure_count,
-                average_scores, results, config, created_at
-             FROM api_test_reports
-             WHERE project_id = $1 AND user_id = $2 AND (config->>'testType' IS NULL OR config->>'testType' != 'MANUAL_PROMPT_TEST')
-             ORDER BY created_at DESC
-             LIMIT $3 OFFSET $4`,
-            [projectId, userId, limit, offset]
+             `SELECT 
+                 id, job_id, total_prompts, success_count, failure_count,
+                 average_scores, results, config, created_at
+              FROM api_test_reports
+              WHERE ${whereClause}
+              ORDER BY created_at DESC
+              LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`,
+             queryParams
         );
         
         res.json({ 
