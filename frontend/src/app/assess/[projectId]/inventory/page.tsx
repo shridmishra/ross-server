@@ -841,7 +841,7 @@ export default function ComponentInventoryPage() {
                         {comp.componentName}
                         {comp.version && (
                           <span className="text-[10px] text-muted-foreground ml-1.5 font-normal bg-muted px-1.5 py-0.5 rounded-md">
-                            v{comp.version}
+                            v{comp.version.replace(/^v/i, "")}
                           </span>
                         )}
                       </TableCell>
@@ -1366,6 +1366,19 @@ export default function ComponentInventoryPage() {
                     return (
                       <div
                         key={cat}
+                        role="checkbox"
+                        tabIndex={0}
+                        aria-checked={isChecked}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            if (cat === "No Data Processing") {
+                              handleNoDataProcessing();
+                            } else {
+                              handleCategoryToggle(cat);
+                            }
+                          }
+                        }}
                         onClick={() => {
                           if (cat === "No Data Processing") {
                             handleNoDataProcessing();

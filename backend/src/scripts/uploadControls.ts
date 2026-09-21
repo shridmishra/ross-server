@@ -163,8 +163,8 @@ async function uploadControls() {
           nist_ai_rmf: parseCompliance(row[10] || ""),
           iso_42001: parseCompliance(row[11] || ""),
         },
-        risk_description: row[12],
-        aima_mapping: parseAima(row[13] || ""),
+        risk_description: row[13],
+        aima_mapping: parseAima(row[12] || ""),
         expected_timeline: row[16],
       };
       

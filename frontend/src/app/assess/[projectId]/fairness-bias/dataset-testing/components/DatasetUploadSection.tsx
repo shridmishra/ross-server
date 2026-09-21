@@ -95,7 +95,7 @@ export const DatasetUploadSection = ({
                             <div className="space-y-2">
                                 <p className="text-sm font-semibold text-foreground">Why premium includes this</p>
                                 <p className="leading-relaxed">
-                                    You get a guided upload, automatic purge after inactivity, and a stored narrative alongside table metrics so reviewers can show what the dataset looked like at a point in time. Basic premium lists at {FALLBACK_PRICES.basic} USD per month in the app when pricing fallbacks are shown.
+                                    You get a guided upload, automatic purge after inactivity, and a stored narrative alongside table metrics so reviewers can show what the dataset looked like at a point in time.
                                 </p>
                             </div>
 

@@ -58,6 +58,16 @@ export interface WizardEngineOutput {
   informational_notes: string[];
 }
 
+export function formatBiometricUse(val?: string): string {
+  if (!val || val === "none") return "None";
+  if (val === "public_spaces_identification") return "Remote Identification in Public Spaces";
+  if (val === "biometric_identification") return "Biometric Identification";
+  if (val === "biometric_categorization") return "Biometric Categorization";
+  if (val === "emotion_recognition") return "Emotion Recognition";
+  if (val === "verification_authentication") return "Verification & Authentication";
+  return val.replace(/_/g, " ");
+}
+
 /**
  * Deterministic rules engine that processes wizard answers and returns compliance and risk outputs.
  * 
@@ -130,7 +140,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
       } else if (isCriticalUseCase) {
         eu_risk_reason = `Classified as High-Risk due to critical use case: ${answers.use_case}.`;
       } else if (isSensitiveBiometrics) {
-        eu_risk_reason = `Classified as High-Risk due to biometric processing: ${answers.biometric_use}.`;
+        eu_risk_reason = `Classified as High-Risk due to biometric processing: ${formatBiometricUse(answers.biometric_use)}.`;
       } else {
         eu_risk_reason = "Classified as High-Risk due to direct interaction or impact on children (vulnerable groups).";
       }
@@ -248,7 +258,10 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
 
     // EU AI Act rules (takes precedence)
     if (hasEU && applicable_frameworks.includes("EU AI Act")) {
-      if (eu_risk_tier === "HIGH" || eu_risk_tier === "UNACCEPTABLE") {
+      if (eu_risk_tier === "UNACCEPTABLE") {
+        flag = "MANDATORY";
+        reason = "Mandatory regulatory obligation for Unacceptable Risk AI systems under the EU AI Act.";
+      } else if (eu_risk_tier === "HIGH") {
         flag = "MANDATORY";
         reason = "Mandatory regulatory obligation for High-Risk AI systems under the EU AI Act.";
       } else if (eu_risk_tier === "LIMITED") {
@@ -300,7 +313,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
       title: "Biometric Data Processing Privacy Violation and Algorithmic Misidentification",
       category: "Privacy",
       rating: "High",
-      description: `Processing biometric data (${answers.biometric_use}) carries severe privacy compliance risks under GDPR/CCPA and algorithmic misidentification liability.`,
+      description: `Processing biometric data (${formatBiometricUse(answers.biometric_use)}) carries severe privacy compliance risks under GDPR/CCPA and algorithmic misidentification liability.`,
       mitigation_plan: "Execute a full Data Protection Impact Assessment (DPIA), enforce end-to-end encryption for biometric vectors, implement explicit user opt-in, and provide manual override bypasses."
     });
   }
@@ -493,7 +506,12 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   const providersText = third_party_providers.length > 0 ? `integrating third-party services from ${third_party_providers.join(", ")}` : "relying on fully internal or open-source infrastructure";
   const geoText = geographic_scope.join(" and ");
 
-  const copilotSummary = `This project represents a ${govScopeText}. Under the EU AI Act, it is classified as a ${eu_risk_tier} Risk profile because: ${eu_risk_reason} Internally, the project is rated at a ${internal_risk_tier} Risk tier. The system operates under a ${answers.regulatory_role || "deployer"} role, using ${answers.automation_level || "semi-autonomous"} automation, and is deployed within the ${geoText} geography, ${providersText}.`;
+  const hasEUScope = applicable_frameworks.includes("EU AI Act") || geographic_scope.some(g => g.toLowerCase().includes("eu") || g.toLowerCase() === "global");
+  const euNarrative = hasEUScope 
+    ? ` Under the EU AI Act, it is classified as a ${eu_risk_tier} Risk profile because: ${eu_risk_reason}` 
+    : "";
+
+  const copilotSummary = `This project represents a ${govScopeText}.${euNarrative} Internally, the project is rated at a ${internal_risk_tier} Risk tier. The system operates under a ${answers.regulatory_role || "deployer"} role, using ${answers.automation_level || "semi-autonomous"} automation, and is deployed within the ${geoText} geography, ${providersText}.`;
 
   // ==========================================
   // RULE SET 10: Template Pre-Fill Variables
@@ -519,17 +537,15 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   const copilot_context = `[AI System Profile Context]
 System/Program Name: ${answers.name}
 Governance Scope: ${answers.governance_scope}
-EU AI Act Risk Tier: ${eu_risk_tier}
-Internal Risk Tier: ${internal_risk_tier}
-Risk Justification: ${eu_risk_reason}
-Regulatory Role: ${answers.regulatory_role}
+${hasEUScope ? `EU AI Act Risk Tier: ${eu_risk_tier}\n` : ""}Internal Risk Tier: ${internal_risk_tier}
+${hasEUScope ? `Risk Justification: ${eu_risk_reason}\n` : ""}Regulatory Role: ${answers.regulatory_role}
 Automation Level: ${answers.automation_level}
 Geographic Scope: ${geographic_scope.join(", ")}
 Data Categories Processed: ${data_categories.join(", ")}
 Primary Use Case: ${answers.use_case}
 Third-Party Providers: ${third_party_providers.join(", ") || "None"}
 Sensitive Domains: ${annex_iii_domains.join(", ")}
-Biometric Use: ${answers.biometric_use || "None"}
+Biometric Use: ${formatBiometricUse(answers.biometric_use)}
 Child Safety Impact: ${answers.affects_children}
 Active Frameworks: ${applicable_frameworks.join(", ")}`;
 

@@ -295,7 +295,7 @@ router.post("/:projectId/component/:componentId/complete", authenticateToken, as
         DO UPDATE SET
           evidence_status = 'Evidence Complete',
           evidence_url = $4,
-          audit_ready = true,
+          audit_ready = CASE WHEN crc_assessment_responses.value = 1 THEN true ELSE false END,
           updated_at = CURRENT_TIMESTAMP`,
         [projectId, ctrl.id, userId, evidenceUrl]
       );

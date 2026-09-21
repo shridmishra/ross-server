@@ -51,7 +51,10 @@ export const ApiHistory = ({ projectId, routeMode = 'fairness' }: ApiHistoryProp
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const res = await fetch(`${API_BASE_URL}/fairness/api-reports/${projectId}`, {
+                const url = routeMode === 'vulnerability'
+                    ? `${API_BASE_URL}/fairness/api-reports/${projectId}?testType=SECURITY_SCAN`
+                    : `${API_BASE_URL}/fairness/api-reports/${projectId}`;
+                const res = await fetch(url, {
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
                     }
@@ -72,7 +75,7 @@ export const ApiHistory = ({ projectId, routeMode = 'fairness' }: ApiHistoryProp
         };
 
         fetchReports();
-    }, [projectId]);
+    }, [projectId, routeMode]);
 
     const handleViewReport = (report: ApiReport) => {
         const pathBase = routeMode === 'vulnerability' 
