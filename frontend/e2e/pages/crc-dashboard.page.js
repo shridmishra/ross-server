@@ -13,6 +13,7 @@ class CrcDashboardPage {
     // crc/dashboard/page.tsx) — four mutually-exclusive fixed labels.
     this.tierBadge = page
       .getByText("Ready", { exact: true })
+      .or(page.getByText("Substantially Ready", { exact: true }))
       .or(page.getByText("Partially Ready", { exact: true }))
       .or(page.getByText("Not Ready", { exact: true }))
       .or(page.getByText("Insufficient Data", { exact: true }))
