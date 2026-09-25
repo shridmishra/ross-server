@@ -850,7 +850,7 @@ button:enabled,
   opacity: 0.85;
 }
 .sidebar-btn-premium:hover {
-  background-color: hsl(var(--primary) / 0.08) !important;
+  background-color: color-mix(in srgb, var(--section-premium) 8%, transparent) !important;
   color: var(--section-premium) !important;
   opacity: 1;
 }
@@ -861,7 +861,7 @@ button:enabled,
 /* Active State: Rich, full color themed highlight */
 .sidebar-btn-premium[data-active="true"] {
   border-left: 4px solid var(--section-premium) !important;
-  background-color: hsl(var(--primary) / 0.12) !important;
+  background-color: color-mix(in srgb, var(--section-premium) 12%, transparent) !important;
   color: var(--section-premium) !important;
   font-weight: 700 !important;
   opacity: 1;

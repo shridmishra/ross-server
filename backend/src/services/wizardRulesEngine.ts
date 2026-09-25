@@ -222,6 +222,9 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   }
   applicable_frameworks.push("ISO/IEC 42001"); // Always applicable for premium projects
 
+  const hasNISTScope = applicable_frameworks.includes("NIST AI RMF");
+  const hasISOScope = applicable_frameworks.includes("ISO/IEC 42001");
+
   // ==========================================
   // RULE SET 3: CRC Control Flagging
   // ==========================================
@@ -230,7 +233,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   const hasRealRef = (entries: any): boolean => {
     if (!entries || !Array.isArray(entries) || entries.length === 0) return false;
     return entries.some((e: any) => {
-      const ref = e?.ref?.trim().toUpperCase();
+      const ref = typeof e?.ref === "string" ? e.ref.trim().toUpperCase() : undefined;
       return Boolean(ref && ref !== "N/A" && ref !== "NONE" && ref !== "NOT APPLICABLE");
     });
   };
@@ -241,8 +244,13 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
   });
   const isHighOrCritical = internal_risk_tier === "HIGH" || internal_risk_tier === "CRITICAL" || eu_risk_tier === "HIGH";
   const usesThirdParty = answers.uses_third_party_models === "yes";
-  const highAutomation = answers.automation_level === "full" || answers.automation_level === "high";
-  const affectsProtectedGroups = answers.affects_children === "yes" || (answers.annex_iii_domains && answers.annex_iii_domains.length > 0);
+  const highAutomation =
+    answers.automation_level === "autonomous" ||
+    answers.automation_level === "semi_autonomous" ||
+    answers.automation_level === "full" ||
+    answers.automation_level === "high";
+  const hasRealAnnexIIIDomains = (answers.annex_iii_domains || []).some(d => d && d !== "none");
+  const affectsProtectedGroups = answers.affects_children === "yes" || hasRealAnnexIIIDomains;
 
   for (const control of controls) {
     const cid = control.control_id;
@@ -266,7 +274,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
     let reason = "Optional control based on current system profile.";
 
     if (isGov) {
-      if (answers.governance_scope === "organization") {
+      if (answers.governance_scope === "organization" && ((hasISO && hasISOScope) || (hasNIST && hasNISTScope))) {
         flag = "MANDATORY";
         reason = "Mandatory organizational AI management control under ISO/IEC 42001 & NIST AI RMF.";
       } else if (isHighOrCritical) {
@@ -277,7 +285,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Recommended baseline AI governance best practice.";
       }
     } else if (isRisk) {
-      if (isHighOrCritical) {
+      if (isHighOrCritical && ((hasEU && hasEUScope) || (hasNIST && hasNISTScope))) {
         flag = "MANDATORY";
         reason = "Mandatory continuous risk management requirement under EU AI Act Article 9 / NIST AI RMF.";
       } else {
@@ -285,7 +293,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Recommended risk assessment and management control.";
       }
     } else if (isData) {
-      if (processesSensitiveData || eu_risk_tier === "HIGH") {
+      if ((processesSensitiveData || eu_risk_tier === "HIGH") && hasEU && hasEUScope) {
         flag = "MANDATORY";
         reason = "Mandatory data governance control under EU AI Act Article 10 for sensitive and training data management.";
       } else {
@@ -293,7 +301,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Recommended data quality and provenance management practice.";
       }
     } else if (isFair) {
-      if (affectsProtectedGroups || eu_risk_tier === "HIGH") {
+      if ((affectsProtectedGroups || eu_risk_tier === "HIGH") && hasEU && hasEUScope) {
         flag = "MANDATORY";
         reason = "Mandatory bias mitigation and non-discrimination assurance under EU AI Act Article 10(2)(f).";
       } else {
@@ -309,7 +317,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Optional control as system does not utilize third-party AI models.";
       }
     } else if (isTrans) {
-      if (eu_risk_tier === "LIMITED" || eu_risk_tier === "HIGH" || highAutomation) {
+      if ((eu_risk_tier === "LIMITED" || eu_risk_tier === "HIGH" || highAutomation) && hasEU && hasEUScope) {
         flag = "MANDATORY";
         reason = "Mandatory transparency and human oversight obligation under EU AI Act Articles 13, 14, or 50.";
       } else {
@@ -317,7 +325,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Recommended transparency and explainability best practice.";
       }
     } else if (isVerif) {
-      if (isHighOrCritical) {
+      if (isHighOrCritical && hasEU && hasEUScope) {
         flag = "MANDATORY";
         reason = "Mandatory technical robustness, cybersecurity, and accuracy verification under EU AI Act Article 15.";
       } else {
@@ -325,7 +333,7 @@ export function runRulesEngine(answers: WizardAnswers, controls: any[] = []): Wi
         reason = "Recommended verification and testing best practice.";
       }
     } else if (isOps) {
-      if (isHighOrCritical) {
+      if (isHighOrCritical && hasEU && hasEUScope) {
         flag = "MANDATORY";
         reason = "Mandatory post-market monitoring, logging, and incident reporting under EU AI Act Articles 12 & 72.";
       } else {

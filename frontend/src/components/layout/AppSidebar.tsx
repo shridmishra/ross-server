@@ -521,14 +521,13 @@ function SidebarContentComponent() {
   const [staticDomains, setStaticDomains] = useState<any[]>([]);
 
   const handleProjectAction = useCallback((destinationRoute: string) => {
-    const isInsideProject = !!getProjectIdFromPath(pathname);
-    if (!isInsideProject) {
+    if (!projectId) {
       setPendingDestinationRoute(destinationRoute);
       setShowProjectModal(true);
       return true;
     }
     return false;
-  }, [pathname]);
+  }, [projectId]);
 
   const handleProjectNav = useCallback((route: string) => {
     if (handleProjectAction(route)) return;

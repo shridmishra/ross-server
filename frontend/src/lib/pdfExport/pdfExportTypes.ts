@@ -189,6 +189,7 @@ export function humanize(val?: string | null): string {
   return str
     .replace(/[_-]+/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, "$1 ")
     .split(" ")
     .map(word => {
       const lower = word.toLowerCase();

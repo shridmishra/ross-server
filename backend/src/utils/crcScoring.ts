@@ -113,7 +113,7 @@ function readinessPoints(value: number | null): number {
 function hasValidFrameworkMapping(entries?: Array<{ ref?: string; context?: string }>): boolean {
     if (!entries || !Array.isArray(entries) || entries.length === 0) return false;
     return entries.some((entry) => {
-        const ref = entry?.ref?.trim().toUpperCase();
+        const ref = typeof entry?.ref === "string" ? entry.ref.trim().toUpperCase() : undefined;
         return Boolean(ref && ref !== "N/A" && ref !== "NONE" && ref !== "NOT APPLICABLE");
     });
 }
@@ -249,17 +249,6 @@ export async function computeCrcResults(projectId: string): Promise<CrcResults> 
             evidenceBreakdown.inProgress++;
         } else if (status === 'Evidence Complete') {
             evidenceBreakdown.evidenceComplete++;
-        }
-
-        if (hasValidFrameworkMapping(mapping.iso_42001)) {
-            fw.iso_42001.totalControls++;
-            if (value === ANSWER_NA) {
-                fw.iso_42001.naCount++;
-            }
-            if (value !== null && SCOREABLE_VALUES.has(value)) {
-                fw.iso_42001.scoredControls++;
-                fw.iso_42001.points += pts;
-            }
         }
 
         if (value === null) continue;

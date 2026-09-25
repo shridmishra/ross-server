@@ -36,11 +36,12 @@ export const authenticateToken = async (
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
     if (decoded.isMfaSetupToken) {
+      const requestPath = (req.originalUrl ? req.originalUrl.split("?")[0] : req.path) || "";
       const isMfaEndpoint =
         req.path.endsWith("/setup-mfa") ||
         req.path.endsWith("/verify-mfa-setup") ||
-        req.originalUrl?.includes("/setup-mfa") ||
-        req.originalUrl?.includes("/verify-mfa-setup");
+        requestPath.endsWith("/setup-mfa") ||
+        requestPath.endsWith("/verify-mfa-setup");
 
       if (!isMfaEndpoint) {
         return res.status(403).json({
